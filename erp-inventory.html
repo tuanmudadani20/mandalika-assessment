@@ -220,6 +220,14 @@ tr:hover td{background:#FCFCFD}
 .table-fit-transfer col:nth-child(6){width:30%}
 .transfer-recap td:nth-child(1),.transfer-recap td:nth-child(2),.transfer-recap td:nth-child(3),.transfer-recap td:nth-child(4),.transfer-recap td:nth-child(5){white-space:nowrap}
 .transfer-recap td:nth-child(6){white-space:normal}
+.receive-check-table{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.receive-check-table table{min-width:0;width:100%}
+.receive-check-table th,.receive-check-table td{padding:8px 9px;font-size:11px;vertical-align:top}
+.receive-check-table th{font-size:9px;position:sticky;top:0;z-index:1}
+.receive-check-table .search,.receive-check-table .select{min-width:0;width:100%}
+.receive-doc-head{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.receive-doc-col{display:grid;gap:10px}
+.receive-line-note{min-width:180px}
 .qty-cell{text-align:right;white-space:nowrap}
 .stacked-select{display:grid;gap:8px}
 .stacked-select .search,.stacked-select .select{min-width:0;width:100%}
@@ -478,6 +486,59 @@ tr:hover td{background:#FCFCFD}
         </div>
         <div class="stage-tabs" id="transfer-stage-tabs"></div>
         <div class="card table-compact"><div class="tw"><table class="table-fit-transfer"><colgroup><col><col><col><col><col><col></colgroup><thead><tr><th>No Transfer</th><th>Tanggal</th><th>Asal Gudang</th><th>Tujuan Gudang</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-transfer"></tbody></table></div></div>
+        <div class="card card-pad inline-form flow-form-card transfer-form" id="transfer-receive-card">
+          <div class="ph">
+            <div>
+              <div class="title" style="font-size:18px;margin:4px 0">Konfirmasi Penerimaan Transfer</div>
+              <div class="subtitle" style="font-size:12px">Cek penerimaan berdasarkan surat jalan transfer untuk memastikan varian dan qty diterima sesuai.</div>
+            </div>
+            <span class="badge b-ok">Receive Check</span>
+          </div>
+          <div class="receive-doc-head">
+            <div class="receive-doc-col">
+              <div class="field"><label>No Transfer</label><div class="selected-pill" id="transfer-receive-doc-no">-</div></div>
+              <div class="field"><label>Gudang Asal</label><div class="selected-pill" id="transfer-receive-from">-</div></div>
+            </div>
+            <div class="receive-doc-col">
+              <div class="field"><label>Tanggal Surat Jalan</label><div class="selected-pill" id="transfer-receive-date">-</div></div>
+              <div class="field"><label>Gudang Tujuan</label><div class="selected-pill" id="transfer-receive-to">-</div></div>
+            </div>
+          </div>
+          <div class="panel-bottom">
+            <div class="picker-head">
+              <div>
+                <div class="picker-title">Checklist Varian Diterima</div>
+                <div class="picker-meta" id="transfer-receive-meta">0 item diperiksa</div>
+              </div>
+            </div>
+            <div class="receive-check-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Kode</th>
+                    <th>Varian</th>
+                    <th>Qty SJ</th>
+                    <th>Qty Diterima</th>
+                    <th>Hasil</th>
+                    <th>Catatan</th>
+                  </tr>
+                </thead>
+                <tbody id="transfer-receive-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="flow-summary" id="transfer-receive-summary"></div>
+          <div class="panel-bottom" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:280px">
+              <label>Catatan Umum Penerimaan</label>
+              <input class="search" id="transfer-receive-note" placeholder="Catatan umum penerimaan transfer">
+            </div>
+            <div style="display:flex;gap:8px;align-items:end">
+              <button class="btn btn-ghost" type="button" onclick="closeTransferReceiveForm()">Batal</button>
+              <button class="btn btn-primary" type="button" onclick="submitTransferReceiveForm()">Konfirmasi Received</button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="section" id="sec-return">
@@ -686,6 +747,7 @@ const RETURN_RECEIVE_META = JSON.parse(window.localStorage.getItem('erp.return.r
 let doQtyDraft = {};
 let transferQtyDraft = {};
 let returnQtyDraft = {};
+let transferReceiveDraft = null;
 let mutationSourceDraft = {};
 let mutationTargetDraft = {};
 let editingDoNo = '';
@@ -2413,26 +2475,133 @@ function editTransferPacking(trfNo){
 }
 
 function confirmTransferReceived(trfNo){
+  openTransferReceiveForm(trfNo);
+}
+
+function getTransferReceiveLineResult(line){
+  const expectedQty = Number(line.expected_qty || 0);
+  const receivedQty = Number(line.received_qty || 0);
+  if(receivedQty < expectedQty) return 'Kurang';
+  if(receivedQty > expectedQty) return 'Lebih/Bermasalah';
+  if(String(line.condition || 'Sesuai') !== 'Sesuai') return 'Lebih/Bermasalah';
+  return 'Sesuai';
+}
+
+function openTransferReceiveForm(trfNo){
   const doc = groupTransferDocs(buildTransferRows()).find(r => r.trf_no === trfNo);
   if(!doc) return toast('Transfer tidak ditemukan.');
-  const expectedQty = doc.details.reduce((sum, d) => sum + Number(d.qty || 0), 0);
-  const receivedQtyRaw = window.prompt(`Total qty yang diterima berapa? Expected: ${expectedQty}`, String(expectedQty));
-  if(receivedQtyRaw === null) return;
-  const receivedQty = Number(receivedQtyRaw || 0);
-  if(Number.isNaN(receivedQty) || receivedQty < 0) return toast('Qty received tidak valid.');
+  const savedMeta = TRANSFER_RECEIVE_META[trfNo] || {};
+  const savedLines = Array.isArray(savedMeta.lines) ? savedMeta.lines : [];
+  transferReceiveDraft = {
+    trf_no: doc.trf_no,
+    trf_date: doc.trf_date,
+    from_warehouse: doc.from_warehouse,
+    to_warehouse: doc.to_warehouse,
+    note: savedMeta.note || '',
+    lines: doc.details.map(d => {
+      const saved = savedLines.find(x => x.fg_code === d.fg_code) || {};
+      return {
+        fg_code: d.fg_code,
+        fg_name: d.fg_name,
+        expected_qty: Number(d.qty || 0),
+        received_qty: Number(saved.received_qty ?? d.qty ?? 0),
+        condition: saved.condition || 'Sesuai',
+        note: saved.note || ''
+      };
+    })
+  };
+  renderTransferReceiveForm();
+  document.getElementById('transfer-receive-card').classList.add('active');
+  refreshInventoryModalState();
+}
+
+function closeTransferReceiveForm(){
+  transferReceiveDraft = null;
+  document.getElementById('transfer-receive-card').classList.remove('active');
+  refreshInventoryModalState();
+}
+
+function updateTransferReceiveQty(index, value){
+  if(!transferReceiveDraft || !transferReceiveDraft.lines[index]) return;
+  const qty = Number(value || 0);
+  transferReceiveDraft.lines[index].received_qty = Number.isNaN(qty) || qty < 0 ? 0 : qty;
+  renderTransferReceiveForm();
+}
+
+function updateTransferReceiveCondition(index, value){
+  if(!transferReceiveDraft || !transferReceiveDraft.lines[index]) return;
+  transferReceiveDraft.lines[index].condition = value || 'Sesuai';
+  renderTransferReceiveForm();
+}
+
+function updateTransferReceiveLineNote(index, value){
+  if(!transferReceiveDraft || !transferReceiveDraft.lines[index]) return;
+  transferReceiveDraft.lines[index].note = value || '';
+}
+
+function renderTransferReceiveForm(){
+  if(!transferReceiveDraft) return;
+  document.getElementById('transfer-receive-doc-no').textContent = transferReceiveDraft.trf_no;
+  document.getElementById('transfer-receive-date').textContent = transferReceiveDraft.trf_date;
+  document.getElementById('transfer-receive-from').textContent = transferReceiveDraft.from_warehouse;
+  document.getElementById('transfer-receive-to').textContent = transferReceiveDraft.to_warehouse;
+  document.getElementById('transfer-receive-note').value = transferReceiveDraft.note || '';
+  const expectedQty = transferReceiveDraft.lines.reduce((sum, line) => sum + Number(line.expected_qty || 0), 0);
+  const receivedQty = transferReceiveDraft.lines.reduce((sum, line) => sum + Number(line.received_qty || 0), 0);
+  const issueCount = transferReceiveDraft.lines.filter(line => getTransferReceiveLineResult(line) !== 'Sesuai').length;
+  document.getElementById('transfer-receive-meta').textContent = `${transferReceiveDraft.lines.length} item diperiksa • Expected ${expectedQty} • Received ${receivedQty}`;
+  document.getElementById('transfer-receive-body').innerHTML = transferReceiveDraft.lines.map((line, index) => {
+    const rowResult = getTransferReceiveLineResult(line);
+    return `
+      <tr>
+        <td class="mono">${line.fg_code}</td>
+        <td>${line.fg_name}</td>
+        <td>${line.expected_qty}</td>
+        <td><input class="search" type="number" min="0" value="${line.received_qty}" oninput="updateTransferReceiveQty(${index}, this.value)"></td>
+        <td>
+          <select class="select receive-status-select" onchange="updateTransferReceiveCondition(${index}, this.value)">
+            <option value="Sesuai" ${line.condition === 'Sesuai' ? 'selected' : ''}>Sesuai</option>
+            <option value="Bermasalah" ${line.condition === 'Bermasalah' ? 'selected' : ''}>Bermasalah</option>
+          </select>
+          <div class="summary-note" style="margin-top:6px">${badge(rowResult)}</div>
+        </td>
+        <td><input class="search receive-line-note" value="${line.note || ''}" placeholder="Catatan varian" oninput="updateTransferReceiveLineNote(${index}, this.value)"></td>
+      </tr>
+    `;
+  }).join('');
+  document.getElementById('transfer-receive-summary').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Total Varian</div><div class="mini-v">${transferReceiveDraft.lines.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Expected Qty</div><div class="mini-v">${expectedQty}</div></div>
+    <div class="mini-item"><div class="mini-k">Received Qty</div><div class="mini-v">${receivedQty}</div></div>
+    <div class="mini-item"><div class="mini-k">Varian Bermasalah</div><div class="mini-v">${issueCount}</div></div>
+  `;
+}
+
+function submitTransferReceiveForm(){
+  if(!transferReceiveDraft) return;
+  transferReceiveDraft.note = document.getElementById('transfer-receive-note').value || '';
+  const expectedQty = transferReceiveDraft.lines.reduce((sum, line) => sum + Number(line.expected_qty || 0), 0);
+  const receivedQty = transferReceiveDraft.lines.reduce((sum, line) => sum + Number(line.received_qty || 0), 0);
   let result = 'Sesuai';
-  if(receivedQty < expectedQty) result = 'Kurang';
-  if(receivedQty > expectedQty) result = 'Lebih/Bermasalah';
-  if(receivedQty === expectedQty){
-    const issue = window.confirm(`Qty diterima ${receivedQty}. Klik OK jika transfer diterima sesuai, Cancel jika ada masalah.`);
-    if(!issue) result = 'Lebih/Bermasalah';
-  }
-  let note = '';
-  if(result !== 'Sesuai') note = window.prompt('Isi catatan penerimaan / selisih transfer:', receivedQty !== expectedQty ? `Expected ${expectedQty}, received ${receivedQty}` : 'Kondisi barang bermasalah') || '';
-  TRANSFER_RECEIVE_META[trfNo] = { result, note, expected_qty: expectedQty, received_qty: receivedQty };
-  TRANSFER_STATUS_OVERRIDES[trfNo] = 'Received';
+  if(transferReceiveDraft.lines.some(line => Number(line.received_qty || 0) < Number(line.expected_qty || 0))) result = 'Kurang';
+  if(transferReceiveDraft.lines.some(line => Number(line.received_qty || 0) > Number(line.expected_qty || 0) || String(line.condition || 'Sesuai') !== 'Sesuai')) result = 'Lebih/Bermasalah';
+  TRANSFER_RECEIVE_META[transferReceiveDraft.trf_no] = {
+    result,
+    note: transferReceiveDraft.note,
+    expected_qty: expectedQty,
+    received_qty: receivedQty,
+    lines: transferReceiveDraft.lines.map(line => ({
+      fg_code: line.fg_code,
+      expected_qty: Number(line.expected_qty || 0),
+      received_qty: Number(line.received_qty || 0),
+      condition: line.condition || 'Sesuai',
+      note: line.note || ''
+    }))
+  };
+  TRANSFER_STATUS_OVERRIDES[transferReceiveDraft.trf_no] = 'Received';
   window.localStorage.setItem('erp.transfer.receive_meta', JSON.stringify(TRANSFER_RECEIVE_META));
   window.localStorage.setItem('erp.transfer.status_overrides', JSON.stringify(TRANSFER_STATUS_OVERRIDES));
+  closeTransferReceiveForm();
   location.reload();
 }
 
