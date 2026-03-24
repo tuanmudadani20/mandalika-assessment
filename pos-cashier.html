@@ -80,9 +80,11 @@ button,input,select{font:inherit}
 .pay-method.active{border-color:var(--navy);background:var(--sky);color:var(--navy)}
 .footer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
 .full{grid-column:1 / -1}
+.draft-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .modal{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
 .modal.open{display:flex}
 .modal-card{width:min(520px,92vw);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 54px rgba(15,23,42,.18);padding:18px}
+.modal-card.wide{width:min(760px,94vw)}
 .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
 .modal-head b{font-size:18px}
 .modal-head small{display:block;color:var(--muted);margin-top:4px;line-height:1.5}
@@ -92,6 +94,12 @@ button,input,select{font:inherit}
 .receipt-box .mono{font-family:'IBM Plex Mono',monospace}
 .receipt-items{display:grid;gap:8px}
 .receipt-item{display:flex;justify-content:space-between;gap:10px}
+.held-list{display:grid;gap:10px;max-height:420px;overflow:auto}
+.held-item{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fcfdff}
+.held-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.held-item b{font-size:13px}
+.held-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+.held-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 @media (max-width:1180px){
   .app{grid-template-columns:1fr}
   .side{position:fixed;right:0;top:0;bottom:0;width:min(420px,100vw);z-index:30;box-shadow:-16px 0 40px rgba(15,23,42,.16)}
@@ -151,6 +159,11 @@ button,input,select{font:inherit}
       <div class="sum-row"><span>Subtotal</span><b id="sum-subtotal">Rp 0</b></div>
       <div class="sum-row total"><span>Total</span><b id="sum-total">Rp 0</b></div>
       <div class="pay-grid" id="pay-methods"></div>
+      <div class="draft-tools">
+        <button class="btn btn-ghost" type="button" onclick="holdCurrentCart()">Hold</button>
+        <button class="btn btn-ghost" type="button" onclick="openHeldModal()">Resume</button>
+        <button class="btn btn-ghost" type="button" onclick="voidCurrentCart()">Void</button>
+      </div>
       <div class="footer-actions">
         <button class="btn btn-ghost" type="button" onclick="clearCart()">Kosongkan</button>
         <button class="btn btn-primary" type="button" onclick="openPayModal()">Bayar</button>
@@ -199,7 +212,24 @@ button,input,select{font:inherit}
     <div class="receipt-box" id="done-receipt"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" type="button" onclick="toggleDoneModal(false)">Tutup</button>
+      <button class="btn btn-ghost" type="button" onclick="printReceipt()">Print Struk</button>
       <button class="btn btn-primary" type="button" onclick="newOrder()">Transaksi Baru</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="held-modal">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <div>
+        <b>Resume Draft</b>
+        <small>Draft transaksi yang di-hold per toko dan kasir.</small>
+      </div>
+      <button class="btn btn-ghost" type="button" onclick="toggleHeldModal(false)">Tutup</button>
+    </div>
+    <div class="held-list" id="held-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" onclick="toggleHeldModal(false)">Tutup</button>
     </div>
   </div>
 </div>
@@ -212,6 +242,8 @@ const STORES = DATA.tokos || [];
 const FG = DATA.fg_items || [];
 const POS_RETURN_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_return') || '[]');
 const BASE_SALES = [...(TX.sales || [])];
+const HELD_ORDER_KEY = 'erp.pos.held_orders';
+const VOID_ORDER_KEY = 'erp.pos.void_orders';
 let selectedStore = '';
 let selectedCategory = '';
 let selectedPayment = 'Cash';
@@ -237,6 +269,28 @@ function currentReturnRows(){
   return POS_RETURN_EXTRA;
 }
 
+function currentDate(){
+  const now = new Date();
+  const pad = value => String(value).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+function readHeldOrders(){
+  return JSON.parse(window.localStorage.getItem(HELD_ORDER_KEY) || '[]');
+}
+
+function writeHeldOrders(rows){
+  window.localStorage.setItem(HELD_ORDER_KEY, JSON.stringify(rows));
+}
+
+function readVoidOrders(){
+  return JSON.parse(window.localStorage.getItem(VOID_ORDER_KEY) || '[]');
+}
+
+function writeVoidOrders(rows){
+  window.localStorage.setItem(VOID_ORDER_KEY, JSON.stringify(rows));
+}
+
 function getStoreName(code){
   return (STORES.find(store => store.store_code === code) || {}).store_name || code;
 }
@@ -256,9 +310,19 @@ function stockAtStore(storeCode, fgCode){
 
 function inferredPrice(fg){
   const code = String(fg.fg_code || '');
+  const variant = String(fg.variant_type || '').toUpperCase();
+  const packSize = Number(fg.pack_size || 0);
   if(code.startsWith('PW110')) return 249000;
+  if(code.startsWith('PP120')) return 269000;
+  if(code.startsWith('PP100')) return 239000;
   if(code.startsWith('A10')) return 89000;
   if(code.startsWith('V2')) return 29000;
+  if(code.startsWith('15G')) return 119000;
+  if(variant.includes('ATOMIZER')) return 89000;
+  if(variant.includes('DISPLAY')) return 0;
+  if(packSize >= 100) return 239000;
+  if(packSize >= 10) return 89000;
+  if(packSize > 0 && packSize <= 2) return 29000;
   return 99000;
 }
 
@@ -397,7 +461,7 @@ function renderCart(){
   document.getElementById('sum-items').textContent = cart.reduce((sum, item) => sum + item.qty, 0) + ' pcs';
   document.getElementById('sum-subtotal').textContent = fmtMoney(getSubtotal());
   document.getElementById('sum-total').textContent = fmtMoney(getSubtotal());
-  document.getElementById('order-doc').textContent = `${selectedStore || '-'} / Draft`;
+  document.getElementById('order-doc').textContent = `${selectedStore || '-'} / Draft / ${document.getElementById('cashier-select').value}`;
 }
 
 function clearCart(){
@@ -429,11 +493,104 @@ function toggleDoneModal(show){
   document.getElementById('done-modal').classList.toggle('open', !!show);
 }
 
+function toggleHeldModal(show){
+  document.getElementById('held-modal').classList.toggle('open', !!show);
+}
+
+function openHeldModal(){
+  renderHeldOrders();
+  toggleHeldModal(true);
+}
+
+function holdCurrentCart(){
+  if(!cart.length) return;
+  const heldOrders = readHeldOrders();
+  const holdNo = `HOLD-${currentDate().replace(/-/g,'')}-${String(heldOrders.length + 1).padStart(3,'0')}`;
+  heldOrders.unshift({
+    hold_no: holdNo,
+    hold_date: currentDate(),
+    store_code: selectedStore,
+    store_name: getStoreName(selectedStore),
+    cashier_id: document.getElementById('cashier-select').value,
+    payment_method: selectedPayment,
+    customer_name: String(document.getElementById('customer-name').value || '').trim() || 'Umum',
+    customer_phone: String(document.getElementById('customer-phone').value || '').trim(),
+    total: getSubtotal(),
+    items: cart.map(item => ({ ...item }))
+  });
+  writeHeldOrders(heldOrders);
+  clearCart();
+}
+
+function resumeHeldOrder(holdNo){
+  const heldOrders = readHeldOrders();
+  const row = heldOrders.find(item => item.hold_no === holdNo);
+  if(!row) return;
+  selectedStore = row.store_code;
+  document.getElementById('store-select').value = row.store_code;
+  document.getElementById('cashier-select').value = row.cashier_id || 'KSR-01';
+  document.getElementById('customer-name').value = row.customer_name || '';
+  document.getElementById('customer-phone').value = row.customer_phone || '';
+  selectedPayment = row.payment_method || 'Cash';
+  cart = (row.items || []).map(item => ({ ...item }));
+  writeHeldOrders(heldOrders.filter(item => item.hold_no !== holdNo));
+  renderStorePill();
+  renderPaymentMethods();
+  renderCart();
+  renderProducts();
+  toggleHeldModal(false);
+}
+
+function removeHeldOrder(holdNo){
+  writeHeldOrders(readHeldOrders().filter(item => item.hold_no !== holdNo));
+  renderHeldOrders();
+}
+
+function renderHeldOrders(){
+  const rows = readHeldOrders().filter(row => !selectedStore || row.store_code === selectedStore);
+  document.getElementById('held-list').innerHTML = rows.length ? rows.map(row => `
+    <div class="held-item">
+      <div class="held-item-head">
+        <div>
+          <b>${row.hold_no}</b>
+          <div class="held-meta">${row.hold_date} · ${row.store_name} · ${row.cashier_id}<br>${row.customer_name || 'Umum'} · ${row.items.length} item · ${fmtMoney(row.total || 0)}</div>
+        </div>
+        <div class="store-pill">${row.payment_method || 'Cash'}</div>
+      </div>
+      <div class="held-meta">${row.items.map(item => `${item.fg_code} x ${item.qty}`).join(' • ')}</div>
+      <div class="held-actions">
+        <button class="btn btn-ghost" type="button" onclick="removeHeldOrder('${row.hold_no}')">Hapus</button>
+        <button class="btn btn-primary" type="button" onclick="resumeHeldOrder('${row.hold_no}')">Resume</button>
+      </div>
+    </div>
+  `).join('') : `<div class="cart-empty">Tidak ada draft yang di-hold.</div>`;
+}
+
+function voidCurrentCart(){
+  if(!cart.length) return;
+  const rows = readVoidOrders();
+  rows.unshift({
+    void_no: `VOID-${currentDate().replace(/-/g,'')}-${String(rows.length + 1).padStart(3,'0')}`,
+    void_date: currentDate(),
+    store_code: selectedStore,
+    cashier_id: document.getElementById('cashier-select').value,
+    customer_name: String(document.getElementById('customer-name').value || '').trim() || 'Umum',
+    payment_method: selectedPayment,
+    total: getSubtotal(),
+    items: cart.map(item => ({ ...item }))
+  });
+  writeVoidOrders(rows);
+  clearCart();
+}
+
 function submitPayment(){
   if(!cart.length) return;
   const salesNo = nextSalesNo();
-  const salesDate = '2026-03-23';
+  const salesDate = currentDate();
   const store = STORES.find(row => row.store_code === selectedStore);
+  const cashierId = document.getElementById('cashier-select').value;
+  const customerName = String(document.getElementById('customer-name').value || '').trim() || 'Umum';
+  const customerPhone = String(document.getElementById('customer-phone').value || '').trim();
   cart.forEach(item => {
     RUNTIME.append('sales', {
       sales_no: salesNo,
@@ -445,9 +602,9 @@ function submitPayment(){
       qty: item.qty,
       net_sales: item.qty * item.price,
       payment_method: selectedPayment,
-      cashier_id: document.getElementById('cashier-select').value,
-      customer_name: String(document.getElementById('customer-name').value || '').trim() || 'Umum',
-      customer_phone: String(document.getElementById('customer-phone').value || '').trim(),
+      cashier_id: cashierId,
+      customer_name: customerName,
+      customer_phone: customerPhone,
       status: 'Posted'
     });
   });
@@ -455,6 +612,9 @@ function submitPayment(){
     sales_no: salesNo,
     sales_date: salesDate,
     store_name: store.store_name,
+    cashier_id: cashierId,
+    customer_name: customerName,
+    customer_phone: customerPhone,
     payment_method: selectedPayment,
     total: getSubtotal(),
     items: cart.map(item => ({ ...item }))
@@ -463,6 +623,8 @@ function submitPayment(){
     <div class="sum-row"><span>No Penjualan</span><b class="mono">${lastSaved.sales_no}</b></div>
     <div class="sum-row"><span>Tanggal</span><b>${lastSaved.sales_date}</b></div>
     <div class="sum-row"><span>Toko</span><b>${lastSaved.store_name}</b></div>
+    <div class="sum-row"><span>Kasir</span><b>${lastSaved.cashier_id}</b></div>
+    <div class="sum-row"><span>Pelanggan</span><b>${lastSaved.customer_name}</b></div>
     <div class="sum-row"><span>Metode Bayar</span><b>${lastSaved.payment_method}</b></div>
     <div style="margin:10px 0;border-top:1px dashed var(--line)"></div>
     ${lastSaved.items.map(item => `<div class="receipt-item"><span>${item.fg_code} x ${item.qty}</span><b>${fmtMoney(item.qty * item.price)}</b></div>`).join('')}
@@ -478,7 +640,42 @@ function newOrder(){
   toggleDoneModal(false);
   document.getElementById('customer-name').value = '';
   document.getElementById('customer-phone').value = '';
+  selectedPayment = 'Cash';
+  renderPaymentMethods();
   renderProducts();
+}
+
+function printReceipt(){
+  if(!lastSaved) return;
+  const popup = window.open('', '_blank', 'width=420,height=720');
+  if(!popup) return;
+  popup.document.write(`<!DOCTYPE html>
+  <html lang="id"><head><meta charset="UTF-8"><title>Struk ${lastSaved.sales_no}</title>
+  <style>
+  body{font-family:Arial,sans-serif;padding:18px;color:#111}
+  .head{text-align:center;margin-bottom:12px}
+  .head b{display:block;font-size:18px}
+  .mono{font-family:monospace}
+  .row{display:flex;justify-content:space-between;gap:10px;margin:4px 0}
+  .sep{border-top:1px dashed #999;margin:10px 0}
+  .item{margin:8px 0}
+  .item small{display:block;color:#555}
+  .total{font-weight:700;font-size:16px}
+  </style></head><body>
+    <div class="head"><b>Mandalika POS</b><div>${lastSaved.store_name}</div></div>
+    <div class="row"><span>No</span><span class="mono">${lastSaved.sales_no}</span></div>
+    <div class="row"><span>Tanggal</span><span>${lastSaved.sales_date}</span></div>
+    <div class="row"><span>Kasir</span><span>${lastSaved.cashier_id}</span></div>
+    <div class="row"><span>Pelanggan</span><span>${lastSaved.customer_name}</span></div>
+    <div class="row"><span>Bayar</span><span>${lastSaved.payment_method}</span></div>
+    <div class="sep"></div>
+    ${lastSaved.items.map(item => `<div class="item"><div class="row"><span>${item.fg_code}</span><span>${fmtMoney(item.qty * item.price)}</span></div><small>${item.fg_name} · ${item.qty} x ${fmtMoney(item.price)}</small></div>`).join('')}
+    <div class="sep"></div>
+    <div class="row total"><span>Total</span><span>${fmtMoney(lastSaved.total)}</span></div>
+  </body></html>`);
+  popup.document.close();
+  popup.focus();
+  popup.print();
 }
 
 document.getElementById('store-select').addEventListener('change', e => {
@@ -487,6 +684,7 @@ document.getElementById('store-select').addEventListener('change', e => {
   clearCart();
   renderProducts();
 });
+document.getElementById('cashier-select').addEventListener('change', renderCart);
 document.getElementById('category-filter').addEventListener('change', renderProducts);
 document.getElementById('search-product').addEventListener('input', renderProducts);
 

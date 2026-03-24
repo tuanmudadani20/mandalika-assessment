@@ -133,6 +133,8 @@ tr:hover td{background:#FCFCFD}
         </div>
         <div class="nav-parent" id="nav-parent-pos-mon" data-group="pos-mon" data-default-sec="store">Monitoring <small>Stok toko</small></div>
         <div class="nav-group collapsed" id="nav-group-pos-mon">
+          <a class="nav-link" href="#" data-sec="held">Hold Bill</a>
+          <a class="nav-link" href="#" data-sec="void">Void POS</a>
           <a class="nav-link" href="#" data-sec="receipt">Penerimaan DO Toko</a>
           <a class="nav-link" href="#" data-sec="store">Stok Toko</a>
           <a class="nav-link" href="#" data-sec="movement">Pergerakan Stok Toko</a>
@@ -207,7 +209,7 @@ tr:hover td{background:#FCFCFD}
             </div>
           </div>
         </div>
-        <div class="card"><div class="tw"><table><thead><tr><th>No Penjualan</th><th>Tanggal</th><th>Toko</th><th>FG</th><th>Qty</th><th>Net Sales</th><th>Status</th></tr></thead><tbody id="tbl-sales"></tbody></table></div></div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Penjualan</th><th>Tanggal</th><th>Toko</th><th>FG</th><th>Qty</th><th>Net Sales</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-sales"></tbody></table></div></div>
       </section>
 
       <section class="section" id="sec-return">
@@ -313,6 +315,46 @@ tr:hover td{background:#FCFCFD}
         <div class="card"><div class="tw"><table><thead><tr><th>Tanggal Terima</th><th>No DO</th><th>Toko</th><th>Gudang Asal</th><th>FG</th><th>Qty Terima</th><th>Status</th></tr></thead><tbody id="tbl-receipt"></tbody></table></div></div>
       </section>
 
+      <section class="section" id="sec-held">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-held" placeholder="Cari hold bill, toko, kasir, atau customer">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-held-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-held-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-held-store"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('held')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Hold</th><th>Tanggal</th><th>Toko</th><th>Kasir</th><th>Pelanggan</th><th>Item</th><th>Total</th><th>Status</th></tr></thead><tbody id="tbl-held"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-void">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-void" placeholder="Cari void, toko, kasir, atau customer">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-void-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-void-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-void-store"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('void')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Void</th><th>Tanggal</th><th>Toko</th><th>Kasir</th><th>Pelanggan</th><th>Item</th><th>Total</th><th>Status</th></tr></thead><tbody id="tbl-void"></tbody></table></div></div>
+      </section>
+
       <section class="section" id="sec-movement">
         <div class="toolbar">
           <div class="toolbar-left">
@@ -379,18 +421,27 @@ const RUNTIME = window.ERP_RUNTIME || {};
 const TOKOS = DATA.tokos || [];
 const FG = DATA.fg_items || [];
 const COLUMN_PREFS_KEY = 'erp.pos.columnPrefs';
-const COLUMN_CONFIG = {
-  sales:{ title:'Penjualan', bodyId:'tbl-sales', columns:['No Penjualan','Tanggal','Toko','FG','Qty','Net Sales','Status'] },
-  return:{ title:'Retur Penjualan', bodyId:'tbl-return', columns:['No Retur','Tanggal','Toko','FG','Qty','Alasan','Status'] },
-  closing:{ title:'Closing Kasir', bodyId:'tbl-closing', columns:['No Closing','Tanggal','Toko','Transaksi','Qty Terjual','Net Sales','Status'] },
-  receipt:{ title:'Penerimaan DO Toko', bodyId:'tbl-receipt', columns:['Tanggal Terima','No DO','Toko','Gudang Asal','FG','Qty Terima','Status'] },
-  store:{ title:'Stok Toko', bodyId:'tbl-store', columns:['Toko','Kode FG','Nama FG','Kategori','Stok Toko','Status'] },
-  movement:{ title:'Pergerakan Stok Toko', bodyId:'tbl-movement', columns:['Tanggal','Toko','Dokumen','Tipe','FG','Masuk','Keluar','Saldo'] }
-};
-let columnPrefs = loadColumnPrefs();
-let activeColumnSection = 'sales';
-const POS_RETURN_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_return') || '[]');
-const POS_CLOSING_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_closing') || '[]');
+  const COLUMN_CONFIG = {
+    sales:{ title:'Penjualan', bodyId:'tbl-sales', columns:['No Penjualan','Tanggal','Toko','FG','Qty','Net Sales','Status','Aksi'] },
+    return:{ title:'Retur Penjualan', bodyId:'tbl-return', columns:['No Retur','Tanggal','Toko','FG','Qty','Alasan','Status'] },
+    closing:{ title:'Closing Kasir', bodyId:'tbl-closing', columns:['No Closing','Tanggal','Toko','Transaksi','Qty Terjual','Net Sales','Status'] },
+    receipt:{ title:'Penerimaan DO Toko', bodyId:'tbl-receipt', columns:['Tanggal Terima','No DO','Toko','Gudang Asal','FG','Qty Terima','Status'] },
+    held:{ title:'Hold Bill', bodyId:'tbl-held', columns:['No Hold','Tanggal','Toko','Kasir','Pelanggan','Item','Total','Status'] },
+    void:{ title:'Void POS', bodyId:'tbl-void', columns:['No Void','Tanggal','Toko','Kasir','Pelanggan','Item','Total','Status'] },
+    store:{ title:'Stok Toko', bodyId:'tbl-store', columns:['Toko','Kode FG','Nama FG','Kategori','Stok Toko','Status'] },
+    movement:{ title:'Pergerakan Stok Toko', bodyId:'tbl-movement', columns:['Tanggal','Toko','Dokumen','Tipe','FG','Masuk','Keluar','Saldo'] }
+  };
+  let columnPrefs = loadColumnPrefs();
+  let activeColumnSection = 'sales';
+  const POS_RETURN_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_return') || '[]');
+  const POS_CLOSING_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_closing') || '[]');
+  const POS_HELD_EXTRA = JSON.parse(window.localStorage.getItem('erp.pos.held_orders') || '[]');
+  const POS_VOID_EXTRA = JSON.parse(window.localStorage.getItem('erp.pos.void_orders') || '[]');
+  const POS_SALES_VOID_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_sales_void') || '[]');
+  const POS_SALES_VOID_MAP = POS_SALES_VOID_EXTRA.reduce((map, row) => {
+    map[row.sales_no] = row;
+    return map;
+  }, {});
 let selectedSalesNo = '';
 let selectedReceiptNo = '';
 let selectedMovementKey = '';
@@ -398,14 +449,31 @@ let selectedClosingNo = '';
 let selectedReturnNo = '';
 let movementViewMode = 'RECAP';
 
-function badge(status){
-  const map = { Aktif:'b-ok', Draft:'b-draft', Posted:'b-ok', Closed:'b-ok', Review:'b-info', Open:'b-warn' };
-  return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
-}
-function pickStore(i){ return TOKOS[(i * 3) % TOKOS.length]; }
-function pickFg(i){ return FG[(i * 7) % FG.length]; }
-function fmtMoney(n){ return new Intl.NumberFormat('id-ID').format(n || 0); }
-function getStoreName(storeCode){ return TOKOS.find(x => x.store_code === storeCode)?.store_name || storeCode || '-'; }
+  function badge(status){
+    const map = { Aktif:'b-ok', Draft:'b-draft', Posted:'b-ok', Closed:'b-ok', Review:'b-info', Open:'b-warn' };
+    return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
+  }
+  function pickStore(i){ return TOKOS[(i * 3) % TOKOS.length]; }
+  function pickFg(i){ return FG[(i * 7) % FG.length]; }
+  function fmtMoney(n){ return new Intl.NumberFormat('id-ID').format(n || 0); }
+  function getStoreName(storeCode){ return TOKOS.find(x => x.store_code === storeCode)?.store_name || storeCode || '-'; }
+  function inferredPosPrice(fg){
+    const code = String(fg?.fg_code || '');
+    const variant = String(fg?.variant_type || '').toUpperCase();
+    const packSize = Number(fg?.pack_size || 0);
+    if(code.startsWith('PW110')) return 249000;
+    if(code.startsWith('PP120')) return 269000;
+    if(code.startsWith('PP100')) return 239000;
+    if(code.startsWith('A10')) return 89000;
+    if(code.startsWith('V2')) return 29000;
+    if(code.startsWith('15G')) return 119000;
+    if(variant.includes('ATOMIZER')) return 89000;
+    if(variant.includes('DISPLAY')) return 0;
+    if(packSize >= 100) return 239000;
+    if(packSize >= 10) return 89000;
+    if(packSize > 0 && packSize <= 2) return 29000;
+    return 99000;
+  }
 
 const SALES_ROWS = [...(TX.sales || []), ...RUNTIME.read('sales')].map(r => ({
   sales_no: r.sales_no,
@@ -420,7 +488,10 @@ const SALES_ROWS = [...(TX.sales || []), ...RUNTIME.read('sales')].map(r => ({
   cashier_id: r.cashier_id || '-',
   customer_name: r.customer_name || 'Umum',
   customer_phone: r.customer_phone || '',
-  status: r.status
+  status: POS_SALES_VOID_MAP[r.sales_no] ? 'Voided' : r.status,
+  void_no: POS_SALES_VOID_MAP[r.sales_no]?.void_no || '',
+  void_date: POS_SALES_VOID_MAP[r.sales_no]?.void_date || '',
+  void_reason: POS_SALES_VOID_MAP[r.sales_no]?.reason || ''
 }));
 
 const RETURN_ROWS = SALES_ROWS.slice(0,7).map((s, i) => ({
@@ -469,26 +540,30 @@ function stockAtStore(storeCode, fgCode){
   return Math.max(0, doIn - outSales + inReturn);
 }
 
-function renderKpis(){
-  document.getElementById('kpis').innerHTML = `
-    <div class="kpi"><div class="kpi-label">Toko Aktif</div><div class="kpi-val">${TOKOS.length}</div></div>
-    <div class="kpi"><div class="kpi-label">Sales Posted</div><div class="kpi-val">${SALES_ROWS.filter(x => x.status === 'Posted').length}</div></div>
-    <div class="kpi"><div class="kpi-label">Closing Closed</div><div class="kpi-val">${CLOSING_ROWS.filter(x => x.status === 'Closed').length}</div></div>
-    <div class="kpi"><div class="kpi-label">Retur Posted</div><div class="kpi-val">${RETURN_ROWS.filter(x => x.status === 'Posted').length}</div></div>
-  `;
-}
+  function renderKpis(){
+    document.getElementById('kpis').innerHTML = `
+      <div class="kpi"><div class="kpi-label">Toko Aktif</div><div class="kpi-val">${TOKOS.length}</div></div>
+      <div class="kpi"><div class="kpi-label">Sales Posted</div><div class="kpi-val">${SALES_ROWS.filter(x => x.status === 'Posted').length}</div></div>
+      <div class="kpi"><div class="kpi-label">Closing Closed</div><div class="kpi-val">${CLOSING_ROWS.filter(x => x.status === 'Closed').length}</div></div>
+      <div class="kpi"><div class="kpi-label">Hold / Void</div><div class="kpi-val">${POS_HELD_EXTRA.length} / ${POS_VOID_EXTRA.length}</div></div>
+    `;
+  }
 
-function fillStoreFilters(){
-  const opts = ['<option value="">Semua Toko</option>'].concat(TOKOS.map(s => `<option value="${s.store_code}">${s.store_code} - ${s.store_name}</option>`));
-  document.getElementById('filter-sales-store').innerHTML = opts.join('');
-  document.getElementById('filter-receipt-store').innerHTML = opts.join('');
-  document.getElementById('filter-store-store').innerHTML = opts.join('');
-  document.getElementById('filter-movement-store').innerHTML = opts.join('');
+  function fillStoreFilters(){
+    const opts = ['<option value="">Semua Toko</option>'].concat(TOKOS.map(s => `<option value="${s.store_code}">${s.store_code} - ${s.store_name}</option>`));
+    document.getElementById('filter-sales-store').innerHTML = opts.join('');
+    document.getElementById('filter-held-store').innerHTML = opts.join('');
+    document.getElementById('filter-void-store').innerHTML = opts.join('');
+    document.getElementById('filter-receipt-store').innerHTML = opts.join('');
+    document.getElementById('filter-store-store').innerHTML = opts.join('');
+    document.getElementById('filter-movement-store').innerHTML = opts.join('');
   document.getElementById('sales-form-store').innerHTML = TOKOS.slice(0, 40).map(s => `<option value="${s.store_code}">${s.store_code} - ${s.store_name}</option>`).join('');
   document.getElementById('sales-form-fg').innerHTML = FG.slice(0, 60).map(f => `<option value="${f.fg_code}">${f.fg_code} - ${f.fg_name}</option>`).join('');
-  document.getElementById('pos-return-form-sales').innerHTML = SALES_ROWS.slice(0, 60).map(s => `<option value="${s.sales_no}">${s.sales_no} - ${s.store_name}</option>`).join('');
+  document.getElementById('pos-return-form-sales').innerHTML = SALES_ROWS.filter(s => s.status === 'Posted').slice(0, 60).map(s => `<option value="${s.sales_no}">${s.sales_no} - ${s.store_name}</option>`).join('');
   document.getElementById('closing-form-store').innerHTML = TOKOS.slice(0, 40).map(s => `<option value="${s.store_code}">${s.store_code} - ${s.store_name}</option>`).join('');
-}
+  const firstFg = FG.find(f => f.fg_code === document.getElementById('sales-form-fg').value) || FG[0];
+  if(firstFg) document.getElementById('sales-form-price').value = inferredPosPrice(firstFg);
+  }
 
 function renderSales(){
   let rows = bySearch(SALES_ROWS, ['sales_no','store_name','fg_code','fg_name'], document.getElementById('search-sales').value);
@@ -509,9 +584,10 @@ function renderSales(){
       <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
       <td>${r.qty}</td>
       <td>Rp ${fmtMoney(r.net_sales)}</td>
-      <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleSalesDetail(true,'${r.sales_no}')">Detail</button></div></td>
+      <td>${badge(r.status)}${r.void_no ? `<div class="muted-line">${r.void_no}</div>` : ''}</td>
+      <td><div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-ghost" type="button" onclick="toggleSalesDetail(true,'${r.sales_no}')">Detail</button>${r.status === 'Posted' ? `<button class="btn btn-primary" type="button" onclick="voidPostedSale('${r.sales_no}')">Void</button>` : ''}</div></td>
     </tr>
-  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data penjualan.</td></tr>`;
+  `).join('') : `<tr><td colspan="8" class="empty">Tidak ada data penjualan.</td></tr>`;
 }
 
 function renderReturn(){
@@ -620,7 +696,55 @@ function buildStoreReceiptRows(){
       fg_name: row.fg_name,
       qty: Number(row.qty || 0),
       status: row.status || 'Received'
-    }));
+      }));
+}
+
+function buildHeldRows(){
+  return POS_HELD_EXTRA.map(row => ({
+    hold_no: row.hold_no,
+    hold_date: row.hold_date,
+    store_code: row.store_code,
+    store_name: row.store_name || getStoreName(row.store_code),
+    cashier_id: row.cashier_id || '-',
+    customer_name: row.customer_name || 'Umum',
+    item_count: Array.isArray(row.items) ? row.items.length : 0,
+    total: Number(row.total || 0),
+    payment_method: row.payment_method || '-',
+    items: row.items || [],
+    status: 'Held'
+  }));
+}
+
+function buildVoidRows(){
+  const draftRows = POS_VOID_EXTRA.map(row => ({
+    void_no: row.void_no,
+    void_date: row.void_date,
+    store_code: row.store_code,
+    store_name: getStoreName(row.store_code),
+    cashier_id: row.cashier_id || '-',
+    customer_name: row.customer_name || 'Umum',
+    item_count: Array.isArray(row.items) ? row.items.length : 0,
+    total: Number(row.total || 0),
+    payment_method: row.payment_method || '-',
+    items: row.items || [],
+    status: 'Voided Draft'
+  }));
+  const salesVoidRows = POS_SALES_VOID_EXTRA.map(row => ({
+    void_no: row.void_no,
+    void_date: row.void_date,
+    store_code: row.store_code,
+    store_name: row.store_name || getStoreName(row.store_code),
+    cashier_id: row.cashier_id || '-',
+    customer_name: row.customer_name || 'Umum',
+    item_count: Array.isArray(row.items) ? row.items.length : 0,
+    total: Number(row.total || 0),
+    payment_method: row.payment_method || '-',
+    items: row.items || [],
+    status: 'Voided Sale',
+    sales_no: row.sales_no || '',
+    reason: row.reason || ''
+  }));
+  return draftRows.concat(salesVoidRows);
 }
 
 function renderReceipt(){
@@ -645,6 +769,52 @@ function renderReceipt(){
       <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleReceiptDetail(true,'${r.do_no}')">Detail</button></div></td>
     </tr>
   `).join('') : `<tr><td colspan="7" class="empty">Belum ada penerimaan DO toko.</td></tr>`;
+}
+
+function renderHeld(){
+  let rows = bySearch(buildHeldRows(), ['hold_no','store_name','store_code','cashier_id','customer_name','payment_method'], document.getElementById('search-held').value);
+  const store = document.getElementById('filter-held-store').value;
+  const dateFrom = document.getElementById('filter-held-date-from').value;
+  const dateTo = document.getElementById('filter-held-date-to').value;
+  if(store) rows = rows.filter(x => x.store_code === store);
+  if(dateFrom) rows = rows.filter(x => String(x.hold_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.hold_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.hold_date || '').localeCompare(String(a.hold_date || '')) || String(b.hold_no || '').localeCompare(String(a.hold_no || '')));
+  document.getElementById('tbl-held').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.hold_no}</td>
+      <td>${r.hold_date}</td>
+      <td>${r.store_name}</td>
+      <td>${r.cashier_id}</td>
+      <td>${r.customer_name}</td>
+      <td>${r.item_count}</td>
+      <td>Rp ${fmtMoney(r.total)}</td>
+      <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleHeldDetail(true,'${r.hold_no}')">Detail</button></div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Belum ada hold bill.</td></tr>`;
+}
+
+function renderVoid(){
+  let rows = bySearch(buildVoidRows(), ['void_no','store_name','store_code','cashier_id','customer_name','payment_method'], document.getElementById('search-void').value);
+  const store = document.getElementById('filter-void-store').value;
+  const dateFrom = document.getElementById('filter-void-date-from').value;
+  const dateTo = document.getElementById('filter-void-date-to').value;
+  if(store) rows = rows.filter(x => x.store_code === store);
+  if(dateFrom) rows = rows.filter(x => String(x.void_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.void_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.void_date || '').localeCompare(String(a.void_date || '')) || String(b.void_no || '').localeCompare(String(a.void_no || '')));
+  document.getElementById('tbl-void').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.void_no}</td>
+      <td>${r.void_date}</td>
+      <td>${r.store_name}</td>
+      <td>${r.cashier_id}</td>
+      <td>${r.customer_name}</td>
+      <td>${r.item_count}</td>
+      <td>Rp ${fmtMoney(r.total)}</td>
+      <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleVoidDetail(true,'${r.void_no}')">Detail</button></div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Belum ada void draft.</td></tr>`;
 }
 
 function buildStoreMovementRows(){
@@ -772,13 +942,14 @@ function toggleSalesDetail(show, salesNo = ''){
     const rows = SALES_ROWS.filter(x => x.sales_no === selectedSalesNo);
     if(!rows.length) return;
     const head = rows[0];
-    document.getElementById('sales-detail-title').textContent = `Detail ${head.sales_no}`;
-    document.getElementById('sales-detail-body').innerHTML = `
-      <div class="mini-item"><div class="mini-k">Informasi Dokumen</div><div class="mini-v">${head.sales_date}<div class="muted-line">${head.store_name}</div></div></div>
-      <div class="mini-item"><div class="mini-k">Pelanggan</div><div class="mini-v">${head.customer_name || 'Umum'}<div class="muted-line">${head.customer_phone || '-'}</div></div></div>
-      <div class="mini-item"><div class="mini-k">Kasir / Metode Bayar</div><div class="mini-v">${head.cashier_id || '-'}<div class="muted-line">${head.payment_method || '-'}</div></div></div>
-      <div class="mini-item"><div class="mini-k">Item Penjualan</div><div class="mini-v">${rows.map(row => `<div class="muted-line"><span class="mono">${row.fg_code}</span> ${row.fg_name} x ${row.qty} = Rp ${fmtMoney(row.net_sales)}</div>`).join('')}</div></div>
-    `;
+      document.getElementById('sales-detail-title').textContent = `Detail ${head.sales_no}`;
+      document.getElementById('sales-detail-body').innerHTML = `
+        <div class="mini-item"><div class="mini-k">Informasi Dokumen</div><div class="mini-v">${head.sales_date}<div class="muted-line">${head.store_name}</div></div></div>
+        <div class="mini-item"><div class="mini-k">Status</div><div class="mini-v">${head.status}${head.void_no ? `<div class="muted-line">${head.void_no} · ${head.void_reason || '-'}</div>` : ''}</div></div>
+        <div class="mini-item"><div class="mini-k">Pelanggan</div><div class="mini-v">${head.customer_name || 'Umum'}<div class="muted-line">${head.customer_phone || '-'}</div></div></div>
+        <div class="mini-item"><div class="mini-k">Kasir / Metode Bayar</div><div class="mini-v">${head.cashier_id || '-'}<div class="muted-line">${head.payment_method || '-'}</div></div></div>
+        <div class="mini-item"><div class="mini-k">Item Penjualan</div><div class="mini-v">${rows.map(row => `<div class="muted-line"><span class="mono">${row.fg_code}</span> ${row.fg_name} x ${row.qty} = Rp ${fmtMoney(row.net_sales)}</div>`).join('')}</div></div>
+      `;
     modal.classList.add('open');
   }else{
     modal.classList.remove('open');
@@ -820,6 +991,47 @@ function toggleReceiptDetail(show, doNo = ''){
       <div class="mini-item"><div class="mini-k">Item Diterima</div><div class="mini-v">${rows.map(row => `<div class="muted-line"><span class="mono">${row.fg_code}</span> ${row.fg_name} x ${row.qty}</div>`).join('')}</div></div>
     `;
     modal.classList.add('open');
+  }else{
+    modal.classList.remove('open');
+  }
+}
+
+function toggleHeldDetail(show, holdNo = ''){
+  const modal = document.getElementById('sales-detail-modal');
+  if(show && holdNo) selectedReceiptNo = holdNo;
+  if(show){
+    const row = buildHeldRows().find(x => x.hold_no === selectedReceiptNo);
+    if(!row) return;
+    document.getElementById('sales-detail-title').textContent = `Detail ${row.hold_no}`;
+    document.getElementById('sales-detail-body').innerHTML = `
+      <div class="mini-item"><div class="mini-k">Informasi Draft</div><div class="mini-v">${row.hold_date}<div class="muted-line">${row.store_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Kasir / Pelanggan</div><div class="mini-v">${row.cashier_id}<div class="muted-line">${row.customer_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Metode / Total</div><div class="mini-v">${row.payment_method}<div class="muted-line">Rp ${fmtMoney(row.total)}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Item Draft</div><div class="mini-v">${row.items.map(item => `<div class="muted-line"><span class="mono">${item.fg_code}</span> ${item.fg_name} x ${item.qty}</div>`).join('')}</div></div>
+    `;
+    modal.classList.add('open');
+  }else{
+    modal.classList.remove('open');
+  }
+}
+
+function toggleVoidDetail(show, voidNo = ''){
+  const modal = document.getElementById('sales-detail-modal');
+  if(show && voidNo) selectedReceiptNo = voidNo;
+  if(show){
+    const row = buildVoidRows().find(x => x.void_no === selectedReceiptNo);
+    if(!row) return;
+    document.getElementById('sales-detail-title').textContent = `Detail ${row.void_no}`;
+      document.getElementById('sales-detail-body').innerHTML = `
+        <div class="mini-item"><div class="mini-k">Informasi Void</div><div class="mini-v">${row.void_date}<div class="muted-line">${row.store_name}</div></div></div>
+        <div class="mini-item"><div class="mini-k">Referensi</div><div class="mini-v">${row.sales_no || '-'}<div class="muted-line">${row.status}</div></div></div>
+        <div class="mini-item"><div class="mini-k">Kasir / Pelanggan</div><div class="mini-v">${row.cashier_id}<div class="muted-line">${row.customer_name}</div></div></div>
+        <div class="mini-item"><div class="mini-k">Metode / Total</div><div class="mini-v">${row.payment_method}<div class="muted-line">Rp ${fmtMoney(row.total)}</div></div></div>
+        <div class="mini-item"><div class="mini-k">Alasan</div><div class="mini-v">${row.reason || '-'}</div></div>
+        <div class="mini-item"><div class="mini-k">Item Void</div><div class="mini-v">${row.items.map(item => `<div class="muted-line"><span class="mono">${item.fg_code}</span> ${item.fg_name} x ${item.qty}</div>`).join('')}</div></div>
+        <div class="mini-item"><div class="mini-k">Dokumen</div><div class="mini-v"><button class="btn btn-ghost" type="button" onclick="printVoidMemo('${row.void_no}')">Print Memo Void</button></div></div>
+      `;
+      modal.classList.add('open');
   }else{
     modal.classList.remove('open');
   }
@@ -869,6 +1081,109 @@ function toggleClosingDetail(show, closingNo = ''){
   }
 }
 
+function voidPostedSale(salesNo){
+  const rows = SALES_ROWS.filter(x => x.sales_no === salesNo);
+  if(!rows.length) return toast('Penjualan tidak ditemukan.');
+  if(rows.some(x => x.status !== 'Posted')) return toast('Penjualan ini sudah tidak bisa di-void.');
+  const reason = window.prompt(`Alasan void untuk ${salesNo}?`, 'Transaksi dibatalkan');
+  if(reason === null) return;
+  const head = rows[0];
+  const voidRows = JSON.parse(window.localStorage.getItem('erp.extra.pos_sales_void') || '[]');
+  const voidNo = nextDoc('VPS', buildVoidRows().concat(voidRows), 'void_no');
+  const total = rows.reduce((sum, row) => sum + Number(row.net_sales || 0), 0);
+  voidRows.push({
+    void_no: voidNo,
+    void_date: '2026-03-24',
+    sales_no: salesNo,
+    store_code: head.store_code,
+    store_name: head.store_name,
+    cashier_id: head.cashier_id || '-',
+    customer_name: head.customer_name || 'Umum',
+    payment_method: head.payment_method || '-',
+    total,
+    reason: String(reason).trim() || 'Transaksi dibatalkan',
+    items: rows.map(row => ({
+      fg_code: row.fg_code,
+      fg_name: row.fg_name,
+      qty: row.qty,
+      net_sales: row.net_sales
+    }))
+  });
+  window.localStorage.setItem('erp.extra.pos_sales_void', JSON.stringify(voidRows));
+
+  const paymentMethod = String(head.payment_method || '').toLowerCase();
+  if(paymentMethod === 'cash' || paymentMethod === 'transfer' || paymentMethod === 'qris' || paymentMethod === 'debit'){
+    const financeCash = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+    financeCash.push({
+      cash_no: nextDoc('CB', CASH_ROWS.concat(financeCash), 'cash_no'),
+      cash_date: '2026-03-24',
+      type: 'Payment',
+      source: 'POS Void',
+      reference: voidNo,
+      amount: total,
+      status: 'Posted'
+    });
+    window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(financeCash));
+  }else if(paymentMethod === 'piutang'){
+    const settlements = JSON.parse(window.localStorage.getItem('erp.extra.finance_ar_settlements') || '{}');
+    AR_ROWS.filter(row => row.source_doc === salesNo && Number(row.balance || 0) > 0).forEach(row => {
+      settlements[row.ar_no] = Number(settlements[row.ar_no] || 0) + Number(row.balance || 0);
+    });
+    window.localStorage.setItem('erp.extra.finance_ar_settlements', JSON.stringify(settlements));
+  }
+
+  const financeJournal = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+  financeJournal.push({
+    journal_no: nextDoc('JV', JOURNAL_ROWS.concat(financeJournal), 'journal_no'),
+    journal_date: '2026-03-24',
+    source: voidNo,
+    desc: `Void penjualan POS ${salesNo}`,
+    debit: total,
+    credit: total,
+    status: 'Posted'
+  });
+  window.localStorage.setItem('erp.extra.finance_journal', JSON.stringify(financeJournal));
+  location.reload();
+}
+
+function printVoidMemo(voidNo){
+  const row = buildVoidRows().find(item => item.void_no === voidNo);
+  if(!row) return;
+  const popup = window.open('', '_blank', 'width=540,height=720');
+  if(!popup) return;
+  popup.document.write(`<!DOCTYPE html>
+  <html lang="id"><head><meta charset="UTF-8"><title>Memo Void ${row.void_no}</title>
+  <style>
+  body{font-family:Arial,sans-serif;padding:24px;color:#111}
+  .head{text-align:center;margin-bottom:18px}
+  .head b{display:block;font-size:20px}
+  .mono{font-family:monospace}
+  .row{display:flex;justify-content:space-between;gap:12px;margin:6px 0}
+  .sep{border-top:1px dashed #999;margin:12px 0}
+  .item{margin:8px 0}
+  .item small{display:block;color:#555}
+  </style></head><body>
+    <div class="head"><b>Memo Void POS</b><div>${row.store_name}</div></div>
+    <div class="row"><span>No Void</span><span class="mono">${row.void_no}</span></div>
+    <div class="row"><span>Tanggal</span><span>${row.void_date}</span></div>
+    <div class="row"><span>Referensi</span><span>${row.sales_no || '-'}</span></div>
+    <div class="row"><span>Kasir</span><span>${row.cashier_id}</span></div>
+    <div class="row"><span>Pelanggan</span><span>${row.customer_name}</span></div>
+    <div class="row"><span>Metode</span><span>${row.payment_method}</span></div>
+    <div class="row"><span>Status</span><span>${row.status}</span></div>
+    <div class="sep"></div>
+    <div><b>Alasan</b></div>
+    <div>${row.reason || '-'}</div>
+    <div class="sep"></div>
+    ${row.items.map(item => `<div class="item"><div class="row"><span>${item.fg_code}</span><span>${item.qty}</span></div><small>${item.fg_name}</small></div>`).join('')}
+    <div class="sep"></div>
+    <div class="row"><b>Total</b><b>Rp ${fmtMoney(row.total)}</b></div>
+  </body></html>`);
+  popup.document.close();
+  popup.focus();
+  popup.print();
+}
+
 function showSection(sec){
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
@@ -876,14 +1191,16 @@ function showSection(sec){
   syncPosNavBySection(sec);
   activeColumnSection = sec;
   document.getElementById('sec-' + sec).classList.add('active');
-  document.getElementById('bc-child').textContent = ({
-    sales: 'Penjualan',
-    return: 'Retur Penjualan',
-    closing: 'Closing Kasir',
-    receipt: 'Penerimaan DO Toko',
-    store: 'Stok Toko',
-    movement: 'Pergerakan Stok Toko'
-  })[sec];
+    document.getElementById('bc-child').textContent = ({
+      sales: 'Penjualan',
+      return: 'Retur Penjualan',
+      closing: 'Closing Kasir',
+      held: 'Hold Bill',
+      void: 'Void Draft',
+      receipt: 'Penerimaan DO Toko',
+      store: 'Stok Toko',
+      movement: 'Pergerakan Stok Toko'
+    })[sec];
   applyColumnVisibility(sec);
 }
 
@@ -957,8 +1274,38 @@ function exportSection(sec){
     return downloadCsv('penerimaan-do-toko.csv', [
       ['Tanggal Terima','No DO','Toko','Gudang Asal','Kode FG','Nama FG','Qty Terima','Status'],
       ...rows.map(r => [r.receipt_date, r.do_no, r.store_name, r.from_warehouse, r.fg_code, r.fg_name, r.qty, r.status])
-    ]);
-  }
+      ]);
+    }
+
+    if(sec === 'held'){
+      let rows = bySearch(buildHeldRows(), ['hold_no','store_name','store_code','cashier_id','customer_name','payment_method'], document.getElementById('search-held').value);
+      const store = document.getElementById('filter-held-store').value;
+      const dateFrom = document.getElementById('filter-held-date-from').value;
+      const dateTo = document.getElementById('filter-held-date-to').value;
+      if(store) rows = rows.filter(x => x.store_code === store);
+      if(dateFrom) rows = rows.filter(x => String(x.hold_date || '') >= dateFrom);
+      if(dateTo) rows = rows.filter(x => String(x.hold_date || '') <= dateTo);
+      rows = rows.sort((a,b) => String(b.hold_date || '').localeCompare(String(a.hold_date || '')) || String(b.hold_no || '').localeCompare(String(a.hold_no || '')));
+      return downloadCsv('pos-hold-bill.csv', [
+        ['No Hold','Tanggal','Toko','Kasir','Pelanggan','Item','Total','Metode','Status'],
+        ...rows.map(r => [r.hold_no, r.hold_date, r.store_name, r.cashier_id, r.customer_name, r.item_count, r.total, r.payment_method, r.status])
+      ]);
+    }
+
+    if(sec === 'void'){
+      let rows = bySearch(buildVoidRows(), ['void_no','store_name','store_code','cashier_id','customer_name','payment_method'], document.getElementById('search-void').value);
+      const store = document.getElementById('filter-void-store').value;
+      const dateFrom = document.getElementById('filter-void-date-from').value;
+      const dateTo = document.getElementById('filter-void-date-to').value;
+      if(store) rows = rows.filter(x => x.store_code === store);
+      if(dateFrom) rows = rows.filter(x => String(x.void_date || '') >= dateFrom);
+      if(dateTo) rows = rows.filter(x => String(x.void_date || '') <= dateTo);
+      rows = rows.sort((a,b) => String(b.void_date || '').localeCompare(String(a.void_date || '')) || String(b.void_no || '').localeCompare(String(a.void_no || '')));
+      return downloadCsv('pos-void-draft.csv', [
+        ['No Void','Tanggal','Toko','Kasir','Pelanggan','Item','Total','Metode','Status'],
+        ...rows.map(r => [r.void_no, r.void_date, r.store_name, r.cashier_id, r.customer_name, r.item_count, r.total, r.payment_method, r.status])
+      ]);
+    }
 
   if(sec === 'movement'){
     let rows = bySearch(buildStoreMovementRows(), ['store_name','store_code','doc_no','fg_code','fg_name','move_type'], document.getElementById('search-movement').value);
@@ -1183,6 +1530,13 @@ function submitSalesForm(){
   location.reload();
 }
 
+function syncSalesFormPrice(){
+  const fgCode = document.getElementById('sales-form-fg').value;
+  const fg = FG.find(item => item.fg_code === fgCode);
+  if(!fg) return;
+  document.getElementById('sales-form-price').value = inferredPosPrice(fg);
+}
+
 function togglePosReturnForm(show){
   document.getElementById('pos-return-form-card').classList.toggle('active', !!show);
   refreshPosModalState();
@@ -1344,6 +1698,8 @@ document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
   ['search-sales', renderSales], ['filter-sales-date-from', renderSales], ['filter-sales-date-to', renderSales], ['filter-sales-store', renderSales],
   ['search-return', renderReturn], ['filter-return-date-from', renderReturn], ['filter-return-date-to', renderReturn],
   ['search-closing', renderClosing], ['filter-closing-date-from', renderClosing], ['filter-closing-date-to', renderClosing],
+  ['search-held', renderHeld], ['filter-held-date-from', renderHeld], ['filter-held-date-to', renderHeld], ['filter-held-store', renderHeld],
+  ['search-void', renderVoid], ['filter-void-date-from', renderVoid], ['filter-void-date-to', renderVoid], ['filter-void-store', renderVoid],
   ['search-receipt', renderReceipt], ['filter-receipt-date-from', renderReceipt], ['filter-receipt-date-to', renderReceipt], ['filter-receipt-store', renderReceipt],
   ['search-store', renderStore], ['filter-store-store', renderStore], ['filter-store-date-from', renderStore], ['filter-store-date-to', renderStore],
   ['search-movement', renderMovement], ['filter-movement-date-from', renderMovement], ['filter-movement-date-to', renderMovement], ['filter-movement-store', renderMovement]
@@ -1351,6 +1707,7 @@ document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
   const el = document.getElementById(id);
   el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn);
 });
+document.getElementById('sales-form-fg')?.addEventListener('change', syncSalesFormPrice);
 
 initDateRangeFilters();
 fillStoreFilters();
@@ -1358,6 +1715,8 @@ renderKpis();
 renderSales();
 renderReturn();
 renderClosing();
+renderHeld();
+renderVoid();
 renderReceipt();
 renderStore();
 renderMovement();
