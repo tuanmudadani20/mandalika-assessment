@@ -1,0 +1,532 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Forecasting</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<script src="./forecast-params.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626; --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:var(--sbm);font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:10px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600}
+.nav-link:hover,.nav-link.active,.nav-item.active{background:rgba(212,175,55,.12);color:var(--gold)}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:58px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:10}
+.bc{font-size:13px;color:var(--muted)}
+.bc b{color:var(--text-d)}
+.btn{border:none;border-radius:10px;padding:9px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:20px}
+.card-pad{padding:20px 22px}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:26px;font-weight:800;color:var(--text-d);margin:8px 0}
+.subtitle{font-size:13px;color:var(--muted);line-height:1.6}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:22px;font-weight:800;color:var(--text-d);margin-top:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar-left,.toolbar-right{display:flex;gap:8px;flex-wrap:wrap}
+.search,.select{padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:12px}
+.search{min-width:220px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.section{display:none}
+.section.active{display:block}
+.tw{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th,td{padding:11px 13px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC}
+tr:hover td{background:#FCFCFD}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-err{background:#FEE2E2;color:#B91C1C}
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+.stack{display:grid;gap:14px}
+.mini-list{display:grid;gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+.note{padding:16px 18px;border:1px dashed var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(212,175,55,.08),rgba(255,255,255,.96));color:var(--text);font-size:12px;line-height:1.6}
+.mono{font-family:'IBM Plex Mono',monospace}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)} .split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Forecasting & Buy Recommendation</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+      <a class="nav-link active" href="./erp-forecasting.html">Forecasting</a>
+      <div class="nav-sec-lbl">Analisa</div>
+      <a class="nav-link active" href="#" data-sec="forecast">Forecast Demand</a>
+      <a class="nav-link" href="#" data-sec="local">Rekomendasi Lokal</a>
+      <a class="nav-link" href="#" data-sec="import">Rekomendasi Impor</a>
+      <a class="nav-link" href="#" data-sec="oil">Rekomendasi Fragrance Oil</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+        Forecasting dihitung dari histori penjualan. Workbook <span class="mono">Book1.xlsx</span> dipakai untuk rekomendasi beli:
+        <span class="mono">% edar</span>, <span class="mono">safety</span>, <span class="mono">% oil</span>, <span class="mono">MOQ</span>, dan <span class="mono">lead time</span>.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><b>Forecasting</b> / <b id="bc-child">Forecast Demand</b></div>
+      <div>
+        <button class="btn btn-ghost" onclick="location.href='./erp-demo-flow.html'">Demo Flow</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-reports.html'">Reports</button>
+        <button class="btn btn-primary" onclick="location.href='./erp-shell.html'">Back to Shell</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="card card-pad">
+        <div class="eyebrow">Smart Planning</div>
+        <div class="title">Forecast Demand dan Rekomendasi Beli</div>
+        <div class="subtitle">
+          Halaman ini sengaja dipisah dua logika. <span class="mono">Forecast Demand</span> memprediksi kebutuhan dari histori penjualan,
+          sedangkan <span class="mono">Rekomendasi Beli</span> mempertimbangkan current stock, open PO, % edar, safety, lead time,
+          MOQ, dan % oil. Kategori <span class="mono">Impor</span> memakai rule vendor nama mengandung <span class="mono">LTD</span>,
+          sisanya masuk <span class="mono">Lokal</span>.
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-sec="forecast">Forecast Demand</button>
+          <button class="tab" data-sec="local">Rekomendasi Lokal</button>
+          <button class="tab" data-sec="import">Rekomendasi Impor</button>
+          <button class="tab" data-sec="oil">Rekomendasi Fragrance Oil</button>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section active" id="sec-forecast">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-forecast" placeholder="Cari forecast demand">
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('forecast')">Export</button>
+          </div>
+        </div>
+        <div class="split">
+          <div class="card"><div class="tw"><table><thead><tr><th>Produk</th><th>Sales 30 Hari</th><th>Avg / Hari</th><th>Forecast 30 Hari</th><th>Safety Base</th><th>Forecast + Safety</th><th>Coverage FG</th><th>Status</th></tr></thead><tbody id="tbl-forecast"></tbody></table></div></div>
+          <div class="stack">
+            <div class="card card-pad"><div class="note">Forecast demand di sini masih pakai rumus dasar yang stabil untuk trial: <span class="mono">avg daily sales x 30 hari</span>, lalu diberi safety base dari parameter varian yang tersedia. Ini saya pisahkan dari rekomendasi beli supaya tidak tercampur.</div></div>
+            <div class="card card-pad"><div class="mini-list" id="forecast-side"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-local">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-local" placeholder="Cari rekomendasi lokal">
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('local')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>RM Lokal</th><th>Vendor</th><th>Harga Beli</th><th>MOQ</th><th>Min Stock</th><th>Current Stock</th><th>Open PO</th><th>Suggested Buy</th><th>Status</th></tr></thead><tbody id="tbl-local"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-import">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-import" placeholder="Cari rekomendasi impor">
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('import')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>RM Impor</th><th>Vendor</th><th>Harga Beli</th><th>MOQ</th><th>Lead Time</th><th>Current Stock</th><th>Open PO</th><th>Suggested Buy</th><th>Status</th></tr></thead><tbody id="tbl-import"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-oil">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-oil" placeholder="Cari rekomendasi fragrance oil">
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('oil')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>Fragrance Oil</th><th>Vendor</th><th>P-E %</th><th>MOQ</th><th>Lead Time</th><th>Need Oil</th><th>Stock + Open PO</th><th>Suggested Buy</th><th>Status</th></tr></thead><tbody id="tbl-oil"></tbody></table></div></div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const TX = window.TRANSACTION_DATA || {};
+const PARAMS = window.FORECAST_PARAMS || {};
+const FG = DATA.fg_items || [];
+const RM = DATA.rm_items || [];
+const VENDORS = DATA.vendors || [];
+const PO = TX.purchase_orders || [];
+const RECEIPTS = TX.receipts || [];
+const SALES = TX.sales || [];
+const EDAR = PARAMS.edar_safety || [];
+const OILS = PARAMS.fragrance_oil || [];
+
+function badge(status){
+  const map = { Aman:'b-ok', Cukup:'b-info', Waspada:'b-warn', Kritis:'b-err', Tinggi:'b-err', Sedang:'b-warn', Rendah:'b-info' };
+  return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
+}
+
+function groupSum(rows, key, valueKey){
+  return rows.reduce((acc, row) => {
+    const groupKey = row[key] || '-';
+    acc[groupKey] = (acc[groupKey] || 0) + Number(row[valueKey] || 0);
+    return acc;
+  }, {});
+}
+
+function safeNum(value, fallback = 0){
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function getFamilyCode(code){
+  const value = String(code || '');
+  const parts = value.split('-');
+  return parts[parts.length - 1] || value;
+}
+
+function normalize(value){
+  return String(value || '').trim().toUpperCase();
+}
+
+function classifyVendor(vendor){
+  return /LTD/i.test(vendor?.vendor_name || '') ? 'IMPORT' : 'LOCAL';
+}
+
+function formatNumber(value){
+  return new Intl.NumberFormat('id-ID').format(safeNum(value, 0));
+}
+
+const vendorByCategory = {};
+VENDORS.forEach(vendor => {
+  const key = normalize(vendor.vendor_category);
+  if(key && !vendorByCategory[key]) vendorByCategory[key] = vendor;
+});
+
+const salesByName = groupSum(SALES, 'fg_name', 'qty');
+const fgReceiptByCode = groupSum(TX.gr_fg || [], 'fg_code', 'qty');
+const doByCode = groupSum(TX.delivery_orders || [], 'fg_code', 'qty');
+const fgStockByCode = FG.reduce((acc, fg, index) => {
+  const inward = safeNum(fgReceiptByCode[fg.fg_code], 0);
+  const outward = safeNum(doByCode[fg.fg_code], 0) + Math.floor(index % 4);
+  acc[fg.fg_code] = Math.max(0, inward - outward + 8 + (index % 6));
+  return acc;
+}, {});
+const rmStockByCode = RECEIPTS.reduce((acc, row) => {
+  acc[row.item_code] = (acc[row.item_code] || 0) + safeNum(row.qty, 0);
+  return acc;
+}, {});
+const rmOpenPoByCode = PO.filter(row => row.status !== 'Posted').reduce((acc, row) => {
+  acc[row.item_code] = (acc[row.item_code] || 0) + safeNum(row.qty, 0);
+  return acc;
+}, {});
+
+const edarByProduct = {};
+EDAR.forEach(row => {
+  const key = normalize(row.product_name);
+  if(!edarByProduct[key]){
+    edarByProduct[key] = {
+      product_name: row.product_name,
+      total_edar: 0,
+      safety_values: []
+    };
+  }
+  edarByProduct[key].total_edar += safeNum(row.edar_pct, 0);
+  if(safeNum(row.safety_pct, 0) > 0) edarByProduct[key].safety_values.push(safeNum(row.safety_pct, 0));
+});
+
+const forecastRows = Object.values(edarByProduct).map((group, index) => {
+  const matchingFg = FG.filter(item => normalize(item.fg_name).includes(normalize(group.product_name)));
+  const sales30 = safeNum(salesByName[group.product_name], 0) || (3 + (index % 5));
+  const avgDaily = Number((sales30 / 30).toFixed(2));
+  const demand30 = Math.ceil(avgDaily * 30);
+  const safetyBase = group.safety_values.length ? Math.max(...group.safety_values) : 1;
+  const forecastWithSafety = Math.ceil(demand30 * safetyBase);
+  const fgStock = matchingFg.reduce((sum, item) => sum + safeNum(fgStockByCode[item.fg_code], 0), 0);
+  const coverageDays = avgDaily > 0 ? Math.floor(fgStock / avgDaily) : 99;
+  const status = fgStock >= forecastWithSafety ? 'Aman' : fgStock >= demand30 ? 'Waspada' : 'Kritis';
+  return {
+    product_name: group.product_name,
+    sales30,
+    avgDaily,
+    demand30,
+    safetyBase,
+    forecastWithSafety,
+    fgStock,
+    coverageDays,
+    status
+  };
+}).sort((a, b) => b.forecastWithSafety - a.forecastWithSafety);
+
+function findForecastByFamily(familyCode){
+  const fromEdar = EDAR.find(row => getFamilyCode(row.product_code) === familyCode);
+  if(!fromEdar) return null;
+  return forecastRows.find(row => normalize(row.product_name) === normalize(fromEdar.product_name)) || null;
+}
+
+function guessVendorForRm(rm){
+  const primary = normalize(rm.primary_supplier);
+  if (primary) {
+    const exact = VENDORS.find(vendor => normalize(vendor.vendor_name) === primary);
+    if (exact) return exact;
+  }
+  const direct = VENDORS.find(v => normalize(v.vendor_code) === normalize(rm.default_vendor_code));
+  if(direct) return direct;
+  return vendorByCategory[normalize(rm.default_vendor_category)] || null;
+}
+
+function inferLeadTimeForRm(vendorClass, rm, vendor){
+  if(/FRAGRANCE OIL/i.test(rm.rm_category || '')) return 14;
+  if(vendorClass === 'IMPORT') return 45;
+  if(/PACKAGING|BOTTLE|ATOMIZER|ACCESSORIES|STICKER/i.test(rm.rm_category || '')) return 14;
+  if(/KERTAS|ABSORB|HANGTAG/i.test(rm.rm_category || '')) return 7;
+  return vendor ? 10 : 12;
+}
+
+function inferMoqForRm(vendorClass, rm){
+  if(vendorClass === 'IMPORT') return 5000;
+  if(/BOTTLE|PACKAGING/i.test(rm.rm_category || '')) return 1000;
+  return 300;
+}
+
+const localRows = [];
+const importRows = [];
+
+RM.forEach((rm, index) => {
+  if(/FRAGRANCE OIL/i.test(rm.rm_category || '')) return;
+  const familyCode = getFamilyCode(rm.rm_code);
+  const forecast = findForecastByFamily(familyCode);
+  const vendor = guessVendorForRm(rm);
+  const vendorClass = classifyVendor(vendor);
+  const currentStock = safeNum(rmStockByCode[rm.rm_code], index % 7);
+  const openPo = safeNum(rmOpenPoByCode[rm.rm_code], 0);
+  const baseNeed = forecast ? Math.max(1, Math.ceil(forecast.forecastWithSafety * 0.35)) : (2 + (index % 4));
+  const minStock = safeNum(rm.min_stock, 0);
+  const safetyNeed = forecast ? Math.ceil(baseNeed * 0.15) : 1;
+  const needPlan = Math.max(baseNeed + safetyNeed, minStock);
+  const rawSuggested = Math.max(0, needPlan - currentStock - openPo);
+  const minimumBuy = safeNum(rm.minimum_buy, 0);
+  const purchasePrice = safeNum(rm.purchase_price, 0);
+  const lead = inferLeadTimeForRm(vendorClass, rm, vendor);
+  const moq = minimumBuy || inferMoqForRm(vendorClass, rm);
+  const suggestedBuy = rawSuggested > 0 ? Math.max(rawSuggested, moq) : 0;
+  const status = suggestedBuy <= 0 ? 'Aman' : suggestedBuy <= Math.max(3, Math.ceil(Math.max(needPlan, moq) * 0.2)) ? 'Waspada' : 'Kritis';
+  const row = {
+    rm_code: rm.rm_code,
+    rm_name: rm.rm_name,
+    vendor_name: vendor?.vendor_name || rm.primary_supplier || 'Belum dipetakan',
+    vendor_category: vendor?.vendor_category || rm.default_vendor_category || '-',
+    purchasePrice,
+    currentStock,
+    openPo,
+    needPlan,
+    minStock,
+    minimumBuy: moq,
+    suggestedBuy,
+    lead,
+    moq,
+    status
+  };
+  if(vendorClass === 'IMPORT') importRows.push(row);
+  else localRows.push(row);
+});
+
+const oilRows = OILS.map((oil, index) => {
+  const rmOil = RM.find(item => normalize(item.rm_code) === normalize(oil.product_code));
+  const oilVendor = rmOil ? guessVendorForRm(rmOil) : null;
+  const familyCode = getFamilyCode(oil.product_code);
+  const familyRows = EDAR.filter(row => getFamilyCode(row.product_code) === familyCode);
+  const forecast = familyRows.length
+    ? forecastRows.find(row => normalize(row.product_name) === normalize(familyRows[0].product_name))
+    : null;
+  const baseDemand = forecast ? forecast.forecastWithSafety : (6 + (index % 5));
+  const weightedNeed = familyRows.reduce((sum, row) => {
+    const edarPct = safeNum(row.edar_pct, 1);
+    const safetyPct = safeNum(row.safety_pct, 1);
+    const oilPct = /PARFUM/i.test(row.variant_type || '') ? safeNum(oil.oil_pct_parfum, 0) : safeNum(oil.oil_pct_edp || oil.oil_pct_parfum, 0);
+    return sum + ((baseDemand * edarPct * safetyPct * oilPct) / 100);
+  }, 0);
+  const needOil = Math.ceil(weightedNeed || (baseDemand * safeNum(oil.oil_pct_parfum, 0) / 100));
+  const currentStock = safeNum(rmStockByCode[oil.product_code], 0);
+  const openPo = safeNum(rmOpenPoByCode[oil.product_code], 0);
+  const suggestedBuy = Math.max(0, Math.max(needOil - currentStock - openPo, 0));
+  const alignedBuy = suggestedBuy > 0 ? Math.max(suggestedBuy, safeNum(oil.moq, 0)) : 0;
+  const status = alignedBuy <= 0 ? 'Aman' : alignedBuy <= Math.max(500, Math.ceil(safeNum(oil.moq, 0) * 0.2)) ? 'Waspada' : 'Kritis';
+  return {
+    code: oil.product_code,
+    name: oil.product_name,
+    vendor_name: oilVendor?.vendor_name || rmOil?.primary_supplier || '-',
+    pe: oil.pe_raw,
+    moq: safeNum(oil.moq, 0),
+    lead: safeNum(oil.lead_time_days, 0),
+    needOil,
+    available: currentStock + openPo,
+    suggestedBuy: alignedBuy,
+    status
+  };
+}).sort((a, b) => b.suggestedBuy - a.suggestedBuy);
+
+function renderKpis(){
+  const forecastCritical = forecastRows.filter(row => row.status === 'Kritis').length;
+  const localNeed = localRows.filter(row => row.suggestedBuy > 0).length;
+  const importNeed = importRows.filter(row => row.suggestedBuy > 0).length;
+  const oilNeed = oilRows.filter(row => row.suggestedBuy > 0).length;
+  document.getElementById('kpis').innerHTML = [
+    ['Forecast Kritis', forecastCritical],
+    ['Rekom Lokal', localNeed],
+    ['Rekom Impor', importNeed],
+    ['Rekom FO', oilNeed]
+  ].map(([label, value]) => `<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-val">${value}</div></div>`).join('');
+}
+
+function renderForecast(rows = forecastRows){
+  document.getElementById('tbl-forecast').innerHTML = rows.map(row => `
+    <tr>
+      <td>${row.product_name}</td>
+      <td>${row.sales30}</td>
+      <td>${row.avgDaily}</td>
+      <td>${row.demand30}</td>
+      <td>${row.safetyBase}</td>
+      <td>${row.forecastWithSafety}</td>
+      <td>${row.coverageDays} hari</td>
+      <td>${badge(row.status)}</td>
+    </tr>`).join('');
+  document.getElementById('forecast-side').innerHTML = [
+    ['Produk terhitung', rows.length],
+    ['Metode forecast', 'Avg sales x 30 hari'],
+    ['Safety source', 'Book1 % safety'],
+    ['Buy logic source', 'Stock + open PO + MOQ']
+  ].map(([key, value]) => `<div class="mini-item"><div class="mini-k">${key}</div><div class="mini-v">${value}</div></div>`).join('');
+}
+
+function renderLocal(rows = localRows){
+  document.getElementById('tbl-local').innerHTML = rows.map(row => `
+    <tr>
+      <td><div class="mono">${row.rm_code}</div><div>${row.rm_name}</div></td>
+      <td>${row.vendor_name}</td>
+      <td>${formatNumber(row.purchasePrice)}</td>
+      <td>${formatNumber(row.minimumBuy)}</td>
+      <td>${formatNumber(row.minStock)}</td>
+      <td>${row.currentStock}</td>
+      <td>${row.openPo}</td>
+      <td>${formatNumber(row.suggestedBuy)}</td>
+      <td>${badge(row.status)}</td>
+    </tr>`).join('');
+}
+
+function renderImport(rows = importRows){
+  document.getElementById('tbl-import').innerHTML = rows.map(row => `
+    <tr>
+      <td><div class="mono">${row.rm_code}</div><div>${row.rm_name}</div></td>
+      <td>${row.vendor_name}</td>
+      <td>${formatNumber(row.purchasePrice)}</td>
+      <td>${formatNumber(row.moq)}</td>
+      <td>${row.lead} hari</td>
+      <td>${row.currentStock}</td>
+      <td>${row.openPo}</td>
+      <td>${formatNumber(row.suggestedBuy)}</td>
+      <td>${badge(row.status)}</td>
+    </tr>`).join('');
+}
+
+function renderOil(rows = oilRows){
+  document.getElementById('tbl-oil').innerHTML = rows.map(row => `
+    <tr>
+      <td><div class="mono">${row.code}</div><div>${row.name}</div></td>
+      <td>${row.vendor_name}</td>
+      <td>${row.pe}</td>
+      <td>${formatNumber(row.moq)}</td>
+      <td>${row.lead} hari</td>
+      <td>${formatNumber(row.needOil)}</td>
+      <td>${formatNumber(row.available)}</td>
+      <td>${formatNumber(row.suggestedBuy)}</td>
+      <td>${badge(row.status)}</td>
+    </tr>`).join('');
+}
+
+function setActive(sec){
+  document.querySelectorAll('.section').forEach(el => el.classList.toggle('active', el.id === `sec-${sec}`));
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(el => el.classList.toggle('active', el.dataset.sec === sec));
+  document.getElementById('bc-child').textContent = ({
+    forecast:'Forecast Demand',
+    local:'Rekomendasi Lokal',
+    import:'Rekomendasi Impor',
+    oil:'Rekomendasi Fragrance Oil'
+  })[sec] || 'Forecast Demand';
+}
+
+function exportSection(sec){
+  alert(`Export ${sec.toUpperCase()} disiapkan untuk tahap berikutnya.`);
+}
+
+[
+  ['forecast', forecastRows, renderForecast],
+  ['local', localRows, renderLocal],
+  ['import', importRows, renderImport],
+  ['oil', oilRows, renderOil]
+].forEach(([sec, rows, renderer]) => {
+  const el = document.getElementById(`search-${sec}`);
+  if(!el) return;
+  el.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    const filtered = !q ? rows : rows.filter(row => Object.values(row).some(value => String(value).toLowerCase().includes(q)));
+    renderer(filtered);
+  });
+});
+
+document.querySelectorAll('[data-sec]').forEach(el => el.addEventListener('click', e => {
+  e.preventDefault();
+  setActive(el.dataset.sec);
+}));
+
+renderKpis();
+renderForecast();
+renderLocal();
+renderImport();
+renderOil();
+</script>
+</body>
+</html>
+
+

@@ -1,0 +1,3017 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626;
+  --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+body.has-inline-modal{overflow:hidden}
+body.has-inline-modal::before{content:'';position:fixed;inset:0;background:rgba(15,23,42,.52);z-index:24}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:#A1A1AA;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.nav-subwrap{margin:6px 8px 10px;padding:8px 6px 10px;border-left:2px solid rgba(212,175,55,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:0 14px 14px 0}
+.nav-group{margin:2px 0 0;padding:0;overflow:hidden;max-height:240px;transition:max-height .24s ease,opacity .2s ease,transform .2s ease,margin .18s ease}
+.nav-group.collapsed{max-height:0;opacity:0;transform:translateY(-6px);margin:0}
+.nav-parent{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 2px;padding:6px 8px;border-radius:10px;color:#B8BDC7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-parent:hover{background:rgba(255,255,255,.06);color:#F4F4F5;transform:translateX(1px)}
+.nav-parent.active{background:rgba(212,175,55,.12);color:#F6D365}
+.nav-parent small{font-size:9px;color:#8E95A3;font-weight:700;text-transform:none;letter-spacing:0}
+.nav-subwrap .nav-link,.nav-subwrap .nav-item{width:100%;margin:1px 0 0;padding:6px 8px 6px 16px;border-radius:9px;font-size:10.5px}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:#A1A1AA;line-height:1.6}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:8px 12px;min-height:34px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.tabs{display:none}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:14px}
+.card-pad{padding:18px}
+.grid-4{display:none}
+.kpi{padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar-right,.toolbar-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search,.select{padding:8px 10px;min-height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:11.5px}
+.search{min-width:240px}
+.date-range-filter{position:relative}
+.date-range-filter[open]{z-index:12}
+.date-range-trigger{list-style:none;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.date-range-trigger::-webkit-details-marker{display:none}
+.date-range-pop{position:absolute;top:calc(100% + 6px);left:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(15,23,42,.12);min-width:290px}
+.date-range-pop label{display:grid;gap:4px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.date-range-pop .search{min-width:0;width:100%}
+.date-range-actions{grid-column:1 / -1;display:flex;justify-content:flex-end}
+.date-range-apply{min-width:92px}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-draft{background:#E5E7EB;color:#374151}.b-err{background:#FEE2E2;color:#B91C1C}
+.ab{border:none;border-radius:8px;padding:5px 8px;min-height:28px;font:inherit;font-size:10px;font-weight:700;cursor:pointer;background:#EEF2FF;color:#1D4ED8}
+.action-row{display:flex;gap:6px;flex-wrap:nowrap;align-items:center}
+.action-row .ab{white-space:nowrap}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.tw{overflow:auto;max-height:560px}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle;white-space:nowrap}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC}
+tr:hover td{background:#FCFCFD}
+.mono{font-family:'IBM Plex Mono',monospace}
+.split{display:grid;grid-template-columns:1fr;gap:10px}
+.stack{display:grid;gap:10px}
+.note{padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(212,175,55,.06),rgba(255,255,255,.98));color:var(--text);font-size:10.5px;line-height:1.5}
+.mini-list{display:grid;gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+.inline-form{display:none;margin-bottom:14px}
+.inline-form.active{display:block;position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:26;width:min(1140px,calc(100vw - 40px));max-height:calc(100vh - 40px);overflow:auto;margin:0}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.field{display:grid;gap:6px}
+.field label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.empty{padding:32px 18px;color:var(--muted);text-align:center}
+.flow-form-card{max-width:980px;margin:0 auto 14px}
+.inline-form.active.flow-form-card,.inline-form.active#gr-form-card{max-width:none}
+.inline-form.active .title{font-size:18px;margin:4px 0}
+.inline-form.active .subtitle{font-size:11px;line-height:1.5}
+.flow-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.muted-line{font-size:11px;color:var(--muted);line-height:1.5}
+.panel-bottom{margin-top:14px}
+.flow-form-card.do-form{max-width:980px}
+.flow-form-card.do-form .form-grid{grid-template-columns:1fr;align-items:end}
+.flow-form-card.do-form .picker-card{background:linear-gradient(180deg,#FCFDFE,#F8FAFC)}
+.flow-form-card.do-form .selected-pill{background:#F8FAFC}
+.flow-form-card.do-form .ph{align-items:center}
+.flow-form-card.do-form .badge{align-self:flex-start}
+.do-head-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:12px}
+.do-head-col{display:grid;gap:10px}
+.do-note-row{margin-top:10px}
+.do-picker-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.do-picker-tools .select{min-width:170px}
+.do-picker-tools .search{min-width:240px}
+.toolbar-left #filter-do-month,.toolbar-left #filter-do-year{display:inline-flex;min-width:92px;max-width:104px}
+.toolbar-left #filter-do-dest,.toolbar-left #filter-do-warehouse{display:inline-flex;min-width:132px}
+.stage-tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.stage-chip{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:999px;padding:8px 12px;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.stage-chip.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.stage-chip .count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 6px;margin-left:6px;border-radius:999px;background:rgba(15,23,42,.08);font-size:10px}
+.stage-chip.active .count{background:rgba(255,255,255,.18)}
+.stage-chip-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.monitoring-pane{display:none}
+.monitoring-pane.active{display:block}
+.pane{display:none}
+.pane.active{display:block}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.monitor-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px 8px}
+.monitor-card-title{font-size:14px;font-weight:800;color:var(--text-d)}
+.monitor-card-sub{font-size:11px;color:var(--muted);line-height:1.5;margin-top:4px}
+.monitor-card-chip{display:inline-flex;padding:6px 10px;border-radius:999px;background:#EFF6FF;color:#1D4ED8;font-size:10px;font-weight:800}
+.stock-pane-table th,.stock-pane-table td{font-size:11px}
+.stock-pane-table th{font-size:9px}
+#sec-stock-total .stock-pane-table td:nth-child(1),
+#sec-stock-total .stock-pane-table td:nth-child(2),
+#sec-stock-total .stock-pane-table th:nth-child(1),
+#sec-stock-total .stock-pane-table th:nth-child(2){white-space:nowrap;word-break:normal}
+.flow-form-card .form-grid{grid-template-columns:repeat(4,minmax(0,1fr));align-items:end}
+.flow-form-card .field .search,.flow-form-card .field .select{width:100%;min-width:0}
+.flow-form-card .field label{margin-bottom:2px}
+.gr-form-card{max-width:860px}
+.gr-form-card .form-grid{grid-template-columns:1fr;align-items:end}
+.gr-head-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+.gr-head-col{display:grid;gap:10px}
+.gr-note-row{margin-top:10px}
+.gr-form-card .ph{align-items:center;margin-bottom:12px}
+.gr-form-card .field .search,.gr-form-card .field .select{width:100%;min-width:0}
+.picker-card{border:1px solid var(--line);border-radius:14px;background:#F8FAFC;padding:10px 10px 6px}
+.picker-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.picker-title{font-size:11px;font-weight:800;color:var(--text-d);text-transform:uppercase;letter-spacing:.06em}
+.picker-meta{font-size:11px;color:var(--muted)}
+.picker-table{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.picker-table table{width:100%;min-width:0;table-layout:auto}
+.picker-table th,.picker-table td{padding:8px 9px;font-size:11px}
+.picker-table th{font-size:9px;position:sticky;top:0;z-index:1}
+.picker-table tr.selected td{background:#FFF7D6}
+.picker-table tr{cursor:pointer}
+.picker-table .qty-cell{text-align:right}
+.picker-col-code{width:18%}
+.picker-col-name{width:32%}
+.picker-col-cat{width:18%}
+.picker-col-stock{width:14%}
+.picker-col-dest{width:14%}
+.picker-col-input{width:14%}
+.pick-qty{width:100%;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 8px;min-height:30px;font:inherit;font-size:11px}
+.selected-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:11px;color:var(--text-d);min-height:39px}
+.table-compact .tw{max-height:420px;overflow:auto}
+.table-compact table{width:100%;min-width:0;table-layout:auto}
+.table-compact th,.table-compact td{padding:8px 9px;font-size:11px;vertical-align:top}
+.table-compact th{font-size:9px;position:sticky;top:0;z-index:1}
+.table-compact td{word-break:break-word}
+.table-compact .mono{font-size:10.5px}
+.table-fit-do col:nth-child(1){width:18%}
+.table-fit-do col:nth-child(2){width:10%}
+.table-fit-do col:nth-child(3){width:30%}
+.table-fit-do col:nth-child(4){width:14%}
+.table-fit-do col:nth-child(5){width:9%}
+.table-fit-do col:nth-child(6){width:19%}
+.do-recap td:nth-child(1),.do-recap td:nth-child(2),.do-recap td:nth-child(4),.do-recap td:nth-child(5){white-space:nowrap}
+.do-recap td:nth-child(3){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.do-recap td:nth-child(6){white-space:normal}
+.do-recap .summary-line,.do-recap .summary-note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.do-recap .summary-note{font-size:10px;color:var(--muted);margin-top:4px}
+.flow-form-card.transfer-form{max-width:980px}
+.flow-form-card.transfer-form .form-grid{grid-template-columns:1fr;align-items:end}
+.transfer-head-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.transfer-head-col{display:grid;gap:10px}
+.transfer-note-row{margin-top:10px}
+.transfer-picker-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.transfer-picker-tools .select{min-width:170px}
+.transfer-picker-tools .search{min-width:240px}
+.flow-form-card.mutation-form{max-width:980px}
+.flow-form-card.mutation-form .form-grid{grid-template-columns:1fr;align-items:end}
+.mutation-head-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:12px}
+.mutation-head-col{display:grid;gap:10px}
+.mutation-note-row{margin-top:10px}
+.mutation-picker-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+.mutation-search-stack{display:grid;gap:6px}
+.mutation-search-stack .search,.mutation-search-stack .select{width:100%;min-width:0}
+.table-fit-mutation col:nth-child(1){width:12%}
+.table-fit-mutation col:nth-child(2){width:22%}
+.table-fit-mutation col:nth-child(3){width:13%}
+.table-fit-mutation col:nth-child(4){width:10%}
+.table-fit-mutation col:nth-child(5){width:10%}
+.table-fit-mutation col:nth-child(6){width:11%}
+.table-fit-mutation col:nth-child(7){width:11%}
+.table-fit-mutation col:nth-child(8){width:11%}
+.mutation-recap td:nth-child(1),.mutation-recap td:nth-child(2),.mutation-recap td:nth-child(6),.mutation-recap td:nth-child(7){white-space:nowrap}
+.mutation-recap td:nth-child(8){white-space:normal}
+.table-fit-transfer col:nth-child(1){width:18%}
+.table-fit-transfer col:nth-child(2){width:10%}
+.table-fit-transfer col:nth-child(3){width:16%}
+.table-fit-transfer col:nth-child(4){width:16%}
+.table-fit-transfer col:nth-child(5){width:10%}
+.table-fit-transfer col:nth-child(6){width:30%}
+.transfer-recap td:nth-child(1),.transfer-recap td:nth-child(2),.transfer-recap td:nth-child(3),.transfer-recap td:nth-child(4),.transfer-recap td:nth-child(5){white-space:nowrap}
+.transfer-recap td:nth-child(6){white-space:normal}
+.qty-cell{text-align:right;white-space:nowrap}
+.stacked-select{display:grid;gap:8px}
+.stacked-select .search,.stacked-select .select{min-width:0;width:100%}
+.doc-print{display:none}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)} .split{grid-template-columns:1fr}}
+@media (max-width:900px){.flow-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.flow-form-card.do-form .form-grid,.flow-form-card.transfer-form .form-grid,.flow-form-card.mutation-form .form-grid,.gr-form-card .form-grid{grid-template-columns:1fr}.do-head-grid,.transfer-head-grid,.mutation-head-grid,.gr-head-grid{grid-template-columns:1fr}.do-picker-tools,.transfer-picker-tools{width:100%}.do-picker-tools .search,.do-picker-tools .select,.transfer-picker-tools .search,.transfer-picker-tools .select{width:100%;min-width:0}.mutation-picker-tools{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Inventory</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link active" href="./erp-inventory.html">Inventory</a>
+      <div class="nav-subwrap">
+        <div class="nav-parent active" id="nav-parent-transaction" data-group="transaction">Transaksi <small>GR, DO, Transfer, Retur</small></div>
+        <div class="nav-group" id="nav-group-transaction">
+          <a class="nav-link active" href="#" data-sec="gr">GR / Hasil FG</a>
+          <a class="nav-link" href="#" data-sec="do">Delivery Order</a>
+          <a class="nav-link" href="#" data-sec="transfer">Transfer Gudang</a>
+          <a class="nav-link" href="#" data-sec="return">Retur</a>
+        </div>
+        <div class="nav-parent" id="nav-parent-monitoring" data-group="monitoring">Monitoring <small>Total, Pergerakan, Per Lokasi</small></div>
+        <div class="nav-group" id="nav-group-monitoring">
+          <a class="nav-link" href="#" data-sec="stock-total">Total Stok</a>
+          <a class="nav-link" href="#" data-sec="stock-card">Pergerakan Stok</a>
+          <a class="nav-link" href="#" data-sec="stock-location">Stok per Lokasi</a>
+        </div>
+      </div>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+          Inventory memakai master FG, toko, reseller, dan gudang FG dari <span class="mono">master-data.js</span>.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc">
+        <small>Inventory Workspace</small>
+        <div><b>Inventory</b> / <b id="bc-child">GR / Hasil FG</b></div>
+      </div>
+      <div>
+        <button class="btn btn-ghost" onclick="location.href='./erp-master.html'">Master Data</button>
+        <button class="btn btn-ghost" onclick="resetInventoryModule()">Reset Inventory</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-pos.html'">Next: POS</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Fase 4</div>
+          <div class="title">Inventory Dasar</div>
+          <div class="subtitle">
+            Inventory ini meneruskan hasil produksi ke gudang FG, lalu ke toko dan reseller.
+            Alur yang disiapkan adalah <span class="mono">GR FG -> DO -> Transfer -> Retur -> Monitoring Stok</span>.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section active" id="sec-gr">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-gr" placeholder="Cari nomor GR atau FG">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-gr-date-from" type="date"></label><label>Sampai<input class="search" id="filter-gr-date-to" type="date"></label></div></details>
+            <select class="select" id="filter-gr-warehouse"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('gr')">Export</button>
+            <button class="btn btn-primary" onclick="quickAddGr()">+ GR FG</button>
+          </div>
+        </div>
+        <div id="gr-stage-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+        <div class="card card-pad inline-form gr-form-card" id="gr-form-card">
+          <div class="ph">
+            <div>
+              <div class="eyebrow">Inbound FG</div>
+              <div class="title" style="font-size:18px;margin:4px 0">Buat GR / Hasil FG</div>
+              <div class="subtitle" style="font-size:12px">Catat barang jadi yang masuk ke gudang FG, baik dari manufacturing maupun input manual.</div>
+            </div>
+            <div class="badge b-ok">GR Flow</div>
+          </div>
+          <div class="form-grid">
+            <div class="gr-head-grid">
+              <div class="gr-head-col">
+                <div class="field"><label>FG</label><input class="search" id="gr-form-fg" list="gr-fg-options" placeholder="Cari SKU atau nama varian FG"><datalist id="gr-fg-options"></datalist></div>
+                <div class="field"><label>Gudang Tujuan</label><select class="select" id="gr-form-warehouse"></select></div>
+              </div>
+              <div class="gr-head-col">
+                <div class="field"><label>Tanggal GR</label><input class="search" id="gr-form-date" type="date" value="2026-03-21"></div>
+                <div class="field"><label>Qty</label><input class="search" id="gr-form-qty" type="number" value="24"></div>
+              </div>
+            </div>
+            <div class="field gr-note-row"><label>Source</label><input class="search" id="gr-form-source" value="Produksi Manual"></div>
+            <div class="field" style="grid-column:1 / -1;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="toggleGrForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitGrForm()">Simpan GR FG</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead id="thead-gr"><tr><th>No GR</th><th>Tanggal</th><th>FG</th><th>Gudang Tujuan</th><th>Qty</th><th>Source</th><th>Status</th></tr></thead><tbody id="tbl-gr"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-do">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-do" placeholder="Cari nomor DO, toko, reseller, atau FG">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-do-date-from" type="date"></label><label>Sampai<input class="search" id="filter-do-date-to" type="date"></label></div></details>
+            <select class="select" id="filter-do-dest">
+              <option value="">Semua Tujuan</option>
+              <option value="TOKO">Toko</option>
+              <option value="RESELLER">Reseller</option>
+            </select>
+            <select class="select" id="filter-do-warehouse"></select>
+            <select class="select" id="filter-do-month"></select>
+            <select class="select" id="filter-do-year"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="quickAddDo()">+ Buat Packing List</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form flow-form-card do-form" id="do-form-card">
+          <div class="ph" style="margin-bottom:12px">
+            <div>
+              <div class="eyebrow">Outgoing</div>
+              <div class="title" style="font-size:18px;margin:4px 0">Buat Packing List</div>
+              <div class="subtitle" style="font-size:12px">Susun item kirim dulu sebagai packing list. Setelah final, progres dokumen dilanjutkan dari tab Packing, Shipping, lalu Received.</div>
+            </div>
+            <div class="badge b-info">DO Flow</div>
+          </div>
+          <div class="form-grid">
+            <div class="do-head-grid">
+              <div class="do-head-col">
+                <div class="field"><label>Gudang Asal</label><input class="search" id="do-form-from" readonly value=""></div>
+                <div class="field"><label>Tanggal DO</label><input class="search" id="do-form-date" type="date" value="2026-03-21"></div>
+              </div>
+              <div class="do-head-col">
+                <div class="field"><label>Tipe Tujuan</label><select class="select" id="do-form-dest-type"><option value="TOKO">Toko</option><option value="RESELLER">Reseller</option></select></div>
+                <div class="field"><label>Tujuan Distribusi</label><select class="select" id="do-form-store"></select></div>
+              </div>
+            </div>
+            <div class="field do-note-row"><label>Catatan</label><input class="search" id="do-form-note" value=""></div>
+            <div class="field" style="display:none"><label>Dokumen</label><div class="selected-pill" id="do-doc-mode">Packing list -> update jadi shipping -> received</div><select class="select" id="do-form-fg" style="display:none"></select></div>
+            <div class="field" style="grid-column:1 / -1">
+              <div class="picker-card">
+                <div class="picker-head">
+                  <div>
+                    <div class="picker-title">List Item Kirim</div>
+                    <div class="picker-meta" id="do-picker-meta">Pilih 1 FG untuk dikirim</div>
+                  </div>
+                  <div class="do-picker-tools">
+                    <select class="select" id="do-form-fg-category"></select>
+                    <input class="search" id="do-form-fg-search" placeholder="Cari kode atau nama FG">
+                  </div>
+                </div>
+                <div class="picker-table">
+                  <table>
+                    <colgroup><col class="picker-col-code"><col class="picker-col-name"><col class="picker-col-cat"><col class="picker-col-stock"><col class="picker-col-dest"><col class="picker-col-input"></colgroup>
+                    <thead><tr><th>Kode</th><th>Nama FG</th><th>Kategori</th><th>Stok Gudang</th><th>Stok Tujuan</th><th>Qty Kirim</th></tr></thead>
+                    <tbody id="do-pick-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="field" style="grid-column:1 / -1">
+              <div class="flow-summary" id="do-summary"></div>
+            </div>
+            <div class="field" style="grid-column:1 / -1;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="toggleDoForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitDoForm('Packing')">Buat Packing List</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-tabs" id="do-stage-tabs"></div>
+        <div class="card table-compact"><div class="tw"><table class="table-fit-do"><colgroup><col><col><col><col><col><col></colgroup><thead><tr><th>No DO</th><th>Tanggal</th><th>Tujuan</th><th>Gudang Asal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-do"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-transfer">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-transfer" placeholder="Cari transfer gudang"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-transfer-date-from" type="date"></label><label>Sampai<input class="search" id="filter-transfer-date-to" type="date"></label></div></details></div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="toggleTransferForm(true)">+ Buat Packing Transfer</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form flow-form-card transfer-form" id="transfer-form-card">
+          <div class="ph" style="margin-bottom:12px">
+            <div>
+              <div class="eyebrow">Internal Move</div>
+              <div class="title" style="font-size:18px;margin:4px 0">Buat Packing Transfer</div>
+              <div class="subtitle" style="font-size:12px">Susun item transfer dulu sebagai packing transfer. Setelah final, lanjutkan progres dari Shipping lalu Received.</div>
+            </div>
+            <div class="badge b-warn">Inter Warehouse</div>
+          </div>
+          <div class="form-grid">
+            <div class="transfer-head-grid">
+              <div class="transfer-head-col">
+                <div class="field"><label>Gudang Asal</label><select class="select" id="transfer-form-from"></select></div>
+                <div class="field"><label>Tanggal Transfer</label><input class="search" id="transfer-form-date" type="date" value="2026-03-21"></div>
+              </div>
+              <div class="transfer-head-col">
+                <div class="field"><label>Gudang Tujuan</label><select class="select" id="transfer-form-to"></select></div>
+                <div class="field" style="display:none"><label>Dokumen</label><div class="selected-pill" id="transfer-doc-mode">Packing transfer -> shipping -> received</div><select class="select" id="transfer-form-status" style="display:none"><option>Packing</option><option>Shipping</option><option>Received</option></select></div>
+              </div>
+            </div>
+            <div class="field transfer-note-row"><label>Catatan</label><input class="search" id="transfer-form-note" value=""></div>
+            <div class="field" style="grid-column:1 / -1">
+              <div class="picker-card">
+                <div class="picker-head">
+                  <div>
+                    <div class="picker-title">List Item Transfer</div>
+                    <div class="picker-meta" id="transfer-picker-meta">Pilih item transfer antar gudang</div>
+                  </div>
+                  <div class="transfer-picker-tools">
+                    <select class="select" id="transfer-form-fg-category"></select>
+                    <input class="search" id="transfer-form-fg-search" placeholder="Cari kode atau nama FG">
+                  </div>
+                </div>
+                <div class="picker-table">
+                  <table>
+                    <colgroup><col class="picker-col-code"><col class="picker-col-name"><col class="picker-col-cat"><col class="picker-col-stock"><col class="picker-col-dest"><col class="picker-col-input"></colgroup>
+                    <thead><tr><th>Kode</th><th>Nama FG</th><th>Kategori</th><th>Asal Gudang</th><th>Tujuan Gudang</th><th>Qty Transfer</th></tr></thead>
+                    <tbody id="transfer-pick-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="field" style="grid-column:1 / -1">
+              <div class="flow-summary" id="transfer-summary"></div>
+            </div>
+            <div class="field" style="grid-column:1 / -1;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="toggleTransferForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitTransferForm('Packing')">Buat Packing Transfer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-tabs" id="transfer-stage-tabs"></div>
+        <div class="card table-compact"><div class="tw"><table class="table-fit-transfer"><colgroup><col><col><col><col><col><col></colgroup><thead><tr><th>No Transfer</th><th>Tanggal</th><th>Asal Gudang</th><th>Tujuan Gudang</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-transfer"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-return">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-return" placeholder="Cari retur toko/reseller">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-return-date-from" type="date"></label><label>Sampai<input class="search" id="filter-return-date-to" type="date"></label></div></details>
+            <select class="select" id="filter-return-source-type">
+              <option value="">Semua Sumber</option>
+              <option value="TOKO">Toko</option>
+              <option value="RESELLER">Reseller</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="toggleInvReturnForm(true)">+ Buat Packing Retur</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form flow-form-card transfer-form" id="inv-return-form-card">
+          <div class="ph" style="margin-bottom:12px">
+            <div>
+              <div class="eyebrow">Reverse Flow</div>
+              <div class="title" style="font-size:18px;margin:4px 0">Buat Packing Retur</div>
+              <div class="subtitle" style="font-size:12px">Siapkan retur dari toko atau reseller ke gudang tujuan, lalu lanjutkan progres dari Shipping sampai Received.</div>
+            </div>
+            <div class="badge b-warn">Return Flow</div>
+          </div>
+          <div class="form-grid">
+            <div class="transfer-head-grid">
+              <div class="transfer-head-col">
+                <div class="field"><label>Gudang Tujuan</label><input class="search" id="inv-return-form-warehouse" readonly value=""></div>
+                <div class="field"><label>Tanggal Retur</label><input class="search" id="inv-return-form-date" type="date" value="2026-03-21"></div>
+              </div>
+              <div class="transfer-head-col">
+                <div class="field"><label>Tipe Sumber</label><select class="select" id="inv-return-form-source-type"><option value="TOKO">Toko</option><option value="RESELLER">Reseller</option></select></div>
+                <div class="field"><label>Sumber Retur</label><select class="select" id="inv-return-form-source"></select></div>
+                <div class="field" style="display:none"><label>Dokumen</label><div class="selected-pill" id="return-doc-mode">Packing retur -> shipping -> received</div><select class="select" id="inv-return-form-status" style="display:none"><option>Packing</option><option>Shipping</option><option>Received</option></select><select class="select" id="inv-return-form-fg" style="display:none"></select></div>
+              </div>
+            </div>
+            <div class="field transfer-note-row"><label>Catatan</label><input class="search" id="inv-return-form-note" value=""></div>
+            <div class="field" style="grid-column:1 / -1">
+              <div class="picker-card">
+                <div class="picker-head">
+                  <div>
+                    <div class="picker-title">List Item Retur</div>
+                    <div class="picker-meta" id="return-picker-meta">Pilih item retur</div>
+                  </div>
+                  <div class="transfer-picker-tools">
+                    <select class="select" id="inv-return-form-fg-category"></select>
+                    <input class="search" id="inv-return-form-fg-search" placeholder="Cari kode atau nama FG">
+                  </div>
+                </div>
+                <div class="picker-table">
+                  <table>
+                    <colgroup><col class="picker-col-code"><col class="picker-col-name"><col class="picker-col-cat"><col class="picker-col-stock"><col class="picker-col-dest"><col class="picker-col-input"></colgroup>
+                    <thead><tr><th>Kode</th><th>Nama FG</th><th>Kategori</th><th>Stok Sumber</th><th>Gudang Tujuan</th><th>Qty Retur</th></tr></thead>
+                    <tbody id="return-pick-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="field" style="grid-column:1 / -1">
+              <div class="flow-summary" id="return-summary"></div>
+            </div>
+            <div class="field" style="grid-column:1 / -1;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="toggleInvReturnForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitInvReturnForm('Packing')">Buat Packing Retur</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stage-tabs" id="return-stage-tabs"></div>
+        <div class="card table-compact"><div class="tw"><table class="table-fit-transfer"><colgroup><col><col><col><col><col><col></colgroup><thead><tr><th>No Retur</th><th>Tanggal</th><th>Sumber</th><th>Gudang Tujuan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-return"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-stock-total">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-stock" placeholder="Cari kode atau nama FG">
+            <select class="select" id="filter-stock-category"></select>
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" type="date" id="filter-stock-date-from"></label><label>Sampai<input class="search" type="date" id="filter-stock-date-to"></label></div></details>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('stock-total')">Export</button>
+          </div>
+        </div>
+        <div class="card table-compact">
+          <div class="monitor-card-head">
+            <div>
+              <div class="monitor-card-title">Total Stok</div>
+              <div class="monitor-card-sub">Lihat total stok gabungan seluruh gudang FG dan seluruh toko aktif dalam satu tampilan.</div>
+            </div>
+            <div class="monitor-card-chip">Global View</div>
+          </div>
+          <div class="tw">
+            <table class="stock-pane-table">
+              <thead id="thead-stock-consolidated"></thead>
+              <tbody id="tbl-stock-consolidated"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-stock-card">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-stock-card" placeholder="Cari dokumen, referensi, atau item">
+            <select class="select" id="filter-stock-card-type">
+              <option value="GUDANG">Gudang</option>
+            <option value="TOKO">Toko</option>
+            </select>
+            <select class="select" id="filter-stock-card-location"></select>
+            <select class="select" id="filter-stock-card-category"></select>
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" type="date" id="filter-stock-card-date-from"></label><label>Sampai<input class="search" type="date" id="filter-stock-card-date-to"></label></div></details>
+          </div>
+          <div class="toolbar-right">
+            <div class="stage-chip-group">
+              <button class="stage-chip" id="stock-card-view-toggle" title="Rekap Pergerakan Stok" aria-label="Rekap Pergerakan Stok" onclick="toggleStockCardViewMode()">≣</button>
+            </div>
+            <button class="btn btn-ghost" onclick="exportSection('stock-card')">Export</button>
+          </div>
+        </div>
+        <div class="card table-compact">
+          <div class="monitor-card-head">
+            <div>
+              <div class="monitor-card-title">Pergerakan Stok</div>
+              <div class="monitor-card-sub">Riwayat pergerakan stok gudang fokus dari transaksi masuk, keluar, transfer, dan retur.</div>
+            </div>
+            <div class="monitor-card-chip">Stock Card</div>
+          </div>
+          <div class="pane active" id="stock-card-pane-recap">
+            <div class="tw">
+              <table class="stock-pane-table">
+                <thead><tr><th>Tanggal</th><th>Dokumen</th><th>Referensi</th><th>Item</th><th>Masuk</th><th>Keluar</th><th>Saldo</th></tr></thead>
+                <tbody id="tbl-stock-card"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="pane" id="stock-card-pane-table">
+            <div class="tw">
+              <table class="stock-pane-table">
+                <thead><tr id="hd-stock-card-table"></tr></thead>
+                <tbody id="tbl-stock-card-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-stock-location">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-stock-location" placeholder="Cari kode atau nama FG">
+            <select class="select" id="filter-stock-location-type">
+              <option value="GUDANG">Gudang</option>
+              <option value="TOKO">Toko</option>
+            </select>
+            <select class="select" id="filter-stock-location-location"></select>
+            <select class="select" id="filter-stock-location-category"></select>
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" type="date" id="filter-stock-location-date-from"></label><label>Sampai<input class="search" type="date" id="filter-stock-location-date-to"></label></div></details>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('stock-location')">Export</button>
+          </div>
+        </div>
+        <div class="card table-compact">
+          <div class="monitor-card-head">
+            <div>
+              <div class="monitor-card-title">Stok per Lokasi</div>
+              <div class="monitor-card-sub">Pantau posisi stok FG per gudang fokus yang sedang dipilih dari filter.</div>
+            </div>
+            <div class="monitor-card-chip">Warehouse View</div>
+          </div>
+          <div class="tw">
+            <table class="stock-pane-table">
+      <thead><tr><th>Kode FG</th><th>Nama</th><th>Kategori</th><th>Gudang Fokus</th><th>Stok</th><th>Status</th></tr></thead>
+              <tbody id="tbl-stock-location"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const TX = window.TRANSACTION_DATA || {};
+const RUNTIME = window.ERP_RUNTIME || {};
+const FG = DATA.fg_items || [];
+const TOKOS = DATA.tokos || [];
+const RESELLERS = DATA.resellers || [];
+const FG_WH = (DATA.gudangs || []).filter(x => x.warehouse_group === 'FG');
+const MAIN_FG = FG_WH.find(x => x.warehouse_code === 'GFG-SBY') || FG_WH[0] || { warehouse_code:'GFG-SBY' };
+const BRANCH_FG = FG_WH.find(x => x.warehouse_code === 'GFG-CBB') || FG_WH[1] || MAIN_FG;
+const CURRENT_USER_NAME = 'User Login';
+const INV_TRANSFER_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.inv_transfer') || '[]');
+const INV_RETURN_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.inv_return') || '[]');
+const INV_MUTATION_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.inv_mutation') || '[]');
+const DO_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.delivery_orders') || '[]');
+const DO_STATUS_OVERRIDES = JSON.parse(window.localStorage.getItem('erp.do.status_overrides') || '{}');
+const DO_RECEIVE_META = JSON.parse(window.localStorage.getItem('erp.do.receive_meta') || '{}');
+const TRANSFER_STATUS_OVERRIDES = JSON.parse(window.localStorage.getItem('erp.transfer.status_overrides') || '{}');
+const TRANSFER_RECEIVE_META = JSON.parse(window.localStorage.getItem('erp.transfer.receive_meta') || '{}');
+const RETURN_STATUS_OVERRIDES = JSON.parse(window.localStorage.getItem('erp.return.status_overrides') || '{}');
+const RETURN_RECEIVE_META = JSON.parse(window.localStorage.getItem('erp.return.receive_meta') || '{}');
+let doQtyDraft = {};
+let transferQtyDraft = {};
+let returnQtyDraft = {};
+let mutationSourceDraft = {};
+let mutationTargetDraft = {};
+let editingDoNo = '';
+let doStageFilter = 'Packing';
+let transferStageFilter = '';
+let returnStageFilter = 'Packing';
+let grSourceFilter = 'ALL';
+let grViewMode = 'DOC';
+let stockCardViewMode = 'RECAP';
+
+function badge(status){
+  const normalized = status === 'Draft' ? 'Packing' : status;
+  const map = { Aktif:'b-ok', Packing:'b-draft', Posted:'b-ok', Shipping:'b-info', Shipped:'b-info', Received:'b-ok', Return:'b-warn', Approved:'b-info', Open:'b-warn', Kurang:'b-warn', 'Lebih/Bermasalah':'b-err', Sesuai:'b-ok' };
+  return `<span class="badge ${map[normalized] || 'b-info'}">${normalized || '-'}</span>`;
+}
+
+function pickFg(i){ return FG[(i * 13) % FG.length]; }
+function pickToko(i){ return TOKOS[(i * 5) % TOKOS.length]; }
+
+const GR_ROWS = (TX.gr_fg || []).map(r => ({
+  gr_no: r.gr_no,
+  gr_date: r.gr_date,
+  fg_code: r.fg_code,
+  fg_name: r.fg_name,
+  warehouse_code: r.warehouse_code,
+  qty: r.qty,
+  source: r.source,
+  status: r.status
+}));
+
+const DO_ROWS = Array.from(new Map([...(TX.delivery_orders || []), ...DO_EXTRA].map(r => {
+  const key = [r.do_no, r.do_date, r.dest_name, r.from_warehouse, r.fg_code, r.qty].join('|');
+  return [key, r];
+})).values()).map(r => ({
+  do_no: r.do_no,
+  do_date: r.do_date,
+  dest_type: String(r.dest_type || '').toUpperCase(),
+  dest_name: r.dest_name,
+  from_warehouse: r.from_warehouse,
+  fg_code: r.fg_code,
+  fg_name: r.fg_name,
+  qty: r.qty,
+  status: DO_STATUS_OVERRIDES[r.do_no] || (r.status === 'Draft' ? 'Packing' : r.status === 'Review' ? 'Shipping' : r.status === 'Posted' ? 'Received' : r.status),
+  note: r.note || '',
+  created_by: r.created_by || CURRENT_USER_NAME,
+  details: Array.isArray(r.details) ? r.details : null
+}));
+
+function buildDoRows(){
+  const extraRows = JSON.parse(window.localStorage.getItem('erp.extra.delivery_orders') || '[]');
+  const statusOverrides = JSON.parse(window.localStorage.getItem('erp.do.status_overrides') || '{}');
+  return Array.from(new Map([...(TX.delivery_orders || []), ...extraRows].map(r => {
+    const key = [r.do_no, r.do_date, r.dest_name, r.from_warehouse, r.fg_code, r.qty].join('|');
+    return [key, r];
+  })).values()).map(r => ({
+    do_no: r.do_no,
+    do_date: r.do_date,
+    dest_type: String(r.dest_type || '').toUpperCase(),
+    dest_name: r.dest_name,
+    store_code: r.store_code || '',
+    from_warehouse: r.from_warehouse,
+    fg_code: r.fg_code,
+    fg_name: r.fg_name,
+    qty: r.qty,
+    status: statusOverrides[r.do_no] || (r.status === 'Draft' ? 'Packing' : r.status === 'Review' ? 'Shipping' : r.status === 'Posted' ? 'Received' : (r.status || 'Packing')),
+    note: r.note || '',
+    created_by: r.created_by || CURRENT_USER_NAME,
+    details: Array.isArray(r.details) ? r.details : null
+  }));
+}
+
+const TRANSFER_ROWS = Array.from({length:8}, (_,i) => {
+  const fg = pickFg(i);
+  const from = i % 2 === 0 ? MAIN_FG : BRANCH_FG;
+  const to = i % 2 === 0 ? BRANCH_FG : MAIN_FG;
+  return {
+    trf_no: `TRF-202603-${String(i + 1).padStart(3,'0')}`,
+    trf_date: `2026-03-${String((i % 18) + 5).padStart(2,'0')}`,
+    from_warehouse: from.warehouse_code,
+    to_warehouse: to.warehouse_code,
+    fg_code: fg.fg_code,
+    fg_name: fg.fg_name,
+    qty: 8 + (i * 3),
+    status: TRANSFER_STATUS_OVERRIDES[`TRF-202603-${String(i + 1).padStart(3,'0')}`] || (i < 2 ? 'Received' : i < 4 ? 'Shipping' : 'Packing'),
+    note: '',
+    created_by: CURRENT_USER_NAME
+  };
+}).concat(INV_TRANSFER_EXTRA.map(r => ({...r, status: TRANSFER_STATUS_OVERRIDES[r.trf_no] || r.status})));
+
+function buildTransferRows(){
+  const extraRows = JSON.parse(window.localStorage.getItem('erp.extra.inv_transfer') || '[]');
+  const statusOverrides = JSON.parse(window.localStorage.getItem('erp.transfer.status_overrides') || '{}');
+  const baseRows = Array.from({length:8}, (_,i) => {
+    const fg = pickFg(i);
+    const from = i % 2 === 0 ? MAIN_FG : BRANCH_FG;
+    const to = i % 2 === 0 ? BRANCH_FG : MAIN_FG;
+    return {
+      trf_no: `TRF-202603-${String(i + 1).padStart(3,'0')}`,
+      trf_date: `2026-03-${String((i % 18) + 5).padStart(2,'0')}`,
+      from_warehouse: from.warehouse_code,
+      to_warehouse: to.warehouse_code,
+      fg_code: fg.fg_code,
+      fg_name: fg.fg_name,
+      qty: 8 + (i * 3),
+      status: i < 2 ? 'Received' : i < 4 ? 'Shipping' : 'Packing',
+      note: '',
+      created_by: CURRENT_USER_NAME
+    };
+  });
+  return Array.from(new Map([...baseRows, ...extraRows].map(r => {
+    const key = [r.trf_no, r.trf_date, r.from_warehouse, r.to_warehouse, r.fg_code, r.qty].join('|');
+    return [key, r];
+  })).values()).map(r => ({
+    ...r,
+    status: statusOverrides[r.trf_no] || (r.status === 'Draft' ? 'Packing' : r.status === 'Review' ? 'Shipping' : r.status === 'Posted' ? 'Received' : (r.status || 'Packing')),
+    created_by: r.created_by || CURRENT_USER_NAME
+  }));
+}
+
+const RETURN_ROWS = Array.from({length:7}, (_,i) => {
+  const fg = pickFg(i);
+  const toko = pickToko(i);
+  return {
+    return_no: `RTN-202603-${String(i + 1).padStart(3,'0')}`,
+    return_date: `2026-03-${String((i % 18) + 6).padStart(2,'0')}`,
+    source_name: i % 4 === 0 ? 'Reseller Placeholder' : toko.store_name,
+    warehouse_code: toko.supply_by_1 || MAIN_FG.warehouse_code,
+    fg_code: fg.fg_code,
+    fg_name: fg.fg_name,
+    qty: 2 + i,
+    status: RETURN_STATUS_OVERRIDES[`RTN-202603-${String(i + 1).padStart(3,'0')}`] || (i < 2 ? 'Received' : i < 4 ? 'Shipping' : 'Packing'),
+    created_by: CURRENT_USER_NAME
+  };
+}).concat(INV_RETURN_EXTRA.map(r => ({...r, status: RETURN_STATUS_OVERRIDES[r.return_no] || r.status})));
+
+function buildReturnRows(){
+  const extraRows = JSON.parse(window.localStorage.getItem('erp.extra.inv_return') || '[]');
+  const statusOverrides = JSON.parse(window.localStorage.getItem('erp.return.status_overrides') || '{}');
+  const baseRows = Array.from({length:7}, (_,i) => {
+    const fg = pickFg(i);
+    const toko = pickToko(i);
+    return {
+      return_no: `RTN-202603-${String(i + 1).padStart(3,'0')}`,
+      return_date: `2026-03-${String((i % 18) + 6).padStart(2,'0')}`,
+      source_name: i % 4 === 0 ? 'Reseller Placeholder' : toko.store_name,
+      warehouse_code: toko.supply_by_1 || MAIN_FG.warehouse_code,
+      fg_code: fg.fg_code,
+      fg_name: fg.fg_name,
+      qty: 2 + i,
+      status: i < 2 ? 'Received' : i < 4 ? 'Shipping' : 'Packing',
+      created_by: CURRENT_USER_NAME
+    };
+  });
+  return Array.from(new Map([...baseRows, ...extraRows].map(r => {
+    const key = [r.return_no, r.return_date, r.source_name, r.warehouse_code, r.fg_code, r.qty].join('|');
+    return [key, r];
+  })).values()).map(r => ({
+    ...r,
+    status: statusOverrides[r.return_no] || r.status || 'Packing',
+    created_by: r.created_by || CURRENT_USER_NAME
+  }));
+}
+
+const ADJUST_ROWS = Array.from({length:8}, (_,i) => {
+  const fg = pickFg(i);
+  return {
+    adj_no: `ADJ-202603-${String(i + 1).padStart(3,'0')}`,
+    adj_date: `2026-03-${String((i % 18) + 7).padStart(2,'0')}`,
+    warehouse_code: i % 2 === 0 ? MAIN_FG.warehouse_code : BRANCH_FG.warehouse_code,
+    fg_code: fg.fg_code,
+    fg_name: fg.fg_name,
+    qty: (i % 3 === 0 ? '-' : '+') + String(1 + i),
+    reason: i % 2 === 0 ? 'Selisih opname' : 'Display / sample',
+    status: i < 5 ? 'Approved' : 'Draft'
+  };
+});
+
+const MUTATION_ROWS = Array.from({length:4}, (_,i) => {
+  const source = pickFg(i);
+  const target = pickFg(i + 7);
+  const toko = pickToko(i);
+  return {
+    mut_no: `MUT-202603-${String(i + 1).padStart(3,'0')}`,
+    mut_date: `2026-03-${String((i % 18) + 8).padStart(2,'0')}`,
+    location_type: i % 2 === 0 ? 'GUDANG' : 'TOKO',
+    location_code: i % 2 === 0 ? MAIN_FG.warehouse_code : toko.store_code,
+    location_name: i % 2 === 0 ? MAIN_FG.warehouse_name : toko.store_name,
+    source_fg_code: source.fg_code,
+    source_fg_name: source.fg_name,
+    source_qty: 2 + i,
+    target_fg_code: target.fg_code,
+    target_fg_name: target.fg_name,
+    target_qty: 1 + i,
+    note: i % 2 === 0 ? 'Repack display' : 'Konversi varian',
+    created_by: CURRENT_USER_NAME
+  };
+}).concat(INV_MUTATION_EXTRA);
+
+function bySearch(arr, keys, q){
+  const term = (q || '').trim().toLowerCase();
+  if(!term) return arr;
+  return arr.filter(row => keys.some(k => String(row[k] || '').toLowerCase().includes(term)));
+}
+
+function isOnOrBefore(dateValue, cutoffDate){
+  if(!cutoffDate) return true;
+  const dateStr = String(dateValue || '').slice(0,10);
+  if(!dateStr) return false;
+  return dateStr <= cutoffDate;
+}
+
+function isWithinRange(dateValue, fromDate, toDate){
+  const dateStr = String(dateValue || '').slice(0,10);
+  if(!dateStr) return false;
+  if(fromDate && dateStr < fromDate) return false;
+  if(toDate && dateStr > toDate) return false;
+  return true;
+}
+
+function getSnapshotDate(fromDate, toDate){
+  return toDate || fromDate || '';
+}
+
+function stockSimForFgAtDate(fgCode, warehouseCode, cutoffDate){
+  let total = 0;
+  GR_ROWS.filter(x => x.fg_code === fgCode && x.warehouse_code === warehouseCode && x.status === 'Posted' && isOnOrBefore(x.gr_date, cutoffDate)).forEach(x => total += Number(x.qty || 0));
+  buildDoRows().filter(x => x.fg_code === fgCode && x.from_warehouse === warehouseCode && x.status !== 'Packing' && isOnOrBefore(x.do_date, cutoffDate)).forEach(x => total -= Number(x.qty || 0));
+  buildTransferRows().forEach(x => {
+    if(x.fg_code === fgCode && x.from_warehouse === warehouseCode && isOnOrBefore(x.trf_date, cutoffDate)) total -= Number(x.qty || 0);
+    if(x.fg_code === fgCode && x.to_warehouse === warehouseCode && x.status === 'Received' && isOnOrBefore(x.trf_date, cutoffDate)) total += Number(x.qty || 0);
+  });
+  buildReturnRows().forEach(x => {
+    if(x.fg_code === fgCode && x.warehouse_code === warehouseCode && x.status === 'Received' && isOnOrBefore(x.return_date, cutoffDate)) total += Number(x.qty || 0);
+  });
+  ADJUST_ROWS.filter(x => x.fg_code === fgCode && x.warehouse_code === warehouseCode && x.status === 'Approved' && isOnOrBefore(x.adj_date, cutoffDate)).forEach(x => {
+    total += Number(x.qty || 0);
+  });
+  return total;
+}
+
+function stockSimForStoreAtDate(fgCode, storeCode, cutoffDate){
+  if(!storeCode) return 0;
+  let total = 0;
+  buildDoRows().filter(x => x.fg_code === fgCode && x.store_code === storeCode && x.status !== 'Packing' && isOnOrBefore(x.do_date, cutoffDate)).forEach(x => total += Number(x.qty || 0));
+  (TX.sales || []).filter(x => x.fg_code === fgCode && x.store_code === storeCode && x.status !== 'Draft' && isOnOrBefore(x.sales_date || x.sale_date || x.date, cutoffDate)).forEach(x => total -= Number(x.qty || 0));
+  return Math.max(0, total);
+}
+
+function formatLocationBreakdown(rows){
+  return rows.length
+    ? rows.map(r => `<div class="muted-line"><span class="mono">${r.code}</span> ${r.name} <b>${r.qty}</b></div>`).join('')
+    : '<span class="muted-line">-</span>';
+}
+
+function stockSimForFg(fgCode, warehouseCode){
+  let total = 0;
+  GR_ROWS.filter(x => x.fg_code === fgCode && x.warehouse_code === warehouseCode && x.status === 'Posted').forEach(x => total += x.qty);
+  buildDoRows().filter(x => x.fg_code === fgCode && x.from_warehouse === warehouseCode && x.status !== 'Draft').forEach(x => total -= x.qty);
+  TRANSFER_ROWS.filter(x => x.fg_code === fgCode && x.from_warehouse === warehouseCode).forEach(x => total -= x.qty);
+  TRANSFER_ROWS.filter(x => x.fg_code === fgCode && x.to_warehouse === warehouseCode && x.status === 'Received').forEach(x => total += x.qty);
+  RETURN_ROWS.filter(x => x.fg_code === fgCode && x.warehouse_code === warehouseCode && x.status === 'Posted').forEach(x => total += x.qty);
+  ADJUST_ROWS.filter(x => x.fg_code === fgCode && x.warehouse_code === warehouseCode && x.status === 'Approved').forEach(x => {
+    total += Number(x.qty);
+  });
+  return total;
+}
+
+function stockSimForStore(fgCode, storeCode){
+  if(!storeCode) return 0;
+  let total = 0;
+  buildDoRows().filter(x => x.fg_code === fgCode && x.store_code === storeCode && x.status !== 'Draft').forEach(x => total += Number(x.qty || 0));
+  (TX.sales || []).filter(x => x.fg_code === fgCode && x.store_code === storeCode && x.status !== 'Draft').forEach(x => total -= Number(x.qty || 0));
+  return Math.max(0, total);
+}
+
+function stockSimForReseller(fgCode, resellerName){
+  if(!resellerName) return 0;
+  let total = 0;
+  buildDoRows().filter(x => x.fg_code === fgCode && !x.store_code && x.dest_name === resellerName && x.status !== 'Draft').forEach(x => total += Number(x.qty || 0));
+  return Math.max(0, total);
+}
+
+function stockAtLocation(fgCode, locationType, locationCode, locationName){
+  if(locationType === 'TOKO') return stockSimForStore(fgCode, locationCode);
+  if(locationType === 'RESELLER') return stockSimForReseller(fgCode, locationName);
+  return stockSimForFg(fgCode, locationCode);
+}
+
+function getFilteredDoRows(){
+  let rows = bySearch(buildDoRows(), ['do_no','dest_name','from_warehouse','fg_code','fg_name'], document.getElementById('search-do').value);
+  const dest = document.getElementById('filter-do-dest').value;
+  const warehouse = document.getElementById('filter-do-warehouse').value;
+  const month = document.getElementById('filter-do-month').value;
+  const year = document.getElementById('filter-do-year').value;
+  const dateFrom = document.getElementById('filter-do-date-from').value;
+  const dateTo = document.getElementById('filter-do-date-to').value;
+  if(dest) rows = rows.filter(x => x.dest_type === dest);
+  if(warehouse) rows = rows.filter(x => x.from_warehouse === warehouse);
+  if(month) rows = rows.filter(x => String(x.do_date || '').slice(5,7) === month);
+  if(year) rows = rows.filter(x => String(x.do_date || '').slice(0,4) === year);
+  if(dateFrom) rows = rows.filter(x => String(x.do_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.do_date || '') <= dateTo);
+  if(doStageFilter) rows = rows.filter(x => (x.status || 'Packing') === doStageFilter);
+  return rows;
+}
+
+function groupDoDocs(rows){
+  const grouped = new Map();
+  rows.forEach(r => {
+    if(!grouped.has(r.do_no)){
+      grouped.set(r.do_no, {
+        do_no:r.do_no,
+        do_date:r.do_date,
+        dest_type:r.dest_type,
+        dest_name:r.dest_name,
+        store_code:r.store_code || '',
+        from_warehouse:r.from_warehouse,
+        status:r.status,
+        created_by:r.created_by || CURRENT_USER_NAME,
+        note:r.note || '',
+        details:[]
+      });
+    }
+    const doc = grouped.get(r.do_no);
+    const details = Array.isArray(r.details) && r.details.length ? r.details : [{ fg_code:r.fg_code, fg_name:r.fg_name, qty:Number(r.qty || 0) }];
+    details.forEach(d => doc.details.push({ fg_code:d.fg_code, fg_name:d.fg_name, qty:Number(d.qty || 0) }));
+  });
+  return Array.from(grouped.values()).sort((a,b) => `${b.do_date}-${b.do_no}`.localeCompare(`${a.do_date}-${a.do_no}`));
+}
+
+function groupGrDocs(rows){
+  const grouped = new Map();
+  rows.forEach(r => {
+    if(!grouped.has(r.gr_no)){
+      grouped.set(r.gr_no, {
+        gr_no: r.gr_no,
+        gr_date: r.gr_date,
+        warehouse_code: r.warehouse_code,
+        warehouse_name: r.warehouse_name,
+        source: r.source,
+        status: r.status,
+        details: []
+      });
+    }
+    grouped.get(r.gr_no).details.push({
+      fg_code: r.fg_code,
+      fg_name: r.fg_name,
+      qty: Number(r.qty || 0)
+    });
+  });
+  return Array.from(grouped.values()).sort((a,b) => `${b.gr_date}-${b.gr_no}`.localeCompare(`${a.gr_date}-${a.gr_no}`));
+}
+
+function groupTransferDocs(rows){
+  const grouped = new Map();
+  rows.forEach(r => {
+    if(!grouped.has(r.trf_no)){
+      grouped.set(r.trf_no, {
+        trf_no:r.trf_no,
+        trf_date:r.trf_date,
+        from_warehouse:r.from_warehouse,
+        to_warehouse:r.to_warehouse,
+        status:r.status,
+        created_by:r.created_by || CURRENT_USER_NAME,
+        note:r.note || '',
+        details:[]
+      });
+    }
+    grouped.get(r.trf_no).details.push({ fg_code:r.fg_code, fg_name:r.fg_name, qty:Number(r.qty || 0) });
+  });
+  return Array.from(grouped.values()).sort((a,b) => `${b.trf_date}-${b.trf_no}`.localeCompare(`${a.trf_date}-${a.trf_no}`));
+}
+
+function groupReturnDocs(rows){
+  const grouped = new Map();
+  rows.forEach(r => {
+    if(!grouped.has(r.return_no)){
+      grouped.set(r.return_no, {
+        return_no:r.return_no,
+        return_date:r.return_date,
+        source_name:r.source_name,
+        warehouse_code:r.warehouse_code,
+        status:r.status,
+        note:r.note || '',
+        created_by:r.created_by || CURRENT_USER_NAME,
+        details:[]
+      });
+    }
+    grouped.get(r.return_no).details.push({ fg_code:r.fg_code, fg_name:r.fg_name, qty:Number(r.qty || 0) });
+  });
+  return Array.from(grouped.values()).sort((a,b) => `${b.return_date}-${b.return_no}`.localeCompare(`${a.return_date}-${a.return_no}`));
+}
+
+function renderKpis(){
+  const doRows = buildDoRows();
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Finished Good</div><div class="kpi-val">${FG.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Toko Aktif</div><div class="kpi-val">${TOKOS.length}</div></div>
+    <div class="kpi"><div class="kpi-label">DO Aktif</div><div class="kpi-val">${doRows.filter(x => x.status !== 'Draft').length}</div></div>
+    <div class="kpi"><div class="kpi-label">Gudang FG</div><div class="kpi-val">${FG_WH.length}</div></div>
+  `;
+}
+
+function fillFilters(){
+  const whOpts = ['<option value="">Semua Gudang FG</option>'].concat(FG_WH.map(w => `<option value="${w.warehouse_code}">${w.warehouse_code} - ${w.warehouse_name}</option>`));
+  const doDates = buildDoRows().map(r => String(r.do_date || '')).filter(Boolean);
+  const years = [...new Set(doDates.map(d => d.slice(0,4)).filter(Boolean))].sort().reverse();
+  if(!years.length) years.push(String(new Date().getFullYear()));
+  const months = [
+    ['01','Jan'],['02','Feb'],['03','Mar'],['04','Apr'],['05','Mei'],['06','Jun'],
+    ['07','Jul'],['08','Agu'],['09','Sep'],['10','Okt'],['11','Nov'],['12','Des']
+  ];
+  document.getElementById('filter-gr-warehouse').innerHTML = whOpts.join('');
+  document.getElementById('filter-do-warehouse').innerHTML = whOpts.join('');
+  document.getElementById('filter-do-month').innerHTML = ['<option value="">Semua Bulan</option>'].concat(months.map(([v,l]) => `<option value="${v}">${l}</option>`)).join('');
+  document.getElementById('filter-do-year').innerHTML = ['<option value="">Semua Tahun</option>'].concat(years.map(y => `<option value="${y}">${y}</option>`)).join('');
+  document.getElementById('gr-form-warehouse').innerHTML = FG_WH.map(w => `<option value="${w.warehouse_code}">${w.warehouse_code} - ${w.warehouse_name}</option>`).join('');
+  document.getElementById('gr-fg-options').innerHTML = FG.slice(0, 160).map(f => `<option value="${f.fg_code}">${f.fg_code} - ${f.fg_name}</option>`).join('');
+  const fgCategoryOptions = ['<option value="">Semua Kategori</option>'].concat([...new Set(FG.map(f => f.fg_category).filter(Boolean))].sort().map(cat => `<option value="${cat}">${cat}</option>`));
+  document.getElementById('filter-stock-category').innerHTML = fgCategoryOptions.join('');
+  document.getElementById('filter-stock-card-category').innerHTML = fgCategoryOptions.join('');
+  document.getElementById('filter-stock-location-category').innerHTML = fgCategoryOptions.join('');
+  document.getElementById('do-form-fg-category').innerHTML = fgCategoryOptions.join('');
+  document.getElementById('transfer-form-fg-category').innerHTML = fgCategoryOptions.join('');
+  document.getElementById('inv-return-form-fg-category').innerHTML = fgCategoryOptions.join('');
+  fillMonitoringLocationOptions('filter-stock-card-type','filter-stock-card-location');
+  fillMonitoringLocationOptions('filter-stock-location-type','filter-stock-location-location');
+  fillDoTargetOptions();
+  fillTransferWarehouseOptions();
+  fillDoFgOptions();
+  fillTransferFgOptions();
+  fillReturnSourceOptions();
+  fillReturnFgOptions();
+  syncDoFormDetails();
+  syncTransferFormDetails();
+  syncReturnFormDetails();
+}
+
+function fillMonitoringLocationOptions(typeId, locationId){
+  const type = document.getElementById(typeId)?.value || 'GUDANG';
+  const select = document.getElementById(locationId);
+  if(!select) return;
+  const current = select.value;
+  const rows = type === 'TOKO'
+    ? TOKOS.map(t => ({ code:t.store_code, name:t.store_name }))
+    : FG_WH.map(w => ({ code:w.warehouse_code, name:w.warehouse_name }));
+  select.innerHTML = rows.map(r => `<option value="${r.code}">${r.code} - ${r.name}</option>`).join('');
+  if(rows.some(r => r.code === current)) select.value = current;
+  else if(rows[0]) select.value = rows[0].code;
+}
+
+function fillDoTargetOptions(){
+  const destType = document.getElementById('do-form-dest-type').value;
+  const select = document.getElementById('do-form-store');
+  const current = select.value;
+  if(destType === 'RESELLER'){
+    const rows = (RESELLERS || []).length ? RESELLERS : [{ reseller_code:'RSL-PLH', reseller_name:'Reseller Placeholder', default_warehouse: MAIN_FG.warehouse_code }];
+    select.innerHTML = rows.map(r => `<option value="${r.reseller_code || r.partner_code || r.code || ''}">${(r.reseller_code || r.partner_code || r.code || 'RSL')} - ${(r.reseller_name || r.partner_name || r.name || 'Reseller Placeholder')}</option>`).join('');
+    if(rows.some(r => [r.reseller_code, r.partner_code, r.code].includes(current))) select.value = current;
+    else if(rows[0]) select.value = rows[0].reseller_code || rows[0].partner_code || rows[0].code || '';
+  } else {
+    const tokoRows = TOKOS.slice(0, 80);
+    select.innerHTML = tokoRows.length
+      ? tokoRows.map(t => `<option value="${t.store_code}">${t.store_code} - ${t.store_name}</option>`).join('')
+      : '<option value="">Belum ada toko</option>';
+    if(tokoRows.some(t => t.store_code === current)) select.value = current;
+    else if(tokoRows[0]) select.value = tokoRows[0].store_code;
+  }
+  if(!select.value && select.options.length){
+    select.selectedIndex = 0;
+  }
+}
+
+function handleDoDestTypeChange(){
+  fillDoTargetOptions();
+  syncDoFormDetails();
+}
+
+function fillTransferWarehouseOptions(){
+  const fromSelect = document.getElementById('transfer-form-from');
+  const toSelect = document.getElementById('transfer-form-to');
+  const currentFrom = fromSelect.value;
+  const currentTo = toSelect.value;
+  const opts = FG_WH.map(w => `<option value="${w.warehouse_code}">${w.warehouse_code} - ${w.warehouse_name}</option>`).join('');
+  fromSelect.innerHTML = opts;
+  toSelect.innerHTML = opts;
+  fromSelect.value = FG_WH.some(w => w.warehouse_code === currentFrom) ? currentFrom : (MAIN_FG?.warehouse_code || FG_WH[0]?.warehouse_code || '');
+  toSelect.value = FG_WH.some(w => w.warehouse_code === currentTo) ? currentTo : (BRANCH_FG?.warehouse_code || FG_WH[1]?.warehouse_code || FG_WH[0]?.warehouse_code || '');
+  if(fromSelect.value && toSelect.value && fromSelect.value === toSelect.value && FG_WH.length > 1){
+    const alt = FG_WH.find(w => w.warehouse_code !== fromSelect.value);
+    if(alt) toSelect.value = alt.warehouse_code;
+  }
+}
+
+function fillReturnSourceOptions(){
+  const sourceType = document.getElementById('inv-return-form-source-type').value;
+  const select = document.getElementById('inv-return-form-source');
+  const current = select.value;
+  if(sourceType === 'RESELLER'){
+    const rows = (RESELLERS || []).length ? RESELLERS : [{ reseller_code:'RSL-PLH', reseller_name:'Reseller Placeholder', default_warehouse: MAIN_FG.warehouse_code }];
+    select.innerHTML = rows.map(r => `<option value="${r.reseller_code || r.partner_code || r.code || ''}">${(r.reseller_code || r.partner_code || r.code || 'RSL')} - ${(r.reseller_name || r.partner_name || r.name || 'Reseller Placeholder')}</option>`).join('');
+    if(rows.some(r => [r.reseller_code, r.partner_code, r.code].includes(current))) select.value = current;
+  } else {
+    select.innerHTML = TOKOS.slice(0, 80).map(t => `<option value="${t.store_code}">${t.store_code} - ${t.store_name}</option>`).join('');
+    if(TOKOS.some(t => t.store_code === current)) select.value = current;
+  }
+}
+
+function handleReturnSourceTypeChange(){
+  fillReturnSourceOptions();
+  syncReturnFormDetails();
+}
+
+function fillMutationLocationOptions(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const select = document.getElementById('mutation-form-location');
+  const current = select.value;
+  const rows = type === 'TOKO'
+    ? TOKOS.map(t => ({ code:t.store_code, name:t.store_name }))
+    : FG_WH.map(w => ({ code:w.warehouse_code, name:w.warehouse_name }));
+  select.innerHTML = rows.map(r => `<option value="${r.code}">${r.code} - ${r.name}</option>`).join('');
+  if(rows.some(r => r.code === current)) select.value = current;
+}
+
+function fillMutationSourceOptions(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const category = document.getElementById('mutation-form-source-category').value;
+  const q = String(document.getElementById('mutation-form-source-search').value || '').toLowerCase();
+  let rows = FG.slice();
+  if(category) rows = rows.filter(f => f.fg_category === category);
+  if(q) rows = rows.filter(f => `${f.fg_code} ${f.fg_name} ${f.fg_category}`.toLowerCase().includes(q));
+  rows = rows.slice(0, 120);
+  document.getElementById('mutation-source-meta').textContent = `${rows.length} item asal tampil`;
+  renderMutationCombinedTable();
+}
+
+function fillMutationTargetOptions(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const category = document.getElementById('mutation-form-target-category').value;
+  const q = String(document.getElementById('mutation-form-target-search').value || '').toLowerCase();
+  let rows = FG.slice();
+  if(category) rows = rows.filter(f => f.fg_category === category);
+  if(q) rows = rows.filter(f => `${f.fg_code} ${f.fg_name} ${f.fg_category}`.toLowerCase().includes(q));
+  rows = rows.slice(0, 120);
+  document.getElementById('mutation-target-meta').textContent = `${rows.length} item tujuan tampil`;
+  renderMutationCombinedTable();
+}
+
+function renderMutationCombinedTable(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+
+  const sourceCategory = document.getElementById('mutation-form-source-category').value;
+  const sourceSearch = String(document.getElementById('mutation-form-source-search').value || '').toLowerCase();
+  const targetCategory = document.getElementById('mutation-form-target-category').value;
+  const targetSearch = String(document.getElementById('mutation-form-target-search').value || '').toLowerCase();
+
+  let sourceRows = FG.slice();
+  if(sourceCategory) sourceRows = sourceRows.filter(f => f.fg_category === sourceCategory);
+  if(sourceSearch) sourceRows = sourceRows.filter(f => `${f.fg_code} ${f.fg_name} ${f.fg_category}`.toLowerCase().includes(sourceSearch));
+  sourceRows = sourceRows.slice(0, 60);
+
+  let targetRows = FG.slice();
+  if(targetCategory) targetRows = targetRows.filter(f => f.fg_category === targetCategory);
+  if(targetSearch) targetRows = targetRows.filter(f => `${f.fg_code} ${f.fg_name} ${f.fg_category}`.toLowerCase().includes(targetSearch));
+  targetRows = targetRows.slice(0, 60);
+
+  const rowCount = Math.max(sourceRows.length, targetRows.length);
+  const body = document.getElementById('mutation-combined-body');
+  body.innerHTML = rowCount ? Array.from({length: rowCount}, (_, idx) => {
+    const source = sourceRows[idx];
+    const target = targetRows[idx];
+    return `
+      <tr>
+        <td class="mono">${source?.fg_code || ''}</td>
+        <td>${source?.fg_name || ''}</td>
+        <td>${source?.fg_category || ''}</td>
+        <td class="qty-cell">${source ? stockAtLocation(source.fg_code, type, locationCode, locationName) : ''}</td>
+        <td>${source ? `<input class="pick-qty" type="number" min="0" placeholder="Qty" value="${mutationSourceDraft[source.fg_code] ?? ''}" oninput="updateMutationSourceDraft('${source.fg_code}', this.value)" onkeydown="handleMutationKeydown(event)">` : ''}</td>
+        <td class="mono">${target?.fg_code || ''}</td>
+        <td>${target ? `<input class="pick-qty" type="number" min="0" placeholder="Qty" value="${mutationTargetDraft[target.fg_code] ?? ''}" oninput="updateMutationTargetDraft('${target.fg_code}', this.value)" onkeydown="handleMutationKeydown(event)">` : ''}</td>
+        <td>${target?.fg_name || ''}</td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="8" class="empty">Tidak ada item mutasi cocok.</td></tr>`;
+}
+
+function fillDoFgOptions(){
+  const category = document.getElementById('do-form-fg-category').value;
+  const q = String(document.getElementById('do-form-fg-search').value || '').toLowerCase();
+  const fromWarehouse = document.getElementById('do-form-from').value || MAIN_FG.warehouse_code;
+  const storeCode = document.getElementById('do-form-store').value;
+  const destType = document.getElementById('do-form-dest-type').value;
+  const destLabel = destType === 'RESELLER' ? 'Stock Tujuan' : `Stock Toko (${storeCode || '-'})`;
+  const sourceLabel = `Stock Gudang (${fromWarehouse || '-'})`;
+  let rows = FG.slice();
+  if(category) rows = rows.filter(f => f.fg_category === category);
+  if(q) rows = rows.filter(f => `${f.fg_code} ${f.fg_name} ${f.fg_category}`.toLowerCase().includes(q));
+  rows = rows.slice(0, 120);
+  document.getElementById('do-pick-body').innerHTML = rows.length ? rows.map(f => `
+    <tr>
+      <td class="mono">${f.fg_code}</td>
+      <td>${f.fg_name}</td>
+      <td>${f.fg_category || '-'}</td>
+      <td class="qty-cell">${stockSimForFg(f.fg_code, fromWarehouse)}</td>
+      <td class="qty-cell">${stockSimForStore(f.fg_code, storeCode)}</td>
+      <td><input class="pick-qty" type="number" min="0" placeholder="Qty" value="${doQtyDraft[f.fg_code] ?? ''}" oninput="updateDoQtyDraft('${f.fg_code}', this.value)" onkeydown="handleDoQtyKeydown(event)"></td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">Tidak ada FG cocok.</td></tr>`;
+  const doHead = document.querySelector('#do-form-card .picker-table thead tr');
+  if(doHead){
+    doHead.innerHTML = `<th>Kode</th><th>Nama FG</th><th>Kategori</th><th>${sourceLabel}</th><th>${destLabel}</th><th>Qty Kirim</th>`;
+  }
+  document.getElementById('do-picker-meta').textContent = `${rows.length} item tampil`;
+  renderSelectedDoFg();
+}
+
+function fillTransferFgOptions(){
+  const category = document.getElementById('transfer-form-fg-category').value;
+  const q = String(document.getElementById('transfer-form-fg-search').value || '').toLowerCase();
+  const fromWarehouse = document.getElementById('transfer-form-from').value || MAIN_FG.warehouse_code;
+  const toWarehouse = document.getElementById('transfer-form-to').value || BRANCH_FG.warehouse_code;
+  let rows = FG.slice();
+  if(category) rows = rows.filter(f => f.fg_category === category);
+  if(q) rows = rows.filter(f => `${f.fg_code} ${f.fg_name} ${f.fg_category}`.toLowerCase().includes(q));
+  rows = rows.slice(0, 120);
+  document.getElementById('transfer-pick-body').innerHTML = rows.length ? rows.map(f => `
+    <tr>
+      <td class="mono">${f.fg_code}</td>
+      <td>${f.fg_name}</td>
+      <td>${f.fg_category || '-'}</td>
+      <td class="qty-cell">${stockSimForFg(f.fg_code, fromWarehouse)}</td>
+      <td class="qty-cell">${stockSimForFg(f.fg_code, toWarehouse)}</td>
+      <td><input class="pick-qty" type="number" min="0" placeholder="Qty" value="${transferQtyDraft[f.fg_code] ?? ''}" oninput="updateTransferQtyDraft('${f.fg_code}', this.value)" onkeydown="handleTransferQtyKeydown(event)"></td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">Tidak ada FG cocok.</td></tr>`;
+  const transferHead = document.querySelector('#transfer-form-card .picker-table thead tr');
+  if(transferHead){
+    transferHead.innerHTML = `<th>Kode</th><th>Nama FG</th><th>Kategori</th><th>Stock Asal (${fromWarehouse || '-'})</th><th>Stock Tujuan (${toWarehouse || '-'})</th><th>Qty Transfer</th>`;
+  }
+  document.getElementById('transfer-picker-meta').textContent = `${rows.length} item tampil`;
+  renderSelectedTransferFg();
+}
+
+function fillReturnFgOptions(){
+  const sourceType = document.getElementById('inv-return-form-source-type').value;
+  const sourceCode = document.getElementById('inv-return-form-source').value;
+  const sourceName = sourceType === 'RESELLER'
+    ? ((RESELLERS || []).find(r => [r.reseller_code, r.partner_code, r.code].includes(sourceCode))?.reseller_name || (RESELLERS || []).find(r => [r.reseller_code, r.partner_code, r.code].includes(sourceCode))?.partner_name || 'Reseller Placeholder')
+    : (TOKOS.find(t => t.store_code === sourceCode)?.store_name || '-');
+  const category = document.getElementById('inv-return-form-fg-category').value;
+  const q = String(document.getElementById('inv-return-form-fg-search').value || '').toLowerCase();
+  const warehouseCode = document.getElementById('inv-return-form-warehouse').value || MAIN_FG.warehouse_code;
+  let rows = FG.slice();
+  if(category) rows = rows.filter(f => f.fg_category === category);
+  if(q) rows = rows.filter(f => `${f.fg_code} ${f.fg_name} ${f.fg_category}`.toLowerCase().includes(q));
+  rows = rows.slice(0, 120);
+  document.getElementById('return-pick-body').innerHTML = rows.length ? rows.map(f => {
+    const sourceStock = sourceType === 'RESELLER' ? stockSimForReseller(f.fg_code, sourceName) : stockSimForStore(f.fg_code, sourceCode);
+    return `
+      <tr>
+        <td class="mono">${f.fg_code}</td>
+        <td>${f.fg_name}</td>
+        <td>${f.fg_category || '-'}</td>
+        <td class="qty-cell">${sourceStock}</td>
+        <td>${warehouseCode}</td>
+        <td><input class="pick-qty" type="number" min="0" placeholder="Qty" value="${returnQtyDraft[f.fg_code] ?? ''}" oninput="updateReturnQtyDraft('${f.fg_code}', this.value)" onkeydown="handleReturnQtyKeydown(event)"></td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="6" class="empty">Tidak ada FG cocok.</td></tr>`;
+  const returnHead = document.querySelector('#inv-return-form-card .picker-table thead tr');
+  if(returnHead){
+    const sourceLabel = sourceType === 'RESELLER' ? `Stock Reseller (${sourceCode || '-'})` : `Stock Toko (${sourceCode || '-'})`;
+    returnHead.innerHTML = `<th>Kode</th><th>Nama FG</th><th>Kategori</th><th>${sourceLabel}</th><th>Gudang Tujuan (${warehouseCode || '-'})</th><th>Qty Retur</th>`;
+  }
+  document.getElementById('return-picker-meta').textContent = `${rows.length} item tampil`;
+}
+
+function renderSelectedDoFg(){
+  const selectedCodes = Object.keys(doQtyDraft).filter(code => Number(doQtyDraft[code] || 0) > 0);
+  const totalQty = selectedCodes.reduce((sum, code) => sum + Number(doQtyDraft[code] || 0), 0);
+  const modeEl = document.getElementById('do-doc-mode');
+  if(modeEl){
+    modeEl.textContent = selectedCodes.length ? `${selectedCodes.length} item dipilih • Total Qty ${totalQty}` : 'Packing list -> update jadi shipping -> received';
+  }
+}
+
+function renderSelectedTransferFg(){
+  const selectedCodes = Object.keys(transferQtyDraft).filter(code => Number(transferQtyDraft[code] || 0) > 0);
+  const totalQty = selectedCodes.reduce((sum, code) => sum + Number(transferQtyDraft[code] || 0), 0);
+  const modeEl = document.getElementById('transfer-doc-mode');
+  if(modeEl){
+    modeEl.textContent = selectedCodes.length ? `${selectedCodes.length} item dipilih • Total Qty ${totalQty}` : 'Packing transfer -> shipping -> received';
+  }
+}
+
+function updateMutationSourceDraft(code, value){
+  if(value === '') delete mutationSourceDraft[code];
+  else mutationSourceDraft[code] = value;
+  syncMutationFormDetails();
+}
+
+function updateMutationTargetDraft(code, value){
+  if(value === '') delete mutationTargetDraft[code];
+  else mutationTargetDraft[code] = value;
+  syncMutationFormDetails();
+}
+
+function handleMutationKeydown(event){
+  if(event.key !== 'Enter') return;
+  event.preventDefault();
+  submitMutationForm();
+}
+
+function updateDoQtyDraft(code, value){
+  const qty = Number(value || 0);
+  if(qty > 0) doQtyDraft[code] = qty;
+  else delete doQtyDraft[code];
+  renderSelectedDoFg();
+  syncDoFormDetails();
+}
+
+function handleDoQtyKeydown(event){
+  if(event.key === 'Enter'){
+    event.preventDefault();
+    submitDoForm('Packing');
+  }
+}
+
+function updateTransferQtyDraft(code, value){
+  const qty = Number(value || 0);
+  if(qty > 0) transferQtyDraft[code] = qty;
+  else delete transferQtyDraft[code];
+  renderSelectedTransferFg();
+  syncTransferFormDetails();
+}
+
+function updateReturnQtyDraft(code, value){
+  const qty = Number(value || 0);
+  if(qty > 0) returnQtyDraft[code] = qty;
+  else delete returnQtyDraft[code];
+  syncReturnFormDetails();
+}
+
+function handleTransferQtyKeydown(event){
+  if(event.key === 'Enter'){
+    event.preventDefault();
+    submitTransferForm('Packing');
+  }
+}
+
+function handleReturnQtyKeydown(event){
+  if(event.key === 'Enter'){
+    event.preventDefault();
+    submitInvReturnForm('Packing');
+  }
+}
+
+function syncDoFormDetails(){
+  const destType = document.getElementById('do-form-dest-type').value;
+  const storeSelect = document.getElementById('do-form-store');
+  if(!storeSelect.options.length){
+    fillDoTargetOptions();
+  }
+  let storeCode = storeSelect.value;
+  if(destType === 'TOKO' && !storeCode && TOKOS[0]){
+    storeCode = TOKOS[0].store_code;
+    storeSelect.value = storeCode;
+  }
+  if(!storeCode && storeSelect.options.length){
+    storeSelect.selectedIndex = 0;
+    storeCode = storeSelect.value;
+  }
+  const toko = TOKOS.find(t => t.store_code === storeCode) || TOKOS[0];
+  const reseller = (RESELLERS || []).find(r => [r.reseller_code, r.partner_code, r.code].includes(storeCode));
+  const fromWarehouse = destType === 'RESELLER'
+    ? (reseller?.default_warehouse || reseller?.default_warehouse_id || MAIN_FG.warehouse_code)
+    : (toko?.supply_by_1 || MAIN_FG.warehouse_code);
+  const selectedCodes = Object.keys(doQtyDraft).filter(code => Number(doQtyDraft[code] || 0) > 0);
+  const totalQty = selectedCodes.reduce((sum, code) => sum + Number(doQtyDraft[code] || 0), 0);
+  document.getElementById('do-form-from').value = fromWarehouse || '-';
+  document.getElementById('do-summary').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Tujuan</div><div class="mini-v">${destType === 'RESELLER' ? (reseller?.reseller_name || reseller?.partner_name || reseller?.name || 'Reseller Placeholder') : (toko?.store_name || '-')}</div></div>
+    <div class="mini-item"><div class="mini-k">Gudang Asal</div><div class="mini-v">${fromWarehouse || '-'}</div></div>
+    <div class="mini-item"><div class="mini-k">Item Dipilih</div><div class="mini-v">${selectedCodes.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Total Kirim</div><div class="mini-v">${totalQty}</div></div>
+  `;
+  fillDoFgOptions();
+}
+
+function syncTransferFormDetails(){
+  const from = document.getElementById('transfer-form-from').value;
+  const to = document.getElementById('transfer-form-to').value;
+  const selectedCodes = Object.keys(transferQtyDraft).filter(code => Number(transferQtyDraft[code] || 0) > 0);
+  const totalQty = selectedCodes.reduce((sum, code) => sum + Number(transferQtyDraft[code] || 0), 0);
+  document.getElementById('transfer-summary').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Dari Gudang</div><div class="mini-v">${from || '-'}</div></div>
+    <div class="mini-item"><div class="mini-k">Ke Gudang</div><div class="mini-v">${to || '-'}</div></div>
+    <div class="mini-item"><div class="mini-k">Item Dipilih</div><div class="mini-v">${selectedCodes.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Total</div><div class="mini-v">${totalQty}</div></div>
+  `;
+  fillTransferFgOptions();
+}
+
+function syncReturnFormDetails(){
+  const sourceType = document.getElementById('inv-return-form-source-type').value;
+  const sourceCode = document.getElementById('inv-return-form-source').value;
+  const toko = TOKOS.find(t => t.store_code === sourceCode);
+  const reseller = (RESELLERS || []).find(r => [r.reseller_code, r.partner_code, r.code].includes(sourceCode));
+  const warehouseCode = sourceType === 'RESELLER'
+    ? (reseller?.default_warehouse || reseller?.default_warehouse_id || MAIN_FG.warehouse_code)
+    : (toko?.supply_by_1 || MAIN_FG.warehouse_code);
+  document.getElementById('inv-return-form-warehouse').value = warehouseCode;
+  const selectedCodes = Object.keys(returnQtyDraft).filter(code => Number(returnQtyDraft[code] || 0) > 0);
+  const totalQty = selectedCodes.reduce((sum, code) => sum + Number(returnQtyDraft[code] || 0), 0);
+  document.getElementById('return-summary').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Sumber</div><div class="mini-v">${sourceType === 'RESELLER' ? (reseller?.reseller_name || reseller?.partner_name || reseller?.name || 'Reseller Placeholder') : (toko?.store_name || '-')}</div></div>
+    <div class="mini-item"><div class="mini-k">Gudang Tujuan</div><div class="mini-v">${warehouseCode || '-'}</div></div>
+    <div class="mini-item"><div class="mini-k">Item Dipilih</div><div class="mini-v">${selectedCodes.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Total Retur</div><div class="mini-v">${totalQty}</div></div>
+  `;
+  fillReturnFgOptions();
+}
+
+function syncMutationFormDetails(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const sourceCount = Object.keys(mutationSourceDraft).filter(code => Number(mutationSourceDraft[code] || 0) > 0).length;
+  const targetCount = Object.keys(mutationTargetDraft).filter(code => Number(mutationTargetDraft[code] || 0) > 0).length;
+  const sourceQty = Object.values(mutationSourceDraft).reduce((sum, qty) => sum + Number(qty || 0), 0);
+  const targetQty = Object.values(mutationTargetDraft).reduce((sum, qty) => sum + Number(qty || 0), 0);
+  document.getElementById('mutation-summary').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Lokasi</div><div class="mini-v">${locationCode || '-'}${locationName && locationName !== '-' ? `<div class="muted-line">${locationName}</div>` : ''}</div></div>
+    <div class="mini-item"><div class="mini-k">Item Asal</div><div class="mini-v">${sourceCount}</div></div>
+    <div class="mini-item"><div class="mini-k">Item Tujuan</div><div class="mini-v">${targetCount}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Keluar / Masuk</div><div class="mini-v">${sourceQty} / ${targetQty}</div></div>
+  `;
+  fillMutationSourceOptions();
+  fillMutationTargetOptions();
+}
+
+function renderGr(){
+  let rows = bySearch(GR_ROWS, ['gr_no','fg_code','fg_name','warehouse_code','source'], document.getElementById('search-gr').value);
+  const warehouse = document.getElementById('filter-gr-warehouse').value;
+  const dateFrom = document.getElementById('filter-gr-date-from').value;
+  const dateTo = document.getElementById('filter-gr-date-to').value;
+  if(warehouse) rows = rows.filter(x => x.warehouse_code === warehouse);
+  if(dateFrom) rows = rows.filter(x => String(x.gr_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.gr_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.gr_date || '').localeCompare(String(a.gr_date || '')) || String(b.gr_no || '').localeCompare(String(a.gr_no || '')));
+  const isMfgSource = r => {
+    const src = String(r.source || '').toLowerCase();
+    return src.includes('manufacturing') || src.includes('qc fg') || src.startsWith('qc ') || src.includes('produksi');
+  };
+  const allRows = rows.slice();
+  const qcRows = allRows.filter(isMfgSource);
+  const manualRows = allRows.filter(r => !isMfgSource(r));
+  if(grSourceFilter === 'QC') rows = qcRows;
+  if(grSourceFilter === 'MANUAL') rows = manualRows;
+  document.getElementById('gr-stage-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip ${grSourceFilter === 'ALL' ? 'active' : ''}" onclick="setGrSourceFilter('ALL')">Semua <span class="count">${allRows.length}</span></button>
+      <button class="stage-chip ${grSourceFilter === 'QC' ? 'active' : ''}" onclick="setGrSourceFilter('QC')">QC FG <span class="count">${qcRows.length}</span></button>
+      <button class="stage-chip ${grSourceFilter === 'MANUAL' ? 'active' : ''}" onclick="setGrSourceFilter('MANUAL')">Manual <span class="count">${manualRows.length}</span></button>
+      <button class="stage-chip" title="${grViewMode === 'DOC' ? 'Per Dokumen' : 'Rekap Tabel'}" aria-label="${grViewMode === 'DOC' ? 'Per Dokumen' : 'Rekap Tabel'}" onclick="toggleGrViewMode()">${grViewMode === 'DOC' ? '≣' : '▦'}</button>
+    </div>
+  `;
+  const sourceLabel = r => {
+    const src = String(r.source || '');
+    const lower = src.toLowerCase();
+    if(lower.includes('manufacturing') || lower.includes('qc fg') || lower.startsWith('qc ')){
+      return `<div><b>Manufacturing</b></div><div class="muted-line">${src}</div>`;
+    }
+    if(lower.includes('produksi')) return `<div><b>Manufacturing</b></div><div class="muted-line">${src}</div>`;
+    return src || '-';
+  };
+  if(grViewMode === 'TABLE'){
+    const dates = [...new Set(rows.map(r => String(r.gr_date || '')).filter(Boolean))].sort().reverse();
+    document.getElementById('thead-gr').innerHTML = `<tr><th>Kode FG</th><th>Nama Varian</th><th>UOM</th><th>Total</th><th>Status</th>${dates.map(d => `<th>${d}</th>`).join('')}</tr>`;
+    const grouped = Array.from(rows.reduce((map, r) => {
+      const key = r.fg_code;
+      if(!map.has(key)){
+        map.set(key, {
+          fg_code: r.fg_code,
+          fg_name: r.fg_name,
+          uom_code: 'PCS',
+          status: rows.some(x => x.fg_code === r.fg_code && isMfgSource(x)) ? 'Manufacturing' : 'Manual',
+          by_date: {}
+        });
+      }
+      const row = map.get(key);
+      row.by_date[r.gr_date] = (row.by_date[r.gr_date] || 0) + Number(r.qty || 0);
+      return map;
+    }, new Map()).values());
+    document.getElementById('tbl-gr').innerHTML = grouped.length ? grouped.map(r => {
+      const total = Object.values(r.by_date).reduce((sum, qty) => sum + Number(qty || 0), 0);
+      return `
+        <tr>
+          <td class="mono">${r.fg_code}</td>
+          <td>${r.fg_name}</td>
+          <td class="mono">${r.uom_code}</td>
+          <td class="qty-cell">${total}</td>
+          <td>${badge(r.status)}</td>
+          ${dates.map(d => `<td class="qty-cell">${r.by_date[d] || ''}</td>`).join('')}
+        </tr>
+      `;
+    }).join('') : `<tr><td colspan="${5 + dates.length}" class="empty">Tidak ada data GR.</td></tr>`;
+  }else{
+    document.getElementById('thead-gr').innerHTML = `<tr><th>No GR</th><th>Tanggal</th><th>FG</th><th>Gudang Tujuan</th><th>Qty</th><th>Source</th><th>Status</th></tr>`;
+    document.getElementById('tbl-gr').innerHTML = rows.length ? rows.map(r => `
+      <tr>
+        <td class="mono">${r.gr_no}</td>
+        <td>${r.gr_date}</td>
+        <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
+        <td>${r.warehouse_code}</td>
+        <td>${r.qty}</td>
+        <td>${sourceLabel(r)}</td>
+        <td>${badge(r.status)}</td>
+      </tr>
+    `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data GR.</td></tr>`;
+  }
+  const mfgRows = qcRows;
+  const totalMfgQty = mfgRows.reduce((sum, r) => sum + Number(r.qty || 0), 0);
+  const grSide = document.getElementById('gr-side');
+  if(grSide){grSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Gudang FG Utama</div><div class="mini-v">${MAIN_FG.warehouse_code}</div></div>
+    <div class="mini-item"><div class="mini-k">Dari Manufacturing</div><div class="mini-v">${mfgRows.length}<div class="muted-line">Qty ${totalMfgQty}</div></div></div>
+    <div class="mini-item"><div class="mini-k">Gudang Aktif</div><div class="mini-v">${warehouse || 'Semua Gudang FG'}</div></div>
+  `;}
+}
+
+function setGrSourceFilter(filter){
+  grSourceFilter = filter;
+  renderGr();
+}
+
+function setGrViewMode(mode){
+  grViewMode = mode;
+  renderGr();
+}
+
+function toggleGrViewMode(){
+  grViewMode = grViewMode === 'DOC' ? 'TABLE' : 'DOC';
+  renderGr();
+}
+
+function renderDo(){
+  const currentRows = buildDoRows();
+  const allDocs = groupDoDocs(currentRows);
+  const docs = groupDoDocs(getFilteredDoRows());
+  const packingCount = allDocs.filter(d => d.status === 'Packing').length;
+  const shippingCount = allDocs.filter(d => d.status === 'Shipping').length;
+  const receivedCount = allDocs.filter(d => d.status === 'Received').length;
+  document.getElementById('do-stage-tabs').innerHTML = `
+    <button class="stage-chip ${doStageFilter === 'Packing' ? 'active' : ''}" onclick="setDoStageFilter('Packing')">Packing <span class="count">${packingCount}</span></button>
+    <button class="stage-chip ${doStageFilter === 'Shipping' ? 'active' : ''}" onclick="setDoStageFilter('Shipping')">Shipping <span class="count">${shippingCount}</span></button>
+    <button class="stage-chip ${doStageFilter === 'Received' ? 'active' : ''}" onclick="setDoStageFilter('Received')">Received <span class="count">${receivedCount}</span></button>
+  `;
+  document.getElementById('tbl-do').innerHTML = docs.length ? docs.map(doc => {
+    const receiveMeta = DO_RECEIVE_META[doc.do_no];
+    const receiveInfo = doc.status === 'Received' && receiveMeta ? `${receiveMeta.result}${receiveMeta.note ? ` • ${receiveMeta.note}` : ''}` : '';
+    const itemCount = doc.details.length;
+    const action = doc.status === 'Packing'
+      ? `<div class="action-row"><button class="ab" onclick="editDoPacking('${doc.do_no}')">Edit</button><button class="ab" onclick="printDoPackingList('${doc.do_no}')">PDF</button><button class="ab" onclick="updateDoStatus('${doc.do_no}','Shipping')">Update Shipping</button></div>`
+      : doc.status === 'Shipping'
+        ? `<div class="action-row"><button class="ab" onclick="printDoSuratJalan('${doc.do_no}')">Surat Jalan</button><button class="ab" onclick="confirmDoReceived('${doc.do_no}')">Update Received</button></div>`
+        : `<div class="action-row"><button class="ab" onclick="printDoSuratJalan('${doc.do_no}')">Print</button></div>`;
+    return `
+    <tr class="do-recap">
+      <td class="mono">${doc.do_no}</td>
+      <td>${doc.do_date}</td>
+      <td title="${doc.dest_name}">${badge(doc.dest_type)} ${doc.dest_name}</td>
+      <td>${doc.from_warehouse}</td>
+      <td>${badge(doc.status)}<div class="summary-note">${itemCount} item${doc.note ? ` • ${doc.note}` : ''}${receiveInfo ? ` • ${receiveInfo}` : ''}</div></td>
+      <td>${action}</td>
+    </tr>
+  `}).join('') : `<tr><td colspan="6" class="empty">Tidak ada data DO.</td></tr>`;
+  const totalQty = docs.reduce((sum, doc) => sum + doc.details.reduce((s, d) => s + Number(d.qty || 0), 0), 0);
+  const doSide = document.getElementById('do-side');
+  if(doSide){doSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Tab Aktif</div><div class="mini-v">${doStageFilter}</div></div>
+    <div class="mini-item"><div class="mini-k">Dokumen Tampil</div><div class="mini-v">${docs.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Total</div><div class="mini-v">${totalQty}</div></div>
+    <div class="mini-item"><div class="mini-k">Packing / Shipping / Received</div><div class="mini-v">${packingCount} / ${shippingCount} / ${receivedCount}</div></div>
+  `;}
+}
+
+function renderTransfer(){
+  const currentRows = buildTransferRows();
+  const allDocs = groupTransferDocs(currentRows);
+  const docs = groupTransferDocs(getFilteredTransferRows());
+  const allCount = allDocs.length;
+  const packingCount = allDocs.filter(d => d.status === 'Packing').length;
+  const shippingCount = allDocs.filter(d => d.status === 'Shipping').length;
+  const receivedCount = allDocs.filter(d => d.status === 'Received').length;
+  document.getElementById('transfer-stage-tabs').innerHTML = `
+    <button class="stage-chip ${transferStageFilter === '' ? 'active' : ''}" onclick="setTransferStageFilter('')">Semua <span class="count">${allCount}</span></button>
+    <button class="stage-chip ${transferStageFilter === 'Packing' ? 'active' : ''}" onclick="setTransferStageFilter('Packing')">Packing <span class="count">${packingCount}</span></button>
+    <button class="stage-chip ${transferStageFilter === 'Shipping' ? 'active' : ''}" onclick="setTransferStageFilter('Shipping')">Shipping <span class="count">${shippingCount}</span></button>
+    <button class="stage-chip ${transferStageFilter === 'Received' ? 'active' : ''}" onclick="setTransferStageFilter('Received')">Received <span class="count">${receivedCount}</span></button>
+  `;
+  document.getElementById('tbl-transfer').innerHTML = docs.length ? docs.map(doc => {
+    const receiveMeta = TRANSFER_RECEIVE_META[doc.trf_no];
+    const itemCount = doc.details.length;
+    const action = doc.status === 'Packing'
+      ? `<div class="action-row"><button class="ab" onclick="editTransferPacking('${doc.trf_no}')">Edit</button><button class="ab" onclick="printTransferPacking('${doc.trf_no}')">PDF</button><button class="ab" onclick="updateTransferStatus('${doc.trf_no}','Shipping')">Update Shipping</button></div>`
+      : doc.status === 'Shipping'
+        ? `<div class="action-row"><button class="ab" onclick="printTransferPacking('${doc.trf_no}','SURAT JALAN TRANSFER')">Surat Jalan</button><button class="ab" onclick="confirmTransferReceived('${doc.trf_no}')">Update Received</button></div>`
+        : `<div class="action-row"><button class="ab" onclick="printTransferPacking('${doc.trf_no}','SURAT JALAN TRANSFER')">Print</button></div>`;
+    return `
+    <tr class="transfer-recap">
+      <td class="mono">${doc.trf_no}</td>
+      <td>${doc.trf_date}</td>
+      <td>${doc.from_warehouse}</td>
+      <td>${doc.to_warehouse}</td>
+      <td>${badge(doc.status)}<div class="summary-note">${itemCount} item${doc.note ? ` • ${doc.note}` : ''}${receiveMeta ? ` • ${receiveMeta.result}` : ''}</div></td>
+      <td>${action}</td>
+    </tr>
+  `}).join('') : `<tr><td colspan="6" class="empty">Tidak ada data transfer.</td></tr>`;
+  const totalQty = docs.reduce((sum, doc) => sum + doc.details.reduce((s, d) => s + Number(d.qty || 0), 0), 0);
+  const routeCount = new Set(docs.map(r => `${r.from_warehouse}->${r.to_warehouse}`)).size;
+  const transferSide = document.getElementById('transfer-side');
+  if(transferSide){transferSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Tab Aktif</div><div class="mini-v">${transferStageFilter}</div></div>
+    <div class="mini-item"><div class="mini-k">Jumlah Transfer</div><div class="mini-v">${docs.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Total</div><div class="mini-v">${totalQty}</div></div>
+    <div class="mini-item"><div class="mini-k">Rute Aktif</div><div class="mini-v">${routeCount}</div></div>
+    <div class="mini-item"><div class="mini-k">Packing / Shipping / Received</div><div class="mini-v">${packingCount} / ${shippingCount} / ${receivedCount}</div></div>
+  `;}
+}
+
+function getFilteredTransferRows(){
+  let rows = bySearch(buildTransferRows(), ['trf_no','from_warehouse','to_warehouse','fg_code','fg_name'], document.getElementById('search-transfer').value);
+  const dateFrom = document.getElementById('filter-transfer-date-from').value;
+  const dateTo = document.getElementById('filter-transfer-date-to').value;
+  if(dateFrom) rows = rows.filter(r => String(r.trf_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(r => String(r.trf_date || '') <= dateTo);
+  if(transferStageFilter) rows = rows.filter(r => (r.status || 'Packing') === transferStageFilter);
+  return rows;
+}
+
+function renderReturn(){
+  let rows = bySearch(RETURN_ROWS, ['return_no','source_name','warehouse_code','fg_code','fg_name'], document.getElementById('search-return').value);
+  const sourceType = document.getElementById('filter-return-source-type').value;
+  const dateFrom = document.getElementById('filter-return-date-from').value;
+  const dateTo = document.getElementById('filter-return-date-to').value;
+  if(sourceType === 'TOKO') rows = rows.filter(r => TOKOS.some(t => t.store_name === r.source_name));
+  if(sourceType === 'RESELLER') rows = rows.filter(r => !TOKOS.some(t => t.store_name === r.source_name));
+  if(dateFrom) rows = rows.filter(r => String(r.return_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(r => String(r.return_date || '') <= dateTo);
+  if(returnStageFilter) rows = rows.filter(r => (r.status || 'Packing') === returnStageFilter);
+  rows = rows.sort((a,b) => String(b.return_date || '').localeCompare(String(a.return_date || '')) || String(b.return_no || '').localeCompare(String(a.return_no || '')));
+  const allDocs = groupReturnDocs(RETURN_ROWS.filter(r => {
+    if(sourceType === 'TOKO') return TOKOS.some(t => t.store_name === r.source_name);
+    if(sourceType === 'RESELLER') return !TOKOS.some(t => t.store_name === r.source_name);
+    return true;
+  }));
+  const docs = groupReturnDocs(rows);
+  const packingCount = allDocs.filter(d => d.status === 'Packing').length;
+  const shippingCount = allDocs.filter(d => d.status === 'Shipping').length;
+  const receivedCount = allDocs.filter(d => d.status === 'Received').length;
+  document.getElementById('return-stage-tabs').innerHTML = `
+    <button class="stage-chip ${returnStageFilter === 'Packing' ? 'active' : ''}" onclick="setReturnStageFilter('Packing')">Packing <span class="count">${packingCount}</span></button>
+    <button class="stage-chip ${returnStageFilter === 'Shipping' ? 'active' : ''}" onclick="setReturnStageFilter('Shipping')">Shipping <span class="count">${shippingCount}</span></button>
+    <button class="stage-chip ${returnStageFilter === 'Received' ? 'active' : ''}" onclick="setReturnStageFilter('Received')">Received <span class="count">${receivedCount}</span></button>
+  `;
+  document.getElementById('tbl-return').innerHTML = docs.length ? docs.map(doc => {
+    const receiveMeta = RETURN_RECEIVE_META[doc.return_no];
+    const itemCount = doc.details.length;
+    const action = doc.status === 'Packing'
+      ? `<div class="action-row"><button class="ab" onclick="editReturnPacking('${doc.return_no}')">Edit</button><button class="ab" onclick="printReturnSimple('${doc.return_no}','PACKING LIST RETUR')">PDF</button><button class="ab" onclick="updateReturnStatus('${doc.return_no}','Shipping')">Update Shipping</button></div>`
+      : doc.status === 'Shipping'
+        ? `<div class="action-row"><button class="ab" onclick="printReturnSimple('${doc.return_no}','SURAT JALAN RETUR')">Surat Jalan</button><button class="ab" onclick="confirmReturnReceived('${doc.return_no}')">Update Received</button></div>`
+        : `<div class="action-row"><button class="ab" onclick="printReturnSimple('${doc.return_no}','SURAT JALAN RETUR')">Print</button></div>`;
+    return `
+    <tr class="transfer-recap">
+      <td class="mono">${doc.return_no}</td>
+      <td>${doc.return_date}</td>
+      <td>${doc.source_name}</td>
+      <td>${doc.warehouse_code}</td>
+      <td>${badge(doc.status)}<div class="summary-note">${itemCount} item${doc.note ? ` • ${doc.note}` : ''}${receiveMeta ? ` • ${receiveMeta.result}` : ''}</div></td>
+      <td>${action}</td>
+    </tr>
+  `}).join('') : `<tr><td colspan="6" class="empty">Tidak ada data retur.</td></tr>`;
+  const totalQty = docs.reduce((sum, doc) => sum + doc.details.reduce((s, d) => s + Number(d.qty || 0), 0), 0);
+  const returnSide = document.getElementById('return-side');
+  if(returnSide){returnSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Tab Aktif</div><div class="mini-v">${returnStageFilter}</div></div>
+    <div class="mini-item"><div class="mini-k">Jumlah Retur</div><div class="mini-v">${docs.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Total</div><div class="mini-v">${totalQty}</div></div>
+    <div class="mini-item"><div class="mini-k">Dari Toko</div><div class="mini-v">${docs.filter(d => TOKOS.some(t => t.store_name === d.source_name)).length}</div></div>
+    <div class="mini-item"><div class="mini-k">Packing / Shipping / Received</div><div class="mini-v">${packingCount} / ${shippingCount} / ${receivedCount}</div></div>
+  `;}
+}
+
+function renderAdjust(){
+  const rows = bySearch(ADJUST_ROWS, ['adj_no','warehouse_code','fg_code','fg_name','reason'], document.getElementById('search-adjust').value);
+  document.getElementById('tbl-adjust').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.adj_no}</td>
+      <td>${r.adj_date}</td>
+      <td>${r.warehouse_code}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
+      <td>${r.qty}</td>
+      <td>${r.reason}</td>
+      <td>${badge(r.status)}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data adjustment.</td></tr>`;
+}
+
+function renderMutation(){
+  let rows = bySearch(MUTATION_ROWS, ['mut_no','location_code','location_name','source_fg_code','source_fg_name','target_fg_code','target_fg_name','note'], document.getElementById('search-mutation').value);
+  const type = document.getElementById('filter-mutation-type').value;
+  if(type) rows = rows.filter(r => r.location_type === type);
+  document.getElementById('tbl-mutation').innerHTML = rows.length ? rows.map(r => `
+    <tr class="mutation-recap">
+      <td class="mono">${r.mut_no}</td>
+      <td>${r.mut_date}</td>
+      <td>${r.location_code}<div class="muted-line">${r.location_name || '-'}</div></td>
+      <td><span class="mono">${r.source_fg_code}</span><br>${r.source_fg_name}</td>
+      <td><span class="mono">${r.target_fg_code}</span><br>${r.target_fg_name}</td>
+      <td class="qty-cell">${r.source_qty}</td>
+      <td class="qty-cell">${r.target_qty}</td>
+      <td>${r.note || '-'}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Tidak ada data mutasi barang.</td></tr>`;
+  const totalOut = rows.reduce((sum, r) => sum + Number(r.source_qty || 0), 0);
+  const totalIn = rows.reduce((sum, r) => sum + Number(r.target_qty || 0), 0);
+  document.getElementById('mutation-side').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Jumlah Dokumen</div><div class="mini-v">${rows.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Keluar</div><div class="mini-v">${totalOut}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Masuk</div><div class="mini-v">${totalIn}</div></div>
+    <div class="mini-item"><div class="mini-k">Lokasi Aktif</div><div class="mini-v">${new Set(rows.map(r => r.location_code)).size}</div></div>
+  `;
+}
+
+function renderStock(){
+  const qLocation = document.getElementById('search-stock-location').value;
+  const locationType = document.getElementById('filter-stock-location-type').value || 'GUDANG';
+  const locationCode = document.getElementById('filter-stock-location-location').value || (locationType === 'TOKO' ? (TOKOS[0]?.store_code || '') : MAIN_FG.warehouse_code);
+  const locationCategory = document.getElementById('filter-stock-location-category').value || '';
+  const locationDateFrom = document.getElementById('filter-stock-location-date-from').value || '';
+  const locationDateTo = document.getElementById('filter-stock-location-date-to').value || '';
+  const locationSnapshotDate = getSnapshotDate(locationDateFrom, locationDateTo);
+  const qTotal = document.getElementById('search-stock').value;
+  const totalCategory = document.getElementById('filter-stock-category').value || '';
+  const totalDateFrom = document.getElementById('filter-stock-date-from').value || '';
+  const totalDateTo = document.getElementById('filter-stock-date-to').value || '';
+  const totalDate = getSnapshotDate(totalDateFrom, totalDateTo);
+  const cardType = document.getElementById('filter-stock-card-type').value || 'GUDANG';
+  const cardLocation = document.getElementById('filter-stock-card-location').value || (cardType === 'TOKO' ? (TOKOS[0]?.store_code || '') : MAIN_FG.warehouse_code);
+  const cardCategory = document.getElementById('filter-stock-card-category').value || '';
+  const cardDateFrom = document.getElementById('filter-stock-card-date-from').value || '';
+  const cardDateTo = document.getElementById('filter-stock-card-date-to').value || '';
+  let locationRows = bySearch(FG, ['fg_code','fg_name','fg_category'], qLocation).filter(r => !locationCategory || r.fg_category === locationCategory).slice(0, 150);
+  let totalRows = bySearch(FG, ['fg_code','fg_name','fg_category'], qTotal).filter(r => !totalCategory || r.fg_category === totalCategory).slice(0, 150);
+
+  const buildStockCardRows = () => {
+    const trx = [];
+    if(cardType === 'TOKO'){
+      const store = TOKOS.find(t => t.store_code === cardLocation);
+      const storeName = store?.store_name || '';
+      buildDoRows().filter(x => x.store_code === cardLocation && x.status !== 'Packing').forEach(x => {
+        trx.push({ date:x.do_date, doc:'DO Masuk', ref:x.do_no, fg_code:x.fg_code, fg_name:x.fg_name, in_qty:Number(x.qty || 0), out_qty:0 });
+      });
+      (TX.sales || []).filter(x => x.store_code === cardLocation && x.status !== 'Draft').forEach(x => {
+        trx.push({ date:x.sales_date || x.sale_date || x.date || '', doc:'Sales', ref:x.sales_no || x.sale_no || x.pos_no || '-', fg_code:x.fg_code, fg_name:x.fg_name, in_qty:0, out_qty:Number(x.qty || 0) });
+      });
+      buildReturnRows().filter(x => x.source_name === storeName && x.status === 'Received').forEach(x => {
+        trx.push({ date:x.return_date, doc:'Retur Keluar', ref:x.return_no, fg_code:x.fg_code, fg_name:x.fg_name, in_qty:0, out_qty:Number(x.qty || 0) });
+      });
+    } else {
+      GR_ROWS.filter(x => x.warehouse_code === cardLocation && x.status === 'Posted').forEach(x => {
+        trx.push({ date:x.gr_date, doc:'GR FG', ref:x.gr_no, fg_code:x.fg_code, fg_name:x.fg_name, in_qty:Number(x.qty || 0), out_qty:0 });
+      });
+      buildDoRows().filter(x => x.from_warehouse === cardLocation && x.status !== 'Packing').forEach(x => {
+        trx.push({ date:x.do_date, doc:'DO', ref:x.do_no, fg_code:x.fg_code, fg_name:x.fg_name, in_qty:0, out_qty:Number(x.qty || 0) });
+      });
+      buildTransferRows().forEach(x => {
+        if(x.from_warehouse === cardLocation) trx.push({ date:x.trf_date, doc:'Transfer Keluar', ref:x.trf_no, fg_code:x.fg_code, fg_name:x.fg_name, in_qty:0, out_qty:Number(x.qty || 0) });
+        if(x.to_warehouse === cardLocation && x.status === 'Received') trx.push({ date:x.trf_date, doc:'Transfer Masuk', ref:x.trf_no, fg_code:x.fg_code, fg_name:x.fg_name, in_qty:Number(x.qty || 0), out_qty:0 });
+      });
+      groupReturnDocs(buildReturnRows()).forEach(doc => {
+        if(doc.warehouse_code !== cardLocation || doc.status !== 'Received') return;
+        doc.details.forEach(d => trx.push({ date:doc.return_date, doc:'Retur Masuk', ref:doc.return_no, fg_code:d.fg_code, fg_name:d.fg_name, in_qty:Number(d.qty || 0), out_qty:0 }));
+      });
+    }
+    const filtered = trx
+      .filter(r => isWithinRange(r.date, cardDateFrom, cardDateTo))
+      .filter(r => !cardCategory || FG.find(f => f.fg_code === r.fg_code)?.fg_category === cardCategory)
+      .filter(r => !document.getElementById('search-stock-card').value || `${r.fg_code} ${r.fg_name} ${r.doc} ${r.ref}`.toLowerCase().includes(String(document.getElementById('search-stock-card').value).toLowerCase()))
+      .sort((a,b) => `${a.date}-${a.ref}`.localeCompare(`${b.date}-${b.ref}`));
+    let running = 0;
+    return filtered.map(r => {
+      running += Number(r.in_qty || 0) - Number(r.out_qty || 0);
+      return { ...r, balance:running };
+    }).slice(-200).reverse();
+  };
+
+  document.getElementById('tbl-stock-location').innerHTML = locationRows.length ? locationRows.map(r => {
+    const qty = locationType === 'TOKO' ? stockSimForStoreAtDate(r.fg_code, locationCode, locationSnapshotDate) : stockSimForFgAtDate(r.fg_code, locationCode, locationSnapshotDate);
+    const status = qty <= 0 ? 'Habis' : qty < 20 ? 'Tipis' : 'Aman';
+    const locationLabel = locationType === 'TOKO'
+      ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || locationCode)
+      : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || locationCode);
+    return `
+      <tr>
+        <td class="mono">${r.fg_code}</td>
+        <td>${r.fg_name}</td>
+        <td>${r.fg_category}</td>
+        <td><span class="mono">${locationCode}</span><div class="muted-line">${locationLabel}</div></td>
+        <td class="qty-cell">${qty}</td>
+        <td>${badge(status)}</td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="6" class="empty">Tidak ada data stok.</td></tr>`;
+
+  const totalLocations = [
+    ...FG_WH.map(wh => ({ type:'Gudang', code:wh.warehouse_code, name:wh.warehouse_name })),
+    ...TOKOS.map(s => ({ type:'Toko', code:s.store_code, name:s.store_name }))
+  ];
+  document.getElementById('thead-stock-consolidated').innerHTML = `
+    <tr>
+      <th>Kode FG</th>
+      <th>Nama</th>
+      <th>Kategori</th>
+      <th>Total Konsolidasi</th>
+      <th>Status</th>
+      ${totalLocations.map(loc => `<th>${loc.type}<br><span class="mono">${loc.code}</span></th>`).join('')}
+    </tr>
+  `;
+
+  document.getElementById('tbl-stock-consolidated').innerHTML = totalRows.length ? totalRows.map(r => {
+    try {
+      const warehouseQtys = FG_WH.map(wh => Number(stockSimForFgAtDate(r.fg_code, wh.warehouse_code, totalDate) || 0));
+      const storeQtys = TOKOS.map(s => Number(stockSimForStoreAtDate(r.fg_code, s.store_code, totalDate) || 0));
+      const locationQtys = warehouseQtys.concat(storeQtys);
+      const totalWarehouse = warehouseQtys.reduce((sum, x) => sum + x, 0);
+      const totalStore = storeQtys.reduce((sum, x) => sum + x, 0);
+      const total = totalWarehouse + totalStore;
+      const status = total <= 0 ? 'Habis' : total < 40 ? 'Tipis' : 'Aman';
+      return `
+        <tr>
+          <td class="mono">${r.fg_code}</td>
+          <td>${r.fg_name}</td>
+          <td>${r.fg_category || '-'}</td>
+          <td class="qty-cell">${total}</td>
+          <td>${badge(status)}</td>
+          ${locationQtys.map(qty => `<td class="qty-cell">${qty}</td>`).join('')}
+        </tr>
+      `;
+    } catch (e) {
+      return `
+        <tr>
+          <td class="mono">${r.fg_code}</td>
+          <td>${r.fg_name}</td>
+          <td>${r.fg_category || '-'}</td>
+          <td class="qty-cell">-</td>
+          <td>${badge('Info')}</td>
+          ${totalLocations.map(() => '<td class="qty-cell">-</td>').join('')}
+        </tr>
+      `;
+    }
+  }).join('') : `<tr><td colspan="${5 + totalLocations.length}" class="empty">Tidak ada data stok konsolidasi.</td></tr>`;
+
+  const cardRowsAsc = buildStockCardRows().slice().reverse();
+  const cardRows = cardRowsAsc.slice().reverse();
+  const stockCardToggle = document.getElementById('stock-card-view-toggle');
+  if(stockCardToggle){
+    stockCardToggle.textContent = stockCardViewMode === 'RECAP' ? '≣' : '▦';
+    stockCardToggle.title = stockCardViewMode === 'RECAP' ? 'Rekap Pergerakan Stok' : 'Tabel Per Tanggal';
+    stockCardToggle.setAttribute('aria-label', stockCardToggle.title);
+  }
+  document.getElementById('stock-card-pane-recap').classList.toggle('active', stockCardViewMode === 'RECAP');
+  document.getElementById('stock-card-pane-table').classList.toggle('active', stockCardViewMode === 'TABLE');
+  document.getElementById('tbl-stock-card').innerHTML = cardRows.length ? cardRows.map(r => `
+    <tr>
+      <td>${r.date}</td>
+      <td>${r.doc}</td>
+      <td class="mono">${r.ref}</td>
+      <td><span class="mono">${r.fg_code}</span><div class="muted-line">${r.fg_name}</div></td>
+      <td class="qty-cell">${r.in_qty || ''}</td>
+      <td class="qty-cell">${r.out_qty || ''}</td>
+      <td class="qty-cell">${r.balance}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Belum ada riwayat kartu stok.</td></tr>`;
+  const cardDates = [...new Set(cardRowsAsc.map(r => String(r.date || '')).filter(Boolean))].sort().reverse();
+  const groupedCardRows = Array.from(cardRowsAsc.reduce((map, row) => {
+    if(!map.has(row.fg_code)){
+      map.set(row.fg_code, {
+        fg_code: row.fg_code,
+        fg_name: row.fg_name,
+        total_in: 0,
+        total_out: 0,
+        by_date_in: {},
+        by_date_out: {}
+      });
+    }
+    const curr = map.get(row.fg_code);
+    curr.total_in += Number(row.in_qty || 0);
+    curr.total_out += Number(row.out_qty || 0);
+    curr.by_date_in[row.date] = (curr.by_date_in[row.date] || 0) + Number(row.in_qty || 0);
+    curr.by_date_out[row.date] = (curr.by_date_out[row.date] || 0) + Number(row.out_qty || 0);
+    return map;
+  }, new Map()).values()).sort((a,b) => String(a.fg_code).localeCompare(String(b.fg_code)));
+  document.getElementById('hd-stock-card-table').innerHTML = `<tr><th rowspan="2">Kode FG</th><th rowspan="2">Nama Varian</th><th rowspan="2">Total Masuk</th><th rowspan="2">Total Keluar</th>${cardDates.map(d => `<th colspan="2">${d}</th>`).join('')}</tr><tr>${cardDates.map(() => `<th>In</th><th>Out</th>`).join('')}</tr>`;
+  document.getElementById('tbl-stock-card-table').innerHTML = groupedCardRows.length ? groupedCardRows.map(r => `
+    <tr>
+      <td class="mono">${r.fg_code}</td>
+      <td>${r.fg_name}</td>
+      <td class="qty-cell">${r.total_in || ''}</td>
+      <td class="qty-cell">${r.total_out || ''}</td>
+      ${cardDates.map(d => {
+        const inVal = Number(r.by_date_in[d] || 0);
+        const outVal = Number(r.by_date_out[d] || 0);
+        return `<td class="qty-cell ${inVal > 0 ? 'num-pos' : ''}">${inVal > 0 ? `+${inVal}` : ''}</td><td class="qty-cell ${outVal > 0 ? 'num-neg' : ''}">${outVal > 0 ? `-${outVal}` : ''}</td>`;
+      }).join('')}
+    </tr>
+  `).join('') : `<tr><td colspan="${4 + (cardDates.length * 2)}" class="empty">Belum ada riwayat kartu stok.</td></tr>`;
+
+  const totalWarehouseAll = FG_WH.reduce((sum, wh) => sum + FG.reduce((sub, fg) => sub + stockSimForFgAtDate(fg.fg_code, wh.warehouse_code, totalDate), 0), 0);
+  const totalStoreAll = TOKOS.reduce((sum, s) => sum + FG.reduce((sub, fg) => sub + stockSimForStoreAtDate(fg.fg_code, s.store_code, totalDate), 0), 0);
+  const stockSide = document.getElementById('stock-side');
+  if(stockSide){stockSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Tanggal Snapshot</div><div class="mini-v">${totalDate || totalDateTo || totalDateFrom || 'Hari ini'}</div></div>
+    <div class="mini-item"><div class="mini-k">Lokasi Fokus</div><div class="mini-v">${cardLocation || '-'}</div></div>
+    <div class="mini-item"><div class="mini-k">Tipe Lokasi</div><div class="mini-v">${cardType === 'TOKO' ? 'Toko' : 'Gudang'}</div></div>
+    <div class="mini-item"><div class="mini-k">Total Gudang</div><div class="mini-v">${totalWarehouseAll}</div></div>
+    <div class="mini-item"><div class="mini-k">Total Toko</div><div class="mini-v">${totalStoreAll}</div></div>
+    <div class="mini-item"><div class="mini-k">Total Konsolidasi</div><div class="mini-v">${totalWarehouseAll + totalStoreAll}</div></div>
+  `;}
+}
+
+function toggleStockCardViewMode(){
+  stockCardViewMode = stockCardViewMode === 'RECAP' ? 'TABLE' : 'RECAP';
+  renderStock();
+}
+
+function setInventoryNavState(openGroup){
+  const txOpen = openGroup === 'transaction';
+  const monOpen = openGroup === 'monitoring';
+  document.getElementById('nav-parent-transaction')?.classList.toggle('active', txOpen);
+  document.getElementById('nav-parent-monitoring')?.classList.toggle('active', monOpen);
+  document.getElementById('nav-group-transaction')?.classList.toggle('collapsed', !txOpen);
+  document.getElementById('nav-group-monitoring')?.classList.toggle('collapsed', !monOpen);
+}
+
+function showSection(sec){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  document.getElementById('sec-' + sec).classList.add('active');
+  const isMonitoring = sec.startsWith('stock-');
+  setInventoryNavState(isMonitoring ? 'monitoring' : 'transaction');
+  document.getElementById('bc-child').textContent = ({
+    gr: 'GR / Hasil FG',
+    do: 'Delivery Order',
+    transfer: 'Transfer Gudang',
+    return: 'Retur',
+    'stock-total': 'Total Stok',
+    'stock-card': 'Pergerakan Stok',
+    'stock-location': 'Stok per Lokasi'
+  })[sec];
+}
+
+function exportSection(sec){
+  if(sec === 'gr'){
+    const docs = groupGrDocs(GR_ROWS);
+    return downloadCsv(
+      'gr-hasil-fg.csv',
+      ['gr_no','gr_date','warehouse_code','fg_code','fg_name','qty','source','status'],
+      docs.flatMap(doc => doc.details.map(d => [
+        doc.gr_no,
+        doc.gr_date,
+        doc.warehouse_code,
+        d.fg_code,
+        d.fg_name,
+        d.qty,
+        doc.source,
+        doc.status
+      ]))
+    );
+  }
+  if(sec === 'do') return doStageFilter === 'Packing' ? printDoPackingList() : printDoSuratJalan();
+  if(sec === 'transfer') return printTransferSuratJalan();
+  if(sec === 'return') return printReturnSuratJalan();
+  if(sec === 'stock-total' || sec === 'stock-card' || sec === 'stock-location') return exportStockMonitoring(sec);
+  toast('Export belum tersedia.');
+}
+
+function toast(msg){ alert(msg); }
+
+function downloadCsv(filename, headers, rows){
+  const csvRows = [headers].concat(rows).map(row => row.map(cell => {
+    const value = String(cell ?? '');
+    return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  }).join(','));
+  const blob = new Blob([csvRows.join('\r\n')], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportStockMonitoring(sec){
+  const locationType = document.getElementById('filter-stock-location-type').value || 'GUDANG';
+  const locationCode = document.getElementById('filter-stock-location-location').value || (locationType === 'TOKO' ? (TOKOS[0]?.store_code || '') : MAIN_FG.warehouse_code);
+  const locationCategory = document.getElementById('filter-stock-location-category').value || '';
+  const locationDateFrom = document.getElementById('filter-stock-location-date-from').value || '';
+  const locationDateTo = document.getElementById('filter-stock-location-date-to').value || '';
+  const locationSnapshotDate = getSnapshotDate(locationDateFrom, locationDateTo);
+  const cardType = document.getElementById('filter-stock-card-type').value || 'GUDANG';
+  const cardLocation = document.getElementById('filter-stock-card-location').value || (cardType === 'TOKO' ? (TOKOS[0]?.store_code || '') : MAIN_FG.warehouse_code);
+  const totalCategory = document.getElementById('filter-stock-category').value || '';
+  const totalDateFrom = document.getElementById('filter-stock-date-from').value || '';
+  const totalDateTo = document.getElementById('filter-stock-date-to').value || '';
+  const totalDate = getSnapshotDate(totalDateFrom, totalDateTo);
+  const cardCategory = document.getElementById('filter-stock-card-category').value || '';
+  const cardDateFrom = document.getElementById('filter-stock-card-date-from').value || '';
+  const cardDateTo = document.getElementById('filter-stock-card-date-to').value || '';
+  const qLocation = document.getElementById('search-stock-location').value;
+  const qTotal = document.getElementById('search-stock').value;
+  const qCard = document.getElementById('search-stock-card').value;
+  const locationRows = bySearch(FG, ['fg_code','fg_name','fg_category'], qLocation).filter(r => !locationCategory || r.fg_category === locationCategory).slice(0, 150);
+  const totalRows = bySearch(FG, ['fg_code','fg_name','fg_category'], qTotal).filter(r => !totalCategory || r.fg_category === totalCategory).slice(0, 150);
+  if(sec === 'stock-location'){
+    return downloadCsv(
+      'stock-per-lokasi.csv',
+      ['fg_code','fg_name','fg_category','location_type','location_code','stock_qty','status'],
+      locationRows.map(r => {
+        const qty = locationType === 'TOKO' ? stockSimForStoreAtDate(r.fg_code, locationCode, locationSnapshotDate) : stockSimForFgAtDate(r.fg_code, locationCode, locationSnapshotDate);
+        const status = qty <= 0 ? 'Habis' : qty < 20 ? 'Tipis' : 'Aman';
+        return [r.fg_code, r.fg_name, r.fg_category, locationType, locationCode, qty, status];
+      })
+    );
+  }
+  if(sec === 'stock-total'){
+    const totalLocations = [
+      ...FG_WH.map(wh => ({ type:'Gudang', code:wh.warehouse_code, name:wh.warehouse_name })),
+      ...TOKOS.map(s => ({ type:'Toko', code:s.store_code, name:s.store_name }))
+    ];
+    return downloadCsv(
+      'total-stok.csv',
+      ['snapshot_date','fg_code','fg_name','fg_category','total_consolidated','status'].concat(totalLocations.map(loc => `${loc.type}_${loc.code}`)),
+      totalRows.map(r => {
+        const warehouseQtys = FG_WH.map(wh => Number(stockSimForFgAtDate(r.fg_code, wh.warehouse_code, totalDate) || 0));
+        const storeQtys = TOKOS.map(s => Number(stockSimForStoreAtDate(r.fg_code, s.store_code, totalDate) || 0));
+        const totalWarehouse = warehouseQtys.reduce((sum, x) => sum + x, 0);
+        const totalStore = storeQtys.reduce((sum, x) => sum + x, 0);
+        const total = totalWarehouse + totalStore;
+        const status = total <= 0 ? 'Habis' : total < 40 ? 'Tipis' : 'Aman';
+        return [
+          totalDate || 'today',
+          r.fg_code,
+          r.fg_name,
+          r.fg_category,
+          total,
+          status,
+          ...warehouseQtys,
+          ...storeQtys
+        ];
+      })
+    );
+  }
+  const cardRows = Array.from(document.querySelectorAll('#tbl-stock-card tr'))
+    .map(tr => Array.from(tr.children).map(td => td.innerText.replace(/\s+/g,' ').trim()))
+    .filter(row => !qCard || row.join(' ').toLowerCase().includes(String(qCard).toLowerCase()))
+    .filter(row => !cardCategory || row.join(' ').toLowerCase().includes(String(cardCategory).toLowerCase()));
+  return downloadCsv(
+    'pergerakan-stok.csv',
+    ['tanggal','dokumen','referensi','item','masuk','keluar','saldo'],
+    cardRows
+  );
+}
+
+function updateDoStatus(doNo, status){
+  if(status === 'Received') return confirmDoReceived(doNo);
+  DO_STATUS_OVERRIDES[doNo] = status;
+  window.localStorage.setItem('erp.do.status_overrides', JSON.stringify(DO_STATUS_OVERRIDES));
+  location.reload();
+}
+
+function setDoStageFilter(status){
+  doStageFilter = status;
+  renderDo();
+}
+
+function setTransferStageFilter(status){
+  transferStageFilter = status;
+  renderTransfer();
+}
+
+function setReturnStageFilter(status){
+  returnStageFilter = status;
+  renderReturn();
+}
+
+function initDateRangeFilters(){
+  document.querySelectorAll('.date-range-filter').forEach(filter => {
+    const pop = filter.querySelector('.date-range-pop');
+    if(!pop || pop.querySelector('.date-range-actions')) return;
+    const actions = document.createElement('div');
+    actions.className = 'date-range-actions';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary date-range-apply';
+    btn.textContent = 'Terapkan';
+    btn.addEventListener('click', () => {
+      pop.querySelectorAll('input, select').forEach(el => {
+        el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles:true }));
+      });
+      filter.open = false;
+    });
+    actions.appendChild(btn);
+    pop.appendChild(actions);
+  });
+}
+
+function editDoPacking(doNo){
+  const docs = groupDoDocs(buildDoRows());
+  const doc = docs.find(r => r.do_no === doNo);
+  if(!doc) return toast('DO tidak ditemukan.');
+  const localRows = JSON.parse(window.localStorage.getItem('erp.extra.delivery_orders') || '[]');
+  if(!localRows.some(r => r.do_no === doNo)) return toast('Edit hanya untuk packing lokal yang dibuat dari halaman ini.');
+  editingDoNo = doNo;
+  document.getElementById('do-form-date').value = doc.do_date || '2026-03-22';
+  document.getElementById('do-form-note').value = doc.note || '';
+  document.getElementById('do-form-dest-type').value = /RESELLER/i.test(String(doc.dest_type || '')) ? 'RESELLER' : 'TOKO';
+  fillDoTargetOptions();
+  document.getElementById('do-form-store').value = doc.store_code || document.getElementById('do-form-store').value;
+  doQtyDraft = {};
+  doc.details.forEach(d => { doQtyDraft[d.fg_code] = Number(d.qty || 0); });
+  document.getElementById('do-doc-mode').textContent = `Edit Packing ${doNo}`;
+  toggleDoForm(true);
+  renderSelectedDoFg();
+  syncDoFormDetails();
+}
+
+function confirmDoReceived(doNo){
+  const doc = groupDoDocs(buildDoRows()).find(r => r.do_no === doNo);
+  if(!doc) return toast('DO tidak ditemukan.');
+  const expectedQty = doc.details.reduce((sum, d) => sum + Number(d.qty || 0), 0);
+  const receivedQtyRaw = window.prompt(`Total qty yang diterima berapa? Expected: ${expectedQty}`, String(expectedQty));
+  if(receivedQtyRaw === null) return;
+  const receivedQty = Number(receivedQtyRaw || 0);
+  if(Number.isNaN(receivedQty) || receivedQty < 0) return toast('Qty received tidak valid.');
+  let result = 'Sesuai';
+  if(receivedQty < expectedQty) result = 'Kurang';
+  if(receivedQty > expectedQty) result = 'Lebih/Bermasalah';
+  if(receivedQty === expectedQty){
+    const issue = window.confirm(`Qty diterima ${receivedQty}. Klik OK jika barang diterima sesuai, Cancel jika ada masalah kualitas / kondisi barang.`);
+    if(!issue) result = 'Lebih/Bermasalah';
+  }
+  let note = '';
+  if(result !== 'Sesuai') note = window.prompt('Isi catatan penerimaan / selisih barang:', receivedQty !== expectedQty ? `Expected ${expectedQty}, received ${receivedQty}` : 'Kondisi barang bermasalah') || '';
+  DO_RECEIVE_META[doNo] = { result, note, expected_qty: expectedQty, received_qty: receivedQty };
+  DO_STATUS_OVERRIDES[doNo] = 'Received';
+  window.localStorage.setItem('erp.do.receive_meta', JSON.stringify(DO_RECEIVE_META));
+  window.localStorage.setItem('erp.do.status_overrides', JSON.stringify(DO_STATUS_OVERRIDES));
+  location.reload();
+}
+
+function updateTransferStatus(trfNo, status){
+  if(status === 'Received') return confirmTransferReceived(trfNo);
+  TRANSFER_STATUS_OVERRIDES[trfNo] = status;
+  window.localStorage.setItem('erp.transfer.status_overrides', JSON.stringify(TRANSFER_STATUS_OVERRIDES));
+  location.reload();
+}
+
+function updateReturnStatus(returnNo, status){
+  if(status === 'Received') return confirmReturnReceived(returnNo);
+  RETURN_STATUS_OVERRIDES[returnNo] = status;
+  window.localStorage.setItem('erp.return.status_overrides', JSON.stringify(RETURN_STATUS_OVERRIDES));
+  location.reload();
+}
+
+function printDoPackingList(doNo){
+  let docs = groupDoDocs(getFilteredDoRows());
+  if(doNo) docs = docs.filter(r => r.do_no === doNo);
+  docs = docs.filter(r => r.status === 'Packing');
+  if(!docs.length) return toast('Tidak ada packing list untuk diprint.');
+  const html = docs.map((r, index) => `
+    <section class="${index ? 'page-break' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+        <div>
+          <div style="font-size:18px;font-weight:800">CV. MANUSIA WANGI SEPANJANG HARI</div>
+          <div style="font-size:12px;color:#64748B">PACKING LIST DISTRIBUSI</div>
+        </div>
+        <div style="text-align:right;font-size:12px">
+          <div><b>No. DO:</b> ${r.do_no}</div>
+          <div><b>Tanggal:</b> ${r.do_date}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Tujuan</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.dest_name}</div>
+          <div style="font-size:12px;color:#475569">${String(r.dest_type || '').toUpperCase()}</div>
+        </div>
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Gudang Asal</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.from_warehouse}</div>
+          ${r.note ? `<div style="font-size:12px;color:#475569;margin-top:6px">${r.note}</div>` : ''}
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Kode</th>
+            <th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Nama Item</th>
+            <th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:right">Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${r.details.map(d => `<tr><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_code}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_name}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px;text-align:right">${d.qty}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </section>
+  `).join('');
+  const win = window.open('', '_blank', 'width=980,height=760');
+  if(!win) return toast('Popup print terblokir browser.');
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+      <meta charset="UTF-8">
+      <title>Packing List DO</title>
+      <style>
+        body{font-family:'Plus Jakarta Sans',Arial,sans-serif;padding:24px;color:#0F172A}
+        .page-break{page-break-before:always}
+      </style>
+    </head>
+    <body>${html}</body>
+    </html>
+  `);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function printDoSuratJalan(doNo){
+  let docs = groupDoDocs(getFilteredDoRows());
+  if(doNo) docs = docs.filter(r => r.do_no === doNo);
+  if(!docs.length) return toast('Tidak ada DO untuk diprint.');
+  const html = docs.map((r, index) => `
+    <section class="${index ? 'page-break' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+        <div>
+          <div style="font-size:18px;font-weight:800">CV. MANUSIA WANGI SEPANJANG HARI</div>
+          <div style="font-size:12px;color:#64748B">SURAT JALAN DISTRIBUSI</div>
+        </div>
+        <div style="text-align:right;font-size:12px">
+          <div><b>No. DO:</b> ${r.do_no}</div>
+          <div><b>Tanggal:</b> ${r.do_date}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Tujuan</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.dest_name}</div>
+          <div style="font-size:12px;color:#475569">${String(r.dest_type || '').toUpperCase()}</div>
+        </div>
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Gudang Asal</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.from_warehouse}</div>
+          ${r.note ? `<div style="font-size:12px;color:#475569;margin-top:6px">${r.note}</div>` : ''}
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Kode</th>
+            <th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Nama Item</th>
+            <th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:right">Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${r.details.map(d => `<tr><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_code}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_name}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px;text-align:right">${d.qty}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </section>
+  `).join('');
+  const win = window.open('', '_blank', 'width=980,height=760');
+  if(!win) return toast('Popup print terblokir browser.');
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Surat Jalan DO</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;padding:24px;color:#0F172A}.page-break{page-break-before:always}</style></head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function editTransferPacking(trfNo){
+  const docs = groupTransferDocs(buildTransferRows());
+  const doc = docs.find(r => r.trf_no === trfNo);
+  if(!doc) return toast('Transfer tidak ditemukan.');
+  const localRows = JSON.parse(window.localStorage.getItem('erp.extra.inv_transfer') || '[]');
+  if(!localRows.some(r => r.trf_no === trfNo)) return toast('Edit hanya untuk packing transfer lokal.');
+  document.getElementById('transfer-form-date').value = doc.trf_date || '2026-03-22';
+  document.getElementById('transfer-form-from').value = doc.from_warehouse || document.getElementById('transfer-form-from').value;
+  document.getElementById('transfer-form-to').value = doc.to_warehouse || document.getElementById('transfer-form-to').value;
+  document.getElementById('transfer-form-note').value = doc.note || '';
+  transferQtyDraft = {};
+  doc.details.forEach(d => { transferQtyDraft[d.fg_code] = Number(d.qty || 0); });
+  document.getElementById('transfer-doc-mode').textContent = `Edit Packing ${trfNo}`;
+  toggleTransferForm(true);
+  renderSelectedTransferFg();
+  syncTransferFormDetails();
+}
+
+function confirmTransferReceived(trfNo){
+  const doc = groupTransferDocs(buildTransferRows()).find(r => r.trf_no === trfNo);
+  if(!doc) return toast('Transfer tidak ditemukan.');
+  const expectedQty = doc.details.reduce((sum, d) => sum + Number(d.qty || 0), 0);
+  const receivedQtyRaw = window.prompt(`Total qty yang diterima berapa? Expected: ${expectedQty}`, String(expectedQty));
+  if(receivedQtyRaw === null) return;
+  const receivedQty = Number(receivedQtyRaw || 0);
+  if(Number.isNaN(receivedQty) || receivedQty < 0) return toast('Qty received tidak valid.');
+  let result = 'Sesuai';
+  if(receivedQty < expectedQty) result = 'Kurang';
+  if(receivedQty > expectedQty) result = 'Lebih/Bermasalah';
+  if(receivedQty === expectedQty){
+    const issue = window.confirm(`Qty diterima ${receivedQty}. Klik OK jika transfer diterima sesuai, Cancel jika ada masalah.`);
+    if(!issue) result = 'Lebih/Bermasalah';
+  }
+  let note = '';
+  if(result !== 'Sesuai') note = window.prompt('Isi catatan penerimaan / selisih transfer:', receivedQty !== expectedQty ? `Expected ${expectedQty}, received ${receivedQty}` : 'Kondisi barang bermasalah') || '';
+  TRANSFER_RECEIVE_META[trfNo] = { result, note, expected_qty: expectedQty, received_qty: receivedQty };
+  TRANSFER_STATUS_OVERRIDES[trfNo] = 'Received';
+  window.localStorage.setItem('erp.transfer.receive_meta', JSON.stringify(TRANSFER_RECEIVE_META));
+  window.localStorage.setItem('erp.transfer.status_overrides', JSON.stringify(TRANSFER_STATUS_OVERRIDES));
+  location.reload();
+}
+
+function printTransferPacking(trfNo, titleText = 'PACKING LIST TRANSFER'){
+  let docs = groupTransferDocs(getFilteredTransferRows());
+  if(trfNo) docs = docs.filter(r => r.trf_no === trfNo);
+  if(titleText === 'PACKING LIST TRANSFER') docs = docs.filter(r => r.status === 'Packing');
+  if(!docs.length) return toast('Tidak ada dokumen transfer untuk diprint.');
+  const html = docs.map((r, index) => `
+    <section class="${index ? 'page-break' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+        <div>
+          <div style="font-size:18px;font-weight:800">CV. MANUSIA WANGI SEPANJANG HARI</div>
+          <div style="font-size:12px;color:#64748B">${titleText}</div>
+        </div>
+        <div style="text-align:right;font-size:12px">
+          <div><b>No. Transfer:</b> ${r.trf_no}</div>
+          <div><b>Tanggal:</b> ${r.trf_date}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Gudang Asal</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.from_warehouse}</div>
+        </div>
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Gudang Tujuan</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.to_warehouse}</div>
+          ${r.note ? `<div style="font-size:12px;color:#475569;margin-top:6px">${r.note}</div>` : ''}
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr><th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Kode</th><th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Nama Item</th><th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:right">Qty</th></tr></thead>
+        <tbody>${r.details.map(d => `<tr><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_code}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_name}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px;text-align:right">${d.qty}</td></tr>`).join('')}</tbody>
+      </table>
+    </section>
+  `).join('');
+  const win = window.open('', '_blank', 'width=980,height=760');
+  if(!win) return toast('Popup print terblokir browser.');
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${titleText}</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;padding:24px;color:#0F172A}.page-break{page-break-before:always}</style></head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function editReturnPacking(returnNo){
+  const docs = groupReturnDocs(RETURN_ROWS);
+  const doc = docs.find(r => r.return_no === returnNo);
+  if(!doc) return toast('Retur tidak ditemukan.');
+  const localRows = JSON.parse(window.localStorage.getItem('erp.extra.inv_return') || '[]');
+  if(!localRows.some(r => r.return_no === returnNo)) return toast('Edit hanya untuk packing retur lokal.');
+  document.getElementById('inv-return-form-date').value = doc.return_date || '2026-03-22';
+  document.getElementById('inv-return-form-note').value = doc.note || '';
+  document.getElementById('inv-return-form-source-type').value = TOKOS.some(t => t.store_name === doc.source_name) ? 'TOKO' : 'RESELLER';
+  fillReturnSourceOptions();
+  const sourceSelect = document.getElementById('inv-return-form-source');
+  const toko = TOKOS.find(t => t.store_name === doc.source_name);
+  if(toko) sourceSelect.value = toko.store_code;
+  returnQtyDraft = {};
+  doc.details.forEach(d => { returnQtyDraft[d.fg_code] = Number(d.qty || 0); });
+  document.getElementById('return-doc-mode').textContent = `Edit Packing ${returnNo}`;
+  toggleInvReturnForm(true);
+  syncReturnFormDetails();
+}
+
+function confirmReturnReceived(returnNo){
+  const doc = groupReturnDocs(RETURN_ROWS).find(r => r.return_no === returnNo);
+  if(!doc) return toast('Retur tidak ditemukan.');
+  const expectedQty = doc.details.reduce((sum, d) => sum + Number(d.qty || 0), 0);
+  const receivedQtyRaw = window.prompt(`Total qty yang diterima berapa? Expected: ${expectedQty}`, String(expectedQty));
+  if(receivedQtyRaw === null) return;
+  const receivedQty = Number(receivedQtyRaw || 0);
+  if(Number.isNaN(receivedQty) || receivedQty < 0) return toast('Qty received tidak valid.');
+  let result = 'Sesuai';
+  if(receivedQty < expectedQty) result = 'Kurang';
+  if(receivedQty > expectedQty) result = 'Lebih/Bermasalah';
+  if(receivedQty === expectedQty){
+    const issue = window.confirm(`Qty diterima ${receivedQty}. Klik OK jika retur diterima sesuai, Cancel jika ada masalah.`);
+    if(!issue) result = 'Lebih/Bermasalah';
+  }
+  let note = '';
+  if(result !== 'Sesuai') note = window.prompt('Isi catatan penerimaan retur / selisih barang:', receivedQty !== expectedQty ? `Expected ${expectedQty}, received ${receivedQty}` : 'Kondisi barang bermasalah') || '';
+  RETURN_RECEIVE_META[returnNo] = { result, note, expected_qty: expectedQty, received_qty: receivedQty };
+  RETURN_STATUS_OVERRIDES[returnNo] = 'Received';
+  window.localStorage.setItem('erp.return.receive_meta', JSON.stringify(RETURN_RECEIVE_META));
+  window.localStorage.setItem('erp.return.status_overrides', JSON.stringify(RETURN_STATUS_OVERRIDES));
+  location.reload();
+}
+
+function printReturnSimple(returnNo, titleText = 'PACKING LIST RETUR'){
+  let docs = groupReturnDocs(bySearch(RETURN_ROWS, ['return_no','source_name','warehouse_code','fg_code','fg_name'], document.getElementById('search-return').value));
+  if(returnNo) docs = docs.filter(r => r.return_no === returnNo);
+  if(titleText === 'PACKING LIST RETUR') docs = docs.filter(r => r.status === 'Packing');
+  if(!docs.length) return toast('Tidak ada dokumen retur untuk diprint.');
+  const html = docs.map((r, index) => `
+    <section class="${index ? 'page-break' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+        <div>
+          <div style="font-size:18px;font-weight:800">CV. MANUSIA WANGI SEPANJANG HARI</div>
+          <div style="font-size:12px;color:#64748B">${titleText}</div>
+        </div>
+        <div style="text-align:right;font-size:12px">
+          <div><b>No. Retur:</b> ${r.return_no}</div>
+          <div><b>Tanggal:</b> ${r.return_date}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Sumber</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.source_name}</div>
+        </div>
+        <div style="border:1px solid #CBD5E1;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#64748B">Gudang Tujuan</div>
+          <div style="margin-top:6px;font-size:13px;font-weight:700">${r.warehouse_code}</div>
+          ${r.note ? `<div style="font-size:12px;color:#475569;margin-top:6px">${r.note}</div>` : ''}
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr><th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Kode</th><th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:left">Nama Item</th><th style="border:1px solid #CBD5E1;padding:8px;font-size:11px;text-align:right">Qty</th></tr></thead>
+        <tbody>${r.details.map(d => `<tr><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_code}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px">${d.fg_name}</td><td style="border:1px solid #CBD5E1;padding:8px;font-size:12px;text-align:right">${d.qty}</td></tr>`).join('')}</tbody>
+      </table>
+    </section>
+  `).join('');
+  const win = window.open('', '_blank', 'width=980,height=760');
+  if(!win) return toast('Popup print terblokir browser.');
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${titleText}</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;padding:24px;color:#0F172A}.page-break{page-break-before:always}</style></head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function printTransferSuratJalan(){
+  const docs = groupTransferDocs(getFilteredTransferRows());
+  if(!docs.length) return toast('Tidak ada transfer untuk diprint.');
+  const companyName = 'CV. MANUSIA WANGI SEPANJANG HARI';
+  const companyAddress = 'Jl. Raya Made No. 197, Made, Kec. Sambikerep, Surabaya, Jawa Timur 60219';
+  const companyPhone = '+62 813-4563-601';
+  const html = docs.map((r, index) => `
+    <section class="page ${index ? 'page-break' : ''}">
+      <div class="head">
+        <div>
+          <div class="brand">${companyName}</div>
+          <div class="meta">${companyAddress}</div>
+          <div class="meta">${companyPhone}</div>
+        </div>
+        <div class="title-block">
+          <div class="title">SURAT JALAN TRANSFER</div>
+          <table class="doc-meta">
+            <tr><th>No. TF</th><td>${r.trf_no}</td></tr>
+            <tr><th>Tanggal</th><td>${r.trf_date}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-title">Gudang Asal</div>
+          <div class="info-body"><div><b>${r.from_warehouse}</b></div></div>
+        </div>
+        <div class="info-card">
+          <div class="info-title">Gudang Tujuan</div>
+          <div class="info-body"><div><b>${r.to_warehouse}</b></div><div><b>Pembuat:</b> ${r.created_by || CURRENT_USER_NAME}</div></div>
+        </div>
+      </div>
+      <table class="items">
+        <thead><tr><th style="width:52px">No</th><th>Kode Item</th><th>Nama Item</th><th style="width:80px">Qty</th><th style="width:90px">Satuan</th></tr></thead>
+        <tbody>${r.details.map((d, i) => `<tr><td>${i + 1}</td><td class="mono">${d.fg_code}</td><td>${d.fg_name}</td><td style="text-align:right">${d.qty}</td><td>PCS</td></tr>`).join('')}</tbody>
+      </table>
+      <div class="notes"><b>Catatan:</b> ${r.note || '-'}</div>
+      <div class="sign-grid">
+        <div class="sign-box"><div class="sign-label">Dibuat Oleh</div><div class="sign-name">${r.created_by || CURRENT_USER_NAME}</div></div>
+        <div class="sign-box"><div class="sign-label">Dikirim Oleh</div></div>
+        <div class="sign-box"><div class="sign-label">Diterima Oleh</div></div>
+      </div>
+    </section>
+  `).join('');
+  const win = window.open('', '_blank', 'width=1024,height=768');
+  if(!win) return toast('Popup print terblokir browser.');
+  win.document.write(`
+    <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Surat Jalan Transfer</title>
+    <style>
+      body{font-family:Arial,sans-serif;color:#0f172a;margin:0;background:#fff}.page{padding:28px 32px}.page-break{page-break-before:always}
+      .head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:18px}.brand{font-size:22px;font-weight:800}.meta{font-size:12px;line-height:1.5;color:#475569}
+      .title-block{min-width:260px}.title{font-size:28px;font-weight:800;text-align:right;margin-bottom:10px}.doc-meta{width:100%;border-collapse:collapse}
+      .doc-meta th,.doc-meta td,.items th,.items td{border:1px solid #CBD5E1;padding:8px 10px;font-size:12px}.doc-meta th{background:#E2E8F0;text-align:left;width:92px}
+      .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}.info-card{border:1px solid #CBD5E1}.info-title{background:#1E3A8A;color:#fff;padding:8px 10px;font-size:12px;font-weight:700}.info-body{padding:10px 12px;font-size:12px;line-height:1.6;min-height:80px}
+      .items{width:100%;border-collapse:collapse;margin-bottom:14px}.items th{background:#1E3A8A;color:#fff;text-align:left}.mono{font-family:'Courier New',monospace}
+      .notes{border:1px solid #CBD5E1;min-height:82px;padding:10px 12px;font-size:12px;margin-bottom:18px}.sign-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.sign-box{border:1px solid #CBD5E1;min-height:120px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between}.sign-label{font-size:12px;font-weight:700}.sign-name{font-size:12px;color:#475569}
+    </style></head><body>${html}</body></html>
+  `);
+  win.document.close(); win.focus(); win.print();
+}
+
+function printReturnSuratJalan(){
+  const docs = groupReturnDocs(bySearch(RETURN_ROWS, ['return_no','source_name','warehouse_code','fg_code','fg_name'], document.getElementById('search-return').value));
+  if(!docs.length) return toast('Tidak ada retur untuk diprint.');
+  const companyName = 'CV. MANUSIA WANGI SEPANJANG HARI';
+  const companyAddress = 'Jl. Raya Made No. 197, Made, Kec. Sambikerep, Surabaya, Jawa Timur 60219';
+  const companyPhone = '+62 813-4563-601';
+  const html = docs.map((r, index) => `
+    <section class="page ${index ? 'page-break' : ''}">
+      <div class="head">
+        <div><div class="brand">${companyName}</div><div class="meta">${companyAddress}</div><div class="meta">${companyPhone}</div></div>
+        <div class="title-block"><div class="title">SURAT JALAN RETUR</div><table class="doc-meta"><tr><th>No. Retur</th><td>${r.return_no}</td></tr><tr><th>Tanggal</th><td>${r.return_date}</td></tr></table></div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-title">Sumber</div><div class="info-body"><div><b>${r.source_name}</b></div></div></div>
+        <div class="info-card"><div class="info-title">Gudang Tujuan</div><div class="info-body"><div><b>${r.warehouse_code}</b></div></div></div>
+      </div>
+      <table class="items"><thead><tr><th style="width:52px">No</th><th>Kode Item</th><th>Nama Item</th><th style="width:80px">Qty</th><th style="width:90px">Satuan</th></tr></thead>
+      <tbody>${r.details.map((d, i) => `<tr><td>${i + 1}</td><td class="mono">${d.fg_code}</td><td>${d.fg_name}</td><td style="text-align:right">${d.qty}</td><td>PCS</td></tr>`).join('')}</tbody></table>
+      <div class="notes"><b>Catatan:</b> ${r.note || '-'}</div>
+      <div class="sign-grid"><div class="sign-box"><div class="sign-label">Dibuat Oleh</div></div><div class="sign-box"><div class="sign-label">Dikirim Oleh</div></div><div class="sign-box"><div class="sign-label">Diterima Oleh</div></div></div>
+    </section>
+  `).join('');
+  const win = window.open('', '_blank', 'width=1024,height=768');
+  if(!win) return toast('Popup print terblokir browser.');
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Surat Jalan Retur</title>
+  <style>body{font-family:Arial,sans-serif;color:#0f172a;margin:0;background:#fff}.page{padding:28px 32px}.page-break{page-break-before:always}.head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:18px}.brand{font-size:22px;font-weight:800}.meta{font-size:12px;line-height:1.5;color:#475569}.title-block{min-width:260px}.title{font-size:28px;font-weight:800;text-align:right;margin-bottom:10px}.doc-meta{width:100%;border-collapse:collapse}.doc-meta th,.doc-meta td,.items th,.items td{border:1px solid #CBD5E1;padding:8px 10px;font-size:12px}.doc-meta th{background:#E2E8F0;text-align:left;width:92px}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}.info-card{border:1px solid #CBD5E1}.info-title{background:#1E3A8A;color:#fff;padding:8px 10px;font-size:12px;font-weight:700}.info-body{padding:10px 12px;font-size:12px;line-height:1.6;min-height:80px}.items{width:100%;border-collapse:collapse;margin-bottom:14px}.items th{background:#1E3A8A;color:#fff;text-align:left}.mono{font-family:'Courier New',monospace}.notes{border:1px solid #CBD5E1;min-height:82px;padding:10px 12px;font-size:12px;margin-bottom:18px}.sign-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.sign-box{border:1px solid #CBD5E1;min-height:120px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between}.sign-label{font-size:12px;font-weight:700}</style></head><body>${html}</body></html>`);
+  win.document.close(); win.focus(); win.print();
+}
+
+function printMutationDoc(){
+  let rows = bySearch(MUTATION_ROWS, ['mut_no','location_code','location_name','source_fg_code','source_fg_name','target_fg_code','target_fg_name','note'], document.getElementById('search-mutation').value);
+  const type = document.getElementById('filter-mutation-type').value;
+  if(type) rows = rows.filter(r => r.location_type === type);
+  if(!rows.length) return toast('Tidak ada mutasi barang untuk diprint.');
+  const companyName = 'CV. MANUSIA WANGI SEPANJANG HARI';
+  const companyAddress = 'Jl. Raya Made No. 197, Made, Kec. Sambikerep, Surabaya, Jawa Timur 60219';
+  const companyPhone = '+62 813-4563-601';
+  const html = rows.map((r, index) => `
+    <section class="page ${index ? 'page-break' : ''}">
+      <div class="head">
+        <div><div class="brand">${companyName}</div><div class="meta">${companyAddress}</div><div class="meta">${companyPhone}</div></div>
+        <div class="title-block"><div class="title">DOKUMEN MUTASI</div><table class="doc-meta"><tr><th>No. Mutasi</th><td>${r.mut_no}</td></tr><tr><th>Tanggal</th><td>${r.mut_date}</td></tr></table></div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-title">Lokasi</div><div class="info-body"><div><b>${r.location_code}</b></div><div>${r.location_name || '-'}</div><div>${r.location_type}</div></div></div>
+        <div class="info-card"><div class="info-title">Pembuat</div><div class="info-body"><div><b>${r.created_by || CURRENT_USER_NAME}</b></div><div>${r.note || '-'}</div></div></div>
+      </div>
+      <table class="items"><thead><tr><th style="width:72px">Tipe</th><th>Kode Item</th><th>Nama Item</th><th style="width:80px">Qty</th><th style="width:90px">Satuan</th></tr></thead>
+      <tbody>
+        <tr><td>Keluar</td><td class="mono">${r.source_fg_code}</td><td>${r.source_fg_name}</td><td style="text-align:right">${r.source_qty}</td><td>PCS</td></tr>
+        <tr><td>Masuk</td><td class="mono">${r.target_fg_code}</td><td>${r.target_fg_name}</td><td style="text-align:right">${r.target_qty}</td><td>PCS</td></tr>
+      </tbody></table>
+      <div class="notes"><b>Keterangan:</b> ${r.note || '-'}</div>
+      <div class="sign-grid"><div class="sign-box"><div class="sign-label">Dibuat Oleh</div><div class="sign-name">${r.created_by || CURRENT_USER_NAME}</div></div><div class="sign-box"><div class="sign-label">Dicek Oleh</div></div><div class="sign-box"><div class="sign-label">Disetujui Oleh</div></div></div>
+    </section>
+  `).join('');
+  const win = window.open('', '_blank', 'width=1024,height=768');
+  if(!win) return toast('Popup print terblokir browser.');
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Dokumen Mutasi</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:0;background:#fff}.page{padding:28px 32px}.page-break{page-break-before:always}.head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:18px}.brand{font-size:22px;font-weight:800}.meta{font-size:12px;line-height:1.5;color:#475569}.title-block{min-width:260px}.title{font-size:28px;font-weight:800;text-align:right;margin-bottom:10px}.doc-meta{width:100%;border-collapse:collapse}.doc-meta th,.doc-meta td,.items th,.items td{border:1px solid #CBD5E1;padding:8px 10px;font-size:12px}.doc-meta th{background:#E2E8F0;text-align:left;width:92px}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}.info-card{border:1px solid #CBD5E1}.info-title{background:#1E3A8A;color:#fff;padding:8px 10px;font-size:12px;font-weight:700}.info-body{padding:10px 12px;font-size:12px;line-height:1.6;min-height:80px}.items{width:100%;border-collapse:collapse;margin-bottom:14px}.items th{background:#1E3A8A;color:#fff;text-align:left}.mono{font-family:'Courier New',monospace}.notes{border:1px solid #CBD5E1;min-height:82px;padding:10px 12px;font-size:12px;margin-bottom:18px}.sign-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.sign-box{border:1px solid #CBD5E1;min-height:120px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between}.sign-label{font-size:12px;font-weight:700}.sign-name{font-size:12px;color:#475569}</style></head><body>${html}</body></html>`);
+  win.document.close(); win.focus(); win.print();
+}
+
+function nextDoc(prefix, rows, field){
+  const nums = rows.map(r => Number(String(r[field] || '').split('-').pop())).filter(n => !Number.isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `${prefix}-202603-${String(next).padStart(3,'0')}`;
+}
+
+function nextDailyDoc(prefix, rows, field, docDate){
+  const ymd = String(docDate || '2026-03-21').replaceAll('-', '');
+  const nums = rows
+    .filter(r => String(r[field] || '').includes(`-${ymd}-`))
+    .map(r => Number(String(r[field] || '').split('-').pop()))
+    .filter(n => !Number.isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `${prefix}-${ymd}-${String(next).padStart(3,'0')}`;
+}
+
+function quickAddDo(){
+  toggleDoForm(true);
+}
+
+function quickAddGr(){
+  toggleGrForm(true);
+}
+
+function refreshInventoryModalState(){
+  document.body.classList.toggle('has-inline-modal', !!document.querySelector('.inline-form.active'));
+}
+
+function toggleDoForm(show){
+  document.getElementById('do-form-card').classList.toggle('active', !!show);
+  if(show){
+    fillDoTargetOptions();
+    const storeSelect = document.getElementById('do-form-store');
+    if(!storeSelect.value && storeSelect.options.length){
+      storeSelect.selectedIndex = 0;
+    }
+    syncDoFormDetails();
+  } else {
+    editingDoNo = '';
+    doQtyDraft = {};
+    document.getElementById('do-form-note').value = '';
+    document.getElementById('do-doc-mode').textContent = 'Packing list -> update jadi shipping -> received';
+    renderSelectedDoFg();
+    syncDoFormDetails();
+  }
+  refreshInventoryModalState();
+}
+
+function toggleGrForm(show){
+  document.getElementById('gr-form-card').classList.toggle('active', !!show);
+  refreshInventoryModalState();
+}
+
+function submitGrForm(){
+  const fgInput = String(document.getElementById('gr-form-fg').value || '').trim();
+  const fgCode = fgInput.includes(' - ') ? fgInput.split(' - ')[0].trim() : fgInput;
+  const warehouseCode = document.getElementById('gr-form-warehouse').value;
+  const grDate = document.getElementById('gr-form-date').value || '2026-03-21';
+  const qty = Number(document.getElementById('gr-form-qty').value);
+  const source = document.getElementById('gr-form-source').value.trim();
+  const fg = FG.find(f => f.fg_code === fgCode);
+  if(!fg || !warehouseCode || !qty || !source) return toast('Form GR FG belum lengkap.');
+  RUNTIME.append('gr_fg', {
+    gr_no: nextDailyDoc('GRFG', GR_ROWS, 'gr_no', grDate),
+    gr_date: grDate,
+    fg_code: fg.fg_code,
+    fg_name: fg.fg_name,
+    warehouse_code: warehouseCode,
+    qty,
+    source,
+    status: 'Posted'
+  });
+  location.reload();
+}
+
+function submitDoForm(targetStatus){
+  const destType = document.getElementById('do-form-dest-type').value;
+  const doDate = document.getElementById('do-form-date').value || '2026-03-22';
+  const storeCode = document.getElementById('do-form-store').value;
+  const note = document.getElementById('do-form-note').value.trim();
+  const toko = TOKOS.find(t => t.store_code === storeCode) || TOKOS[0];
+  const reseller = (RESELLERS || []).find(r => [r.reseller_code, r.partner_code, r.code].includes(storeCode));
+  const fromWarehouse = destType === 'RESELLER'
+    ? (reseller?.default_warehouse || reseller?.default_warehouse_id || MAIN_FG.warehouse_code)
+    : (toko?.supply_by_1 || MAIN_FG.warehouse_code);
+  const picked = Object.entries(doQtyDraft)
+    .map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) }))
+    .filter(x => x.fg && x.qty > 0);
+  if(!fromWarehouse || !picked.length) return toast('Pilih minimal 1 item kirim.');
+  for(const row of picked){
+    if(row.qty > Math.max(0, stockSimForFg(row.fg.fg_code, fromWarehouse))) return toast(`Qty ${row.fg.fg_code} melebihi stok gudang asal.`);
+  }
+  const localRows = JSON.parse(window.localStorage.getItem('erp.extra.delivery_orders') || '[]');
+  if(editingDoNo && !localRows.some(r => r.do_no === editingDoNo)) return toast('Packing yang diedit tidak ditemukan di data lokal.');
+  const doNo = editingDoNo || nextDailyDoc('DO', buildDoRows(), 'do_no', doDate);
+  const nextRows = localRows.filter(r => r.do_no !== doNo);
+  picked.forEach(row => {
+    nextRows.push({
+      do_no: doNo,
+      do_date: doDate,
+      dest_type: destType === 'RESELLER' ? 'Reseller' : 'Toko',
+      dest_name: destType === 'RESELLER'
+        ? (reseller?.reseller_name || reseller?.partner_name || reseller?.name || 'Reseller Placeholder')
+        : toko.store_name,
+      store_code: destType === 'RESELLER' ? (reseller?.reseller_code || reseller?.partner_code || reseller?.code || '') : toko.store_code,
+      from_warehouse: fromWarehouse,
+      fg_code: row.fg.fg_code,
+      fg_name: row.fg.fg_name,
+      qty: row.qty,
+      status: targetStatus || 'Packing',
+      note,
+      created_by: CURRENT_USER_NAME
+    });
+  });
+  if(DO_STATUS_OVERRIDES[doNo] && (targetStatus || 'Packing') === 'Packing') delete DO_STATUS_OVERRIDES[doNo];
+  window.localStorage.setItem('erp.do.status_overrides', JSON.stringify(DO_STATUS_OVERRIDES));
+  window.localStorage.setItem('erp.extra.delivery_orders', JSON.stringify(nextRows));
+  doQtyDraft = {};
+  editingDoNo = '';
+  location.reload();
+}
+
+function toggleTransferForm(show){
+  document.getElementById('transfer-form-card').classList.toggle('active', !!show);
+  if(show){
+    fillTransferWarehouseOptions();
+    syncTransferFormDetails();
+  } else {
+    transferQtyDraft = {};
+    document.getElementById('transfer-form-note').value = '';
+    const modeEl = document.getElementById('transfer-doc-mode');
+    if(modeEl) modeEl.textContent = 'Packing transfer -> shipping -> received';
+  }
+  refreshInventoryModalState();
+}
+
+function submitTransferForm(targetStatus){
+  const trfDate = document.getElementById('transfer-form-date').value || '2026-03-21';
+  const from = document.getElementById('transfer-form-from').value;
+  const to = document.getElementById('transfer-form-to').value;
+  const note = document.getElementById('transfer-form-note').value.trim();
+  const picked = Object.entries(transferQtyDraft)
+    .map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) }))
+    .filter(x => x.fg && x.qty > 0);
+  if(!from || !to || from === to || !picked.length) return toast('Form transfer belum lengkap.');
+  for(const row of picked){
+    if(row.qty > Math.max(0, stockSimForFg(row.fg.fg_code, from))) return toast(`Qty transfer ${row.fg.fg_code} melebihi stok gudang asal.`);
+  }
+  const rows = JSON.parse(window.localStorage.getItem('erp.extra.inv_transfer') || '[]');
+  const trfNo = nextDailyDoc('TRF', buildTransferRows(), 'trf_no', trfDate);
+  picked.forEach(row => rows.push({
+    trf_no: trfNo,
+    trf_date: trfDate,
+    from_warehouse: from,
+    to_warehouse: to,
+    fg_code: row.fg.fg_code,
+    fg_name: row.fg.fg_name,
+    qty: row.qty,
+    status: targetStatus || 'Packing',
+    note,
+    created_by: CURRENT_USER_NAME
+  }));
+  transferQtyDraft = {};
+  window.localStorage.setItem('erp.extra.inv_transfer', JSON.stringify(rows));
+  location.reload();
+}
+
+function toggleInvReturnForm(show){
+  document.getElementById('inv-return-form-card').classList.toggle('active', !!show);
+  if(show){
+    syncReturnFormDetails();
+  } else {
+    returnQtyDraft = {};
+    document.getElementById('inv-return-form-note').value = '';
+    const modeEl = document.getElementById('return-doc-mode');
+    if(modeEl) modeEl.textContent = 'Packing retur -> shipping -> received';
+  }
+  refreshInventoryModalState();
+}
+
+function toggleMutationForm(show){
+  document.getElementById('mutation-form-card').classList.toggle('active', !!show);
+  if(show) syncMutationFormDetails();
+  refreshInventoryModalState();
+}
+
+function submitInvReturnForm(targetStatus){
+  const sourceType = document.getElementById('inv-return-form-source-type').value;
+  const sourceCode = document.getElementById('inv-return-form-source').value;
+  const returnDate = document.getElementById('inv-return-form-date').value || '2026-03-21';
+  const warehouseCode = document.getElementById('inv-return-form-warehouse').value;
+  const note = document.getElementById('inv-return-form-note').value.trim();
+  const toko = TOKOS.find(t => t.store_code === sourceCode);
+  const reseller = (RESELLERS || []).find(r => [r.reseller_code, r.partner_code, r.code].includes(sourceCode));
+  const sourceName = sourceType === 'RESELLER'
+    ? (reseller?.reseller_name || reseller?.partner_name || reseller?.name || 'Reseller Placeholder')
+    : (toko?.store_name || '');
+  const picked = Object.entries(returnQtyDraft)
+    .map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) }))
+    .filter(x => x.fg && x.qty > 0);
+  if(!sourceCode || !warehouseCode || !picked.length) return toast('Pilih minimal 1 item retur.');
+  for(const row of picked){
+    const available = sourceType === 'RESELLER'
+      ? Math.max(0, stockSimForReseller(row.fg.fg_code, sourceName))
+      : Math.max(0, stockSimForStore(row.fg.fg_code, sourceCode));
+    if(row.qty > available) return toast(`Qty retur ${row.fg.fg_code} melebihi stok sumber.`);
+  }
+  const rows = JSON.parse(window.localStorage.getItem('erp.extra.inv_return') || '[]');
+  const returnNo = nextDailyDoc('RTN', RETURN_ROWS, 'return_no', returnDate);
+  picked.forEach(row => rows.push({
+    return_no: returnNo,
+    return_date: returnDate,
+    source_name: sourceName,
+    warehouse_code: warehouseCode,
+    fg_code: row.fg.fg_code,
+    fg_name: row.fg.fg_name,
+    qty: row.qty,
+    status: targetStatus || 'Packing',
+    note,
+    created_by: CURRENT_USER_NAME
+  }));
+  returnQtyDraft = {};
+  window.localStorage.setItem('erp.extra.inv_return', JSON.stringify(rows));
+  location.reload();
+}
+
+function submitMutationForm(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const mutDate = document.getElementById('mutation-form-date').value || '2026-03-21';
+  const note = document.getElementById('mutation-form-note').value.trim();
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const sourcePicked = Object.entries(mutationSourceDraft).map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) })).filter(x => x.fg && x.qty > 0);
+  const targetPicked = Object.entries(mutationTargetDraft).map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) })).filter(x => x.fg && x.qty > 0);
+  if(!locationCode || sourcePicked.length !== 1 || targetPicked.length !== 1) return toast('Pilih 1 item asal dan 1 item tujuan untuk mutasi.');
+  const source = sourcePicked[0];
+  const target = targetPicked[0];
+  const available = stockAtLocation(source.fg.fg_code, type, locationCode, locationName);
+  if(source.qty > available) return toast(`Qty mutasi ${source.fg.fg_code} melebihi stok lokasi.`);
+  const rows = JSON.parse(window.localStorage.getItem('erp.extra.inv_mutation') || '[]');
+  rows.push({
+    mut_no: nextDailyDoc('MUT', MUTATION_ROWS, 'mut_no', mutDate),
+    mut_date: mutDate,
+    location_type: type,
+    location_code: locationCode,
+    location_name: locationName,
+    source_fg_code: source.fg.fg_code,
+    source_fg_name: source.fg.fg_name,
+    source_qty: source.qty,
+    target_fg_code: target.fg.fg_code,
+    target_fg_name: target.fg.fg_name,
+    target_qty: target.qty,
+    note,
+    created_by: CURRENT_USER_NAME
+  });
+  mutationSourceDraft = {};
+  mutationTargetDraft = {};
+  window.localStorage.setItem('erp.extra.inv_mutation', JSON.stringify(rows));
+  location.reload();
+}
+
+function resetInventoryModule(){
+  if(!window.confirm('Hapus simulasi Inventory lokal?')) return;
+  ['gr_fg','delivery_orders','inv_transfer','inv_return','inv_mutation'].forEach(key => window.localStorage.removeItem(`erp.extra.${key}`));
+  ['erp.do.status_overrides','erp.do.receive_meta','erp.transfer.status_overrides','erp.return.status_overrides'].forEach(key => window.localStorage.removeItem(key));
+  location.reload();
+}
+
+document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    showSection(el.dataset.sec);
+  });
+});
+
+document.querySelectorAll('.nav-parent[data-group]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    const isTransaction = el.dataset.group === 'transaction';
+    const targetGroup = isTransaction ? 'transaction' : 'monitoring';
+    const groupEl = document.getElementById(`nav-group-${targetGroup}`);
+    const isCollapsed = groupEl?.classList.contains('collapsed');
+    setInventoryNavState(isCollapsed ? targetGroup : null);
+  });
+});
+
+setInventoryNavState(null);
+
+[
+  ['search-gr', renderGr], ['filter-gr-date-from', renderGr], ['filter-gr-date-to', renderGr], ['filter-gr-warehouse', renderGr],
+  ['search-do', renderDo], ['filter-do-date-from', renderDo], ['filter-do-date-to', renderDo], ['filter-do-dest', renderDo], ['filter-do-warehouse', renderDo], ['filter-do-month', renderDo], ['filter-do-year', renderDo],
+  ['search-transfer', renderTransfer], ['filter-transfer-date-from', renderTransfer], ['filter-transfer-date-to', renderTransfer],
+  ['search-return', renderReturn], ['filter-return-date-from', renderReturn], ['filter-return-date-to', renderReturn], ['filter-return-source-type', renderReturn],
+  ['search-stock', renderStock], ['filter-stock-category', renderStock], ['filter-stock-date-from', renderStock], ['filter-stock-date-to', renderStock],
+  ['search-stock-location', renderStock], ['filter-stock-location-type', () => { fillMonitoringLocationOptions('filter-stock-location-type','filter-stock-location-location'); renderStock(); }], ['filter-stock-location-location', renderStock], ['filter-stock-location-category', renderStock], ['filter-stock-location-date-from', renderStock], ['filter-stock-location-date-to', renderStock],
+  ['search-stock-card', renderStock], ['filter-stock-card-type', () => { fillMonitoringLocationOptions('filter-stock-card-type','filter-stock-card-location'); renderStock(); }], ['filter-stock-card-location', renderStock], ['filter-stock-card-category', renderStock], ['filter-stock-card-date-from', renderStock], ['filter-stock-card-date-to', renderStock],
+  ['do-form-dest-type', handleDoDestTypeChange], ['do-form-store', syncDoFormDetails], ['do-form-fg', syncDoFormDetails],
+  ['do-form-fg-category', fillDoFgOptions], ['do-form-fg-search', fillDoFgOptions],
+  ['transfer-form-from', syncTransferFormDetails], ['transfer-form-to', syncTransferFormDetails],
+  ['transfer-form-fg-category', fillTransferFgOptions], ['transfer-form-fg-search', fillTransferFgOptions],
+  ['inv-return-form-source-type', handleReturnSourceTypeChange], ['inv-return-form-source', syncReturnFormDetails], ['inv-return-form-fg', syncReturnFormDetails],
+  ['inv-return-form-fg-category', fillReturnFgOptions], ['inv-return-form-fg-search', fillReturnFgOptions]
+].forEach(([id, fn]) => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn);
+});
+
+['filter-stock-date-to','filter-stock-location-date-to','filter-stock-card-date-to'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el && !el.value) el.value = new Date().toISOString().slice(0,10);
+});
+
+initDateRangeFilters();
+fillFilters();
+renderKpis();
+renderGr();
+renderDo();
+renderTransfer();
+renderReturn();
+renderStock();
+</script>
+</body>
+</html>
+
+

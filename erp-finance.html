@@ -1,0 +1,674 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Finance</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626;
+  --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:#A1A1AA;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.nav-subwrap{margin:6px 8px 10px;padding:8px 6px 10px;border-left:2px solid rgba(212,175,55,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:0 14px 14px 0}
+.nav-group{margin:2px 0 0;padding:0;overflow:hidden;max-height:240px;transition:max-height .24s ease,opacity .2s ease,transform .2s ease,margin .18s ease}
+.nav-group.collapsed{max-height:0;opacity:0;transform:translateY(-6px);margin:0}
+.nav-parent{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 2px;padding:6px 8px;border-radius:10px;color:#B8BDC7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-parent:hover{background:rgba(255,255,255,.06);color:#F4F4F5;transform:translateX(1px)}
+.nav-parent.active{background:rgba(212,175,55,.12);color:#F6D365}
+.nav-parent small{font-size:9px;color:#8E95A3;font-weight:700;text-transform:none;letter-spacing:0}
+.nav-subwrap .nav-link,.nav-subwrap .nav-item{width:100%;margin:1px 0 0;padding:6px 8px 6px 16px;border-radius:9px;font-size:10.5px}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:8px 12px;min-height:34px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.tabs{display:none}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:14px}
+.card-pad{padding:18px 20px}
+.grid-4{display:none}
+.kpi{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar-right,.toolbar-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search,.select{padding:8px 10px;min-height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:11.5px}
+.search{min-width:240px}
+.date-range-filter{position:relative}
+.date-range-filter[open]{z-index:12}
+.date-range-trigger{list-style:none;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.date-range-trigger::-webkit-details-marker{display:none}
+.date-range-pop{position:absolute;top:calc(100% + 6px);left:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(15,23,42,.12);min-width:290px}
+.date-range-pop label{display:grid;gap:4px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.date-range-pop .search{min-width:0;width:100%}
+.date-range-actions{grid-column:1 / -1;display:flex;justify-content:flex-end}
+.date-range-apply{min-width:92px}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-draft{background:#E5E7EB;color:#374151}.b-err{background:#FEE2E2;color:#B91C1C}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.tw{overflow:auto;max-height:560px}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle;white-space:nowrap}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC;position:sticky;top:0;z-index:1}
+tr:hover td{background:#FCFCFD}
+.mono{font-family:'IBM Plex Mono',monospace}
+.split{display:grid;grid-template-columns:1fr;gap:10px}
+.stack{display:grid;gap:10px}
+.note{padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(212,175,55,.06),rgba(255,255,255,.98));color:var(--text);font-size:10.5px;line-height:1.5}
+.mini-list{display:grid;gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+.empty{padding:32px 18px;color:var(--muted);text-align:center}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:20px;z-index:30}
+.modal.open{display:flex}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.modal-card{width:min(720px,92vw);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:18px}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.modal-title{font-size:18px;font-weight:800;color:var(--text-d)}
+.modal-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.check-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)} .split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Finance</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <div class="nav-link active">Finance</div>
+      <div class="nav-subwrap">
+        <div class="nav-parent active" id="nav-parent-finance-ledger" data-group="finance-ledger">Ledger <small>Hutang dan piutang</small></div>
+        <div class="nav-group" id="nav-group-finance-ledger">
+          <a class="nav-link active" href="#" data-sec="ap">Account Payable</a>
+          <a class="nav-link" href="#" data-sec="ar">Account Receivable</a>
+        </div>
+        <div class="nav-parent" id="nav-parent-finance-book" data-group="finance-book">Cashbook <small>Kas dan jurnal</small></div>
+        <div class="nav-group" id="nav-group-finance-book">
+          <a class="nav-link" href="#" data-sec="cash">Cash / Bank</a>
+          <a class="nav-link" href="#" data-sec="journal">Journal</a>
+        </div>
+      </div>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+        Finance membaca hasil transaksi purchasing, inventory, dan POS sebagai dasar posting bertahap.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><small>Finance Workspace</small><div><b>Finance</b> / <b id="bc-child">Account Payable</b></div></div>
+      <div>
+        <button class="btn btn-ghost" onclick="openColumnModal()">Atur Kolom</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-master.html'">Master Data</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-reports.html'">Next: Reports</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-shell.html'">Back to Shell</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Fase 6</div>
+          <div class="title">Finance Dasar</div>
+          <div class="subtitle">
+            Fondasi finance ini menyiapkan jalur <span class="mono">AP -> AR -> Cash/Bank -> Journal</span>.
+            Tujuannya agar transaksi purchasing dan POS nanti bisa diposting bertahap ke hutang, piutang, kas, dan jurnal.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section active" id="sec-ap">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-ap" placeholder="Cari hutang vendor">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-ap-date-from" type="date"></label><label>Sampai<input class="search" id="filter-ap-date-to" type="date"></label></div></details>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('ap')">Export</button>
+            <button class="btn btn-primary" onclick="openFinanceAction('vendor-payment')">+ Bayar Vendor</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No AP</th><th>Vendor</th><th>Source Doc</th><th>Due Date</th><th>Amount</th><th>Balance</th><th>Status</th></tr></thead><tbody id="tbl-ap"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-ar">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-ar" placeholder="Cari piutang"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-ar-date-from" type="date"></label><label>Sampai<input class="search" id="filter-ar-date-to" type="date"></label></div></details></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('ar')">Export</button>
+            <button class="btn btn-primary" onclick="openFinanceAction('ar-receipt')">+ Terima Piutang</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No AR</th><th>Partner</th><th>Source Doc</th><th>Due Date</th><th>Amount</th><th>Balance</th><th>Status</th></tr></thead><tbody id="tbl-ar"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-cash">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-cash" placeholder="Cari transaksi kas / bank"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-cash-date-from" type="date"></label><label>Sampai<input class="search" id="filter-cash-date-to" type="date"></label></div></details></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('cash')">Export</button>
+            <button class="btn btn-primary" onclick="openFinanceAction('cash-entry')">+ Cash / Bank</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Cash</th><th>Tanggal</th><th>Type</th><th>Source</th><th>Reference</th><th>Amount</th><th>Status</th></tr></thead><tbody id="tbl-cash"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-journal">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-journal" placeholder="Cari jurnal"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-journal-date-from" type="date"></label><label>Sampai<input class="search" id="filter-journal-date-to" type="date"></label></div></details></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('journal')">Export</button>
+            <button class="btn btn-primary" onclick="openFinanceAction('journal-entry')">+ Journal</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Journal</th><th>Tanggal</th><th>Source</th><th>Keterangan</th><th>Debit</th><th>Credit</th><th>Status</th></tr></thead><tbody id="tbl-journal"></tbody></table></div></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal" id="column-modal" onclick="if(event.target===this) closeColumnModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Atur Kolom Tabel</div>
+          <div class="modal-sub" id="column-modal-sub">Pilih kolom yang ingin ditampilkan.</div>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="closeColumnModal()">Tutup</button>
+      </div>
+      <div class="check-grid" id="column-modal-grid"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-ghost" type="button" onclick="resetColumnPrefs()">Reset</button>
+        <button class="btn btn-primary" type="button" onclick="saveColumnPrefs()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const TX = window.TRANSACTION_DATA || {};
+const VENDORS = DATA.vendors || [];
+const TOKOS = DATA.tokos || [];
+const COLUMN_PREFS_KEY = 'erp.finance.columnPrefs';
+const COLUMN_CONFIG = {
+  ap:{ title:'Account Payable', bodyId:'tbl-ap', columns:['No AP','Vendor','Source Doc','Due Date','Amount','Balance','Status'] },
+  ar:{ title:'Account Receivable', bodyId:'tbl-ar', columns:['No AR','Partner','Source Doc','Due Date','Amount','Balance','Status'] },
+  cash:{ title:'Cash / Bank', bodyId:'tbl-cash', columns:['No Cash','Tanggal','Type','Source','Reference','Amount','Status'] },
+  journal:{ title:'Journal', bodyId:'tbl-journal', columns:['No Journal','Tanggal','Source','Keterangan','Debit','Credit','Status'] }
+};
+let columnPrefs = loadColumnPrefs();
+let activeColumnSection = 'ap';
+const AP_SETTLEMENTS = JSON.parse(window.localStorage.getItem('erp.extra.finance_ap_settlements') || '{}');
+const AR_SETTLEMENTS = JSON.parse(window.localStorage.getItem('erp.extra.finance_ar_settlements') || '{}');
+
+function badge(status){
+  const map = { Open:'b-warn', Partial:'b-info', Closed:'b-ok', Posted:'b-ok', Draft:'b-draft', Receipt:'b-info', Payment:'b-warn', Credit:'b-info' };
+  return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
+}
+function money(n){ return new Intl.NumberFormat('id-ID').format(n || 0); }
+function initDateRangeFilters(){
+  document.querySelectorAll('.date-range-filter').forEach(filter => {
+    const pop = filter.querySelector('.date-range-pop');
+    if(!pop || pop.querySelector('.date-range-actions')) return;
+    const actions = document.createElement('div');
+    actions.className = 'date-range-actions';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary date-range-apply';
+    btn.textContent = 'Terapkan';
+    btn.addEventListener('click', () => {
+      pop.querySelectorAll('input, select').forEach(el => {
+        el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles:true }));
+      });
+      filter.open = false;
+    });
+    actions.appendChild(btn);
+    pop.appendChild(actions);
+  });
+}
+const AP_ROWS = ((TX.ap_rows || []).concat(JSON.parse(window.localStorage.getItem('erp.extra.finance_ap') || '[]'))).map(r => {
+  const settled = Number(AP_SETTLEMENTS[r.ap_no] || 0);
+  const baseBalance = Number(r.balance ?? r.amount ?? 0);
+  const balance = Math.max(0, baseBalance - settled);
+  if(Number(r.amount || 0) < 0 || Number(r.balance || 0) < 0){
+    return { ...r, balance: Number(r.balance ?? r.amount ?? 0), status: r.status || 'Credit' };
+  }
+  return { ...r, balance, status: balance <= 0 ? 'Closed' : settled > 0 ? 'Partial' : (r.status || 'Open') };
+});
+const AR_ROWS = ((TX.ar_rows || []).concat(JSON.parse(window.localStorage.getItem('erp.extra.finance_ar') || '[]'))).map(r => {
+  const settled = Number(AR_SETTLEMENTS[r.ar_no] || 0);
+  const baseBalance = Number(r.balance ?? r.amount ?? 0);
+  const balance = Math.max(0, baseBalance - settled);
+  return { ...r, balance, status: balance <= 0 ? 'Closed' : settled > 0 ? 'Partial' : (r.status || 'Open') };
+});
+const CASH_ROWS = (TX.cash_rows || []).concat(JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]'));
+const JOURNAL_ROWS = (TX.journal_rows || []).concat(JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]'));
+
+function bySearch(arr, keys, q){
+  const term = (q || '').trim().toLowerCase();
+  if(!term) return arr;
+  return arr.filter(row => keys.some(k => String(row[k] || '').toLowerCase().includes(term)));
+}
+
+function renderKpis(){
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">AP Open</div><div class="kpi-val">${AP_ROWS.filter(x => Number(x.balance || 0) > 0 && x.status !== 'Closed').length}</div></div>
+    <div class="kpi"><div class="kpi-label">AR Open</div><div class="kpi-val">${AR_ROWS.filter(x => x.status !== 'Closed').length}</div></div>
+    <div class="kpi"><div class="kpi-label">Cash Posted</div><div class="kpi-val">${CASH_ROWS.filter(x => x.status === 'Posted').length}</div></div>
+    <div class="kpi"><div class="kpi-label">Journal Posted</div><div class="kpi-val">${JOURNAL_ROWS.filter(x => x.status === 'Posted').length}</div></div>
+  `;
+}
+
+function renderAp(){
+  let rows = bySearch(AP_ROWS, ['ap_no','vendor_name','source_doc'], document.getElementById('search-ap').value);
+  const dateFrom = document.getElementById('filter-ap-date-from').value;
+  const dateTo = document.getElementById('filter-ap-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.due_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.due_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.due_date || '').localeCompare(String(a.due_date || '')) || String(b.ap_no || '').localeCompare(String(a.ap_no || '')));
+  document.getElementById('tbl-ap').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.ap_no}</td>
+      <td>${r.vendor_name}</td>
+      <td class="mono">${r.source_doc}</td>
+      <td>${r.due_date}</td>
+      <td>Rp ${money(r.amount)}</td>
+      <td>Rp ${money(r.balance)}</td>
+      <td>${badge(r.status)}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data AP.</td></tr>`;
+
+  const apSide = document.getElementById('ap-side');
+  if(apSide){apSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Source AP</div><div class="mini-v">Penerimaan RM / pembelian bahan</div></div>
+    <div class="mini-item"><div class="mini-k">Source AR</div><div class="mini-v">POS / penjualan toko</div></div>
+    <div class="mini-item"><div class="mini-k">Posting Bertahap</div><div class="mini-v">Purchasing -> AP, POS -> AR, Payment/Receipt -> Cash</div></div>
+  `;}
+}
+
+function renderAr(){
+  let rows = bySearch(AR_ROWS, ['ar_no','partner_name','source_doc'], document.getElementById('search-ar').value);
+  const dateFrom = document.getElementById('filter-ar-date-from').value;
+  const dateTo = document.getElementById('filter-ar-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.due_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.due_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.due_date || '').localeCompare(String(a.due_date || '')) || String(b.ar_no || '').localeCompare(String(a.ar_no || '')));
+  document.getElementById('tbl-ar').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.ar_no}</td>
+      <td>${r.partner_name}</td>
+      <td class="mono">${r.source_doc}</td>
+      <td>${r.due_date}</td>
+      <td>Rp ${money(r.amount)}</td>
+      <td>Rp ${money(r.balance)}</td>
+      <td>${badge(r.status)}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data AR.</td></tr>`;
+}
+
+function renderCash(){
+  let rows = bySearch(CASH_ROWS, ['cash_no','type','source','reference'], document.getElementById('search-cash').value);
+  const dateFrom = document.getElementById('filter-cash-date-from').value;
+  const dateTo = document.getElementById('filter-cash-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.cash_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.cash_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.cash_date || '').localeCompare(String(a.cash_date || '')) || String(b.cash_no || '').localeCompare(String(a.cash_no || '')));
+  document.getElementById('tbl-cash').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.cash_no}</td>
+      <td>${r.cash_date}</td>
+      <td>${badge(r.type)}</td>
+      <td>${r.source}</td>
+      <td class="mono">${r.reference}</td>
+      <td>Rp ${money(r.amount)}</td>
+      <td>${badge(r.status)}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data cash/bank.</td></tr>`;
+}
+
+function renderJournal(){
+  let rows = bySearch(JOURNAL_ROWS, ['journal_no','source','desc'], document.getElementById('search-journal').value);
+  const dateFrom = document.getElementById('filter-journal-date-from').value;
+  const dateTo = document.getElementById('filter-journal-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.journal_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.journal_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.journal_date || '').localeCompare(String(a.journal_date || '')) || String(b.journal_no || '').localeCompare(String(a.journal_no || '')));
+  document.getElementById('tbl-journal').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.journal_no}</td>
+      <td>${r.journal_date}</td>
+      <td class="mono">${r.source}</td>
+      <td>${r.desc}</td>
+      <td>Rp ${money(r.debit)}</td>
+      <td>Rp ${money(r.credit)}</td>
+      <td>${badge(r.status)}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data jurnal.</td></tr>`;
+}
+
+function showSection(sec){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  setFinanceNavState(sec);
+  activeColumnSection = sec;
+  document.getElementById('sec-' + sec).classList.add('active');
+  document.getElementById('bc-child').textContent = ({
+    ap: 'Account Payable',
+    ar: 'Account Receivable',
+    cash: 'Cash / Bank',
+    journal: 'Journal'
+  })[sec];
+  applyColumnVisibility(sec);
+}
+
+function downloadCsv(filename, headers, rows){
+  const csvRows = [headers].concat(rows).map(row => row.map(cell => {
+    const value = String(cell ?? '');
+    return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  }).join(','));
+  const blob = new Blob([csvRows.join('\r\n')], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function nextDoc(prefix, rows, field){
+  const nums = rows.map(r => Number(String(r[field] || '').split('-').pop())).filter(n => !Number.isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `${prefix}-202603-${String(next).padStart(3,'0')}`;
+}
+
+function syncPurchasingTrackingPayment(ap){
+  if(!ap || !ap.source_doc) return;
+  const receipts = TX.receipts || [];
+  const receipt = receipts.find(row => row.receive_no === ap.source_doc)
+    || JSON.parse(window.localStorage.getItem('erp.extra.receipts') || '[]').find(row => row.receive_no === ap.source_doc);
+  if(!receipt?.source_po) return;
+  let trackingRows;
+  try{
+    trackingRows = JSON.parse(window.localStorage.getItem('erp.purchasing.tracking') || '[]');
+  }catch(_err){
+    trackingRows = [];
+  }
+  if(!Array.isArray(trackingRows)) trackingRows = [];
+
+  const settlementMap = JSON.parse(window.localStorage.getItem('erp.extra.finance_ap_settlements') || '{}');
+  const paidAmount = Number(settlementMap[ap.ap_no] || 0);
+  const baseAmount = Number(ap.amount || 0);
+  const paymentStatus = paidAmount <= 0 ? 'Unpaid' : paidAmount >= baseAmount ? 'Paid' : 'Partially Paid';
+  const today = '2026-03-24';
+  const poNo = receipt.source_po;
+
+  const allReceipts = receipts.concat(JSON.parse(window.localStorage.getItem('erp.extra.receipts') || '[]'));
+  const poReceiptQty = allReceipts
+    .filter(row => row.source_po === poNo)
+    .reduce((sum, row) => sum + Number(row.qty || 0), 0);
+
+  const poRows = (TX.purchase_orders || []).concat(JSON.parse(window.localStorage.getItem('erp.extra.purchase_orders') || '[]'))
+    .filter(row => row.po_no === poNo);
+  const poQty = poRows.reduce((sum, row) => sum + Number(row.qty || 0), 0);
+  const isReceivedComplete = poQty > 0 && poReceiptQty >= poQty;
+
+  const existing = trackingRows.find(row => row.po_no === poNo) || { po_no: poNo };
+  const nextOrderStatus = paymentStatus === 'Paid' && isReceivedComplete
+    ? 'Closed'
+    : (existing.order_status || '');
+  const next = {
+    ...existing,
+    po_no: poNo,
+    payment_status: paymentStatus,
+    dp_paid_date: existing.dp_paid_date || (paidAmount > 0 ? today : ''),
+    final_paid_date: paymentStatus === 'Paid' ? today : (existing.final_paid_date || ''),
+    order_status: nextOrderStatus || existing.order_status || ''
+  };
+  const merged = trackingRows.filter(row => row.po_no !== poNo).concat(next);
+  window.localStorage.setItem('erp.purchasing.tracking', JSON.stringify(merged));
+}
+
+function exportSection(sec){
+  const tableMap = {
+    ap: 'tbl-ap',
+    ar: 'tbl-ar',
+    cash: 'tbl-cash',
+    journal: 'tbl-journal'
+  };
+  const bodyId = tableMap[sec];
+  const tbody = bodyId ? document.getElementById(bodyId) : null;
+  const table = tbody ? tbody.closest('table') : null;
+  if(!table || !tbody) return toast('Tabel tidak ditemukan.');
+  const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.replace(/\s+/g, ' ').trim());
+  const rows = Array.from(tbody.querySelectorAll('tr'))
+    .map(tr => Array.from(tr.children).map(td => td.innerText.replace(/\s+/g, ' ').trim()))
+    .filter(row => row.length && !row.join(' ').includes('Tidak ada data'));
+  return downloadCsv(`finance-${sec}.csv`, headers, rows);
+}
+
+function openFinanceAction(kind){
+  if(kind === 'vendor-payment'){
+    const row = AP_ROWS.find(x => x.balance > 0);
+    if(!row) return toast('Tidak ada AP open.');
+    const apNo = window.prompt('No AP yang akan dibayar?', row.ap_no);
+    if(apNo === null) return;
+    const ap = AP_ROWS.find(x => x.ap_no === String(apNo).trim());
+    if(!ap) return toast('No AP tidak ditemukan.');
+    const amountRaw = window.prompt(`Nominal bayar vendor untuk ${ap.ap_no}?`, String(ap.balance || ap.amount || 0));
+    if(amountRaw === null) return;
+    const amount = Number(amountRaw);
+    if(!amount || amount < 0) return toast('Nominal tidak valid.');
+    const settlements = JSON.parse(window.localStorage.getItem('erp.extra.finance_ap_settlements') || '{}');
+    settlements[ap.ap_no] = Number(settlements[ap.ap_no] || 0) + amount;
+    window.localStorage.setItem('erp.extra.finance_ap_settlements', JSON.stringify(settlements));
+    syncPurchasingTrackingPayment(ap);
+    const cashRows = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+    cashRows.push({ cash_no: nextDoc('CB', CASH_ROWS.concat(cashRows), 'cash_no'), cash_date: '2026-03-24', type: 'Payment', source: 'Vendor Payment', reference: ap.ap_no, amount, status: 'Posted' });
+    window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(cashRows));
+    const journals = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+    journals.push({ journal_no: nextDoc('JV', JOURNAL_ROWS.concat(journals), 'journal_no'), journal_date: '2026-03-24', source: ap.ap_no, desc: `Pembayaran vendor ${ap.vendor_name}`, debit: amount, credit: amount, status: 'Posted' });
+    window.localStorage.setItem('erp.extra.finance_journal', JSON.stringify(journals));
+    location.reload();
+    return;
+  }
+  if(kind === 'ar-receipt'){
+    const row = AR_ROWS.find(x => x.balance > 0);
+    if(!row) return toast('Tidak ada AR open.');
+    const arNo = window.prompt('No AR yang akan diterima?', row.ar_no);
+    if(arNo === null) return;
+    const ar = AR_ROWS.find(x => x.ar_no === String(arNo).trim());
+    if(!ar) return toast('No AR tidak ditemukan.');
+    const amountRaw = window.prompt(`Nominal terima piutang untuk ${ar.ar_no}?`, String(ar.balance || ar.amount || 0));
+    if(amountRaw === null) return;
+    const amount = Number(amountRaw);
+    if(!amount || amount < 0) return toast('Nominal tidak valid.');
+    const settlements = JSON.parse(window.localStorage.getItem('erp.extra.finance_ar_settlements') || '{}');
+    settlements[ar.ar_no] = Number(settlements[ar.ar_no] || 0) + amount;
+    window.localStorage.setItem('erp.extra.finance_ar_settlements', JSON.stringify(settlements));
+    const cashRows = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+    cashRows.push({ cash_no: nextDoc('CB', CASH_ROWS.concat(cashRows), 'cash_no'), cash_date: '2026-03-24', type: 'Receipt', source: 'AR Receipt', reference: ar.ar_no, amount, status: 'Posted' });
+    window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(cashRows));
+    const journals = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+    journals.push({ journal_no: nextDoc('JV', JOURNAL_ROWS.concat(journals), 'journal_no'), journal_date: '2026-03-24', source: ar.ar_no, desc: `Penerimaan piutang ${ar.partner_name}`, debit: amount, credit: amount, status: 'Posted' });
+    window.localStorage.setItem('erp.extra.finance_journal', JSON.stringify(journals));
+    location.reload();
+    return;
+  }
+  if(kind === 'cash-entry'){
+    const type = window.prompt('Type cash entry? (Receipt/Payment)', 'Receipt');
+    if(type === null) return;
+    const source = window.prompt('Source cash/bank?', 'Manual Finance');
+    if(source === null) return;
+    const reference = window.prompt('Reference?', '-') ?? '-';
+    const amountRaw = window.prompt('Nominal?', '0');
+    if(amountRaw === null) return;
+    const amount = Number(amountRaw);
+    if(!amount || amount < 0) return toast('Nominal tidak valid.');
+    const cashRows = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+    cashRows.push({ cash_no: nextDoc('CB', CASH_ROWS.concat(cashRows), 'cash_no'), cash_date: '2026-03-24', type: String(type).trim() || 'Receipt', source: String(source).trim() || 'Manual Finance', reference: String(reference).trim() || '-', amount, status: 'Posted' });
+    window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(cashRows));
+    location.reload();
+    return;
+  }
+  if(kind === 'journal-entry'){
+    const desc = window.prompt('Keterangan journal?', 'Journal manual');
+    if(desc === null) return;
+    const amountRaw = window.prompt('Nominal debit/credit?', '0');
+    if(amountRaw === null) return;
+    const amount = Number(amountRaw);
+    if(!amount || amount < 0) return toast('Nominal tidak valid.');
+    const journals = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+    journals.push({ journal_no: nextDoc('JV', JOURNAL_ROWS.concat(journals), 'journal_no'), journal_date: '2026-03-24', source: 'MANUAL', desc: String(desc).trim() || 'Journal manual', debit: amount, credit: amount, status: 'Posted' });
+    window.localStorage.setItem('erp.extra.finance_journal', JSON.stringify(journals));
+    location.reload();
+  }
+}
+
+function toast(msg){ alert(msg); }
+function loadColumnPrefs(){
+  try{
+    const raw = window.localStorage.getItem(COLUMN_PREFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(_err){
+    return {};
+  }
+}
+function persistColumnPrefs(){
+  window.localStorage.setItem(COLUMN_PREFS_KEY, JSON.stringify(columnPrefs));
+}
+function getSectionTable(section){
+  const config = COLUMN_CONFIG[section];
+  const tbody = config ? document.getElementById(config.bodyId) : null;
+  return tbody ? tbody.closest('table') : null;
+}
+function applyColumnVisibility(section){
+  const config = COLUMN_CONFIG[section];
+  const table = getSectionTable(section);
+  if(!config || !table) return;
+  const prefs = columnPrefs[section] || {};
+  table.querySelectorAll('tr').forEach(row => {
+    Array.from(row.children).forEach((cell, index) => {
+      cell.style.display = prefs[index] === false ? 'none' : '';
+    });
+  });
+}
+function openColumnModal(section = activeColumnSection){
+  activeColumnSection = section;
+  const config = COLUMN_CONFIG[section];
+  if(!config) return;
+  const prefs = columnPrefs[section] || {};
+  document.getElementById('column-modal-sub').textContent = `Atur kolom yang tampil untuk ${config.title}.`;
+  document.getElementById('column-modal-grid').innerHTML = config.columns.map((label, index) => `
+    <label class="check-item"><input type="checkbox" data-col-index="${index}" ${prefs[index] !== false ? 'checked' : ''}> <span>${label}</span></label>
+  `).join('');
+  document.getElementById('column-modal').classList.add('open');
+}
+function closeColumnModal(){
+  document.getElementById('column-modal').classList.remove('open');
+}
+function saveColumnPrefs(){
+  const picks = {};
+  document.querySelectorAll('#column-modal-grid input[type="checkbox"]').forEach(input => {
+    picks[input.dataset.colIndex] = input.checked;
+  });
+  columnPrefs[activeColumnSection] = picks;
+  persistColumnPrefs();
+  applyColumnVisibility(activeColumnSection);
+  closeColumnModal();
+}
+function resetColumnPrefs(){
+  delete columnPrefs[activeColumnSection];
+  persistColumnPrefs();
+  openColumnModal(activeColumnSection);
+  applyColumnVisibility(activeColumnSection);
+}
+
+function setFinanceNavState(activeSec='ap'){
+  const ledgerSecs = ['ap','ar'];
+  const bookSecs = ['cash','journal'];
+  document.getElementById('nav-parent-finance-ledger')?.classList.toggle('active', ledgerSecs.includes(activeSec));
+  document.getElementById('nav-parent-finance-book')?.classList.toggle('active', bookSecs.includes(activeSec));
+  document.getElementById('nav-group-finance-ledger')?.classList.remove('collapsed');
+  document.getElementById('nav-group-finance-book')?.classList.remove('collapsed');
+}
+
+document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    showSection(el.dataset.sec);
+  });
+});
+
+document.getElementById('nav-parent-finance-ledger')?.addEventListener('click', e => { e.preventDefault(); showSection('ap'); });
+document.getElementById('nav-parent-finance-book')?.addEventListener('click', e => { e.preventDefault(); showSection('cash'); });
+
+[
+  ['search-ap', renderAp], ['filter-ap-date-from', renderAp], ['filter-ap-date-to', renderAp],
+  ['search-ar', renderAr], ['filter-ar-date-from', renderAr], ['filter-ar-date-to', renderAr],
+  ['search-cash', renderCash], ['filter-cash-date-from', renderCash], ['filter-cash-date-to', renderCash],
+  ['search-journal', renderJournal], ['filter-journal-date-from', renderJournal], ['filter-journal-date-to', renderJournal]
+].forEach(([id, fn]) => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', fn);
+});
+
+initDateRangeFilters();
+renderKpis();
+renderAp();
+renderAr();
+renderCash();
+renderJournal();
+setFinanceNavState('ap');
+Object.keys(COLUMN_CONFIG).forEach(applyColumnVisibility);
+</script>
+</body>
+</html>
+
+

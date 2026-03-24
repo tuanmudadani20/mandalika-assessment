@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mandalika POS Kasir</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --navy:#183153; --navy-2:#0f243f; --sky:#edf4ff; --gold:#d4af37;
+  --bg:#f5f7fb; --card:#ffffff; --line:#dbe4f0; --text:#172033; --muted:#64748b;
+  --ok:#10b981; --warn:#f59e0b; --err:#dc2626; --soft:#f8fafc;
+  --shadow:0 14px 32px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+button,input,select{font:inherit}
+.app{height:100%;display:grid;grid-template-columns:1fr 380px}
+.panel{min-width:0}
+.workspace{display:flex;flex-direction:column;height:100%}
+.topbar{height:68px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 18px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--navy),#264e86);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.brand-copy{min-width:0}
+.brand-copy b{display:block;font-size:15px}
+.brand-copy small{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.toolbar{display:flex;align-items:center;gap:10px;flex:1;justify-content:flex-end;flex-wrap:wrap}
+.search,.select{height:40px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:0 12px;color:var(--text)}
+.search{width:280px}
+.btn{height:40px;border:none;border-radius:12px;padding:0 14px;font-weight:700;cursor:pointer}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-gold{background:var(--gold);color:#fff}
+.content{flex:1;display:grid;grid-template-rows:auto 1fr;min-height:0}
+.filters{padding:14px 18px 10px;display:flex;gap:10px;flex-wrap:wrap}
+.products-wrap{padding:0 18px 18px;min-height:0;display:flex;flex-direction:column}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px;overflow:auto;padding-right:4px}
+.prod-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:168px;cursor:pointer;transition:transform .14s ease, box-shadow .14s ease,border-color .14s ease}
+.prod-card:hover{transform:translateY(-2px);box-shadow:0 20px 36px rgba(15,23,42,.12)}
+.prod-card.out{opacity:.45;cursor:not-allowed}
+.prod-top{height:8px;background:linear-gradient(90deg,var(--navy),#315c97)}
+.prod-body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.prod-code{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+.prod-name{font-size:13px;font-weight:800;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.prod-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+.prod-price{font-family:'IBM Plex Mono',monospace;font-weight:800;color:var(--navy)}
+.stock-chip{padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800}
+.stock-chip.ok{background:#dcfce7;color:#166534}
+.stock-chip.low{background:#fef3c7;color:#92400e}
+.stock-chip.out{background:#fee2e2;color:#b91c1c}
+.side{height:100%;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column}
+.order-head{padding:16px 16px 12px;border-bottom:1px solid var(--line);display:grid;gap:10px}
+.order-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.order-title b{font-size:16px}
+.order-title small{font-size:11px;color:var(--muted)}
+.store-pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:var(--sky);color:var(--navy);font-size:10px;font-weight:800}
+.customer{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.customer .search{width:100%}
+.cart{flex:1;overflow:auto;padding:12px 16px}
+.cart-empty{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px}
+.cart-list{display:grid;gap:10px}
+.cart-item{border:1px solid var(--line);border-radius:16px;padding:12px;background:var(--soft)}
+.cart-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.cart-code{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+.cart-name{font-size:13px;font-weight:800;line-height:1.35;margin-top:2px}
+.cart-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.cart-actions{display:flex;align-items:center;gap:6px;margin-top:10px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.qty button{width:30px;height:30px;border:none;background:#fff;font-size:16px;cursor:pointer}
+.qty span{min-width:34px;text-align:center;font-weight:800}
+.danger{height:30px;border:none;background:#fee2e2;color:#b91c1c;border-radius:10px;padding:0 10px;font-weight:700;cursor:pointer}
+.summary{border-top:1px solid var(--line);padding:14px 16px 16px;background:#fbfcfe;display:grid;gap:8px}
+.sum-row{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.sum-row.total{font-size:18px;font-weight:800;color:var(--navy);padding-top:6px;border-top:1px dashed var(--line)}
+.pay-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
+.pay-method{height:40px;border:1px solid var(--line);background:#fff;border-radius:12px;font-weight:700;cursor:pointer}
+.pay-method.active{border-color:var(--navy);background:var(--sky);color:var(--navy)}
+.footer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.full{grid-column:1 / -1}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal.open{display:flex}
+.modal-card{width:min(520px,92vw);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 54px rgba(15,23,42,.18);padding:18px}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.modal-head b{font-size:18px}
+.modal-head small{display:block;color:var(--muted);margin-top:4px;line-height:1.5}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap}
+.receipt{display:grid;gap:10px;font-size:13px}
+.receipt-box{border:1px dashed var(--line);border-radius:16px;padding:14px;background:#fcfdff}
+.receipt-box .mono{font-family:'IBM Plex Mono',monospace}
+.receipt-items{display:grid;gap:8px}
+.receipt-item{display:flex;justify-content:space-between;gap:10px}
+@media (max-width:1180px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;right:0;top:0;bottom:0;width:min(420px,100vw);z-index:30;box-shadow:-16px 0 40px rgba(15,23,42,.16)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="panel workspace">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge">MP</div>
+        <div class="brand-copy">
+          <b>POS Kasir</b>
+          <small>Frontliner Transaction</small>
+        </div>
+      </div>
+      <div class="toolbar">
+        <select class="select" id="store-select"></select>
+        <select class="select" id="cashier-select">
+          <option value="KSR-01">Kasir 01</option>
+          <option value="KSR-02">Kasir 02</option>
+          <option value="KSR-03">Kasir 03</option>
+        </select>
+        <input class="search" id="search-product" placeholder="Cari SKU atau nama item">
+        <button class="btn btn-ghost" type="button" onclick="location.href='./erp-pos.html'">Back Office</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="filters">
+        <select class="select" id="category-filter"></select>
+        <button class="btn btn-ghost" type="button" onclick="resetSearch()">Reset Filter</button>
+      </div>
+      <div class="products-wrap">
+        <div class="prod-grid" id="product-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel side">
+    <div class="order-head">
+      <div class="order-title">
+        <div>
+          <b>Keranjang</b>
+          <small id="order-doc">POS / Draft</small>
+        </div>
+        <span class="store-pill" id="store-pill">-</span>
+      </div>
+      <div class="customer">
+        <input class="search" id="customer-name" placeholder="Nama pelanggan">
+        <input class="search" id="customer-phone" placeholder="No. HP">
+      </div>
+    </div>
+    <div class="cart" id="cart-area"></div>
+    <div class="summary">
+      <div class="sum-row"><span>Item</span><b id="sum-items">0</b></div>
+      <div class="sum-row"><span>Subtotal</span><b id="sum-subtotal">Rp 0</b></div>
+      <div class="sum-row total"><span>Total</span><b id="sum-total">Rp 0</b></div>
+      <div class="pay-grid" id="pay-methods"></div>
+      <div class="footer-actions">
+        <button class="btn btn-ghost" type="button" onclick="clearCart()">Kosongkan</button>
+        <button class="btn btn-primary" type="button" onclick="openPayModal()">Bayar</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="modal" id="pay-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <b>Konfirmasi Pembayaran</b>
+        <small>Transaksi akan disimpan sebagai penjualan toko pada POS frontliner.</small>
+      </div>
+      <button class="btn btn-ghost" type="button" onclick="togglePayModal(false)">Tutup</button>
+    </div>
+    <div class="receipt">
+      <div class="receipt-box">
+        <div class="sum-row"><span>Toko</span><b id="pay-store">-</b></div>
+        <div class="sum-row"><span>Kasir</span><b id="pay-cashier">-</b></div>
+        <div class="sum-row"><span>Metode</span><b id="pay-method-label">-</b></div>
+        <div class="sum-row total"><span>Total Bayar</span><b id="pay-total">Rp 0</b></div>
+      </div>
+      <div class="receipt-box">
+        <b style="display:block;margin-bottom:10px">Ringkasan Item</b>
+        <div class="receipt-items" id="pay-items"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" onclick="togglePayModal(false)">Batal</button>
+      <button class="btn btn-gold" type="button" onclick="submitPayment()">Simpan Transaksi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="done-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <b>Transaksi Tersimpan</b>
+        <small>Penjualan sudah masuk ke data POS dan bisa dilihat di back office.</small>
+      </div>
+      <button class="btn btn-ghost" type="button" onclick="toggleDoneModal(false)">Tutup</button>
+    </div>
+    <div class="receipt-box" id="done-receipt"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" onclick="toggleDoneModal(false)">Tutup</button>
+      <button class="btn btn-primary" type="button" onclick="newOrder()">Transaksi Baru</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const TX = window.TRANSACTION_DATA || {};
+const RUNTIME = window.ERP_RUNTIME || {};
+const STORES = DATA.tokos || [];
+const FG = DATA.fg_items || [];
+const POS_RETURN_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_return') || '[]');
+const BASE_SALES = [...(TX.sales || [])];
+let selectedStore = '';
+let selectedCategory = '';
+let selectedPayment = 'Cash';
+let cart = [];
+let lastSaved = null;
+
+function fmtMoney(n){
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.round(Number(n || 0)));
+}
+
+function nextSalesNo(){
+  const all = [...BASE_SALES, ...RUNTIME.read('sales')];
+  const nums = all.map(row => Number(String(row.sales_no || '').split('-').pop())).filter(n => !Number.isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `POS-202603-${String(next).padStart(3,'0')}`;
+}
+
+function currentSalesRows(){
+  return [...BASE_SALES, ...RUNTIME.read('sales')];
+}
+
+function currentReturnRows(){
+  return POS_RETURN_EXTRA;
+}
+
+function getStoreName(code){
+  return (STORES.find(store => store.store_code === code) || {}).store_name || code;
+}
+
+function stockAtStore(storeCode, fgCode){
+  const doIn = (TX.delivery_orders || [])
+    .filter(row => row.store_code === storeCode && row.fg_code === fgCode && ['Received','Posted'].includes(row.status || ''))
+    .reduce((sum, row) => sum + Number(row.qty || 0), 0);
+  const sold = currentSalesRows()
+    .filter(row => row.store_code === storeCode && row.fg_code === fgCode && row.status === 'Posted')
+    .reduce((sum, row) => sum + Number(row.qty || 0), 0);
+  const returned = currentReturnRows()
+    .filter(row => row.store_code === storeCode && row.fg_code === fgCode && row.status === 'Posted')
+    .reduce((sum, row) => sum + Number(row.qty || 0), 0);
+  return Math.max(0, doIn - sold + returned);
+}
+
+function inferredPrice(fg){
+  const code = String(fg.fg_code || '');
+  if(code.startsWith('PW110')) return 249000;
+  if(code.startsWith('A10')) return 89000;
+  if(code.startsWith('V2')) return 29000;
+  return 99000;
+}
+
+function productRows(){
+  return FG.map(fg => ({
+    fg_code: fg.fg_code,
+    fg_name: fg.fg_name,
+    fg_category: fg.fg_category || '-',
+    price: inferredPrice(fg),
+    stock: stockAtStore(selectedStore, fg.fg_code)
+  }));
+}
+
+function resetSearch(){
+  document.getElementById('search-product').value = '';
+  document.getElementById('category-filter').value = '';
+  selectedCategory = '';
+  renderProducts();
+}
+
+function fillFilters(){
+  const storeSelect = document.getElementById('store-select');
+  storeSelect.innerHTML = STORES.map(store => `<option value="${store.store_code}">${store.store_code} - ${store.store_name}</option>`).join('');
+  selectedStore = storeSelect.value = (STORES.find(store => store.store_code === 'BSD') || STORES[0] || {}).store_code || '';
+  const categories = [...new Set(FG.map(item => item.fg_category).filter(Boolean))].sort();
+  document.getElementById('category-filter').innerHTML = `<option value="">Semua Kategori</option>${categories.map(cat => `<option value="${String(cat).replace(/"/g,'&quot;')}">${cat}</option>`).join('')}`;
+  renderStorePill();
+  renderPaymentMethods();
+}
+
+function renderStorePill(){
+  document.getElementById('store-pill').textContent = selectedStore || '-';
+}
+
+function renderPaymentMethods(){
+  const methods = ['Cash','QRIS','Debit','Transfer'];
+  document.getElementById('pay-methods').innerHTML = methods.map(method => `
+    <button class="pay-method ${selectedPayment === method ? 'active' : ''}" type="button" onclick="selectPayment('${method}')">${method}</button>
+  `).join('');
+}
+
+function selectPayment(method){
+  selectedPayment = method;
+  renderPaymentMethods();
+}
+
+function renderProducts(){
+  const q = String(document.getElementById('search-product').value || '').trim().toLowerCase();
+  selectedCategory = document.getElementById('category-filter').value || '';
+  let rows = productRows();
+  if(selectedCategory) rows = rows.filter(row => row.fg_category === selectedCategory);
+  if(q) rows = rows.filter(row => [row.fg_code,row.fg_name,row.fg_category].some(val => String(val || '').toLowerCase().includes(q)));
+  rows.sort((a,b) => String(a.fg_name || '').localeCompare(String(b.fg_name || '')));
+  document.getElementById('product-grid').innerHTML = rows.length ? rows.map(row => {
+    const inCart = cart.find(item => item.fg_code === row.fg_code)?.qty || 0;
+    const stock = Math.max(0, row.stock - inCart);
+    const cls = stock <= 0 ? 'out' : '';
+    const chipCls = stock <= 0 ? 'out' : stock < 4 ? 'low' : 'ok';
+    return `
+      <button class="prod-card ${cls}" type="button" onclick="addToCart('${row.fg_code}')">
+        <div class="prod-top"></div>
+        <div class="prod-body">
+          <div class="prod-code">${row.fg_code}</div>
+          <div class="prod-name">${row.fg_name}</div>
+          <div class="prod-meta">
+            <div class="prod-price">${fmtMoney(row.price)}</div>
+            <span class="stock-chip ${chipCls}">${stock} pcs</span>
+          </div>
+        </div>
+      </button>
+    `;
+  }).join('') : `<div class="cart-empty">Tidak ada item yang cocok dengan filter.</div>`;
+}
+
+function addToCart(code){
+  const product = productRows().find(row => row.fg_code === code);
+  if(!product || product.stock <= 0) return;
+  const current = cart.find(item => item.fg_code === code);
+  if(current){
+    if(current.qty >= product.stock) return;
+    current.qty += 1;
+  }else{
+    cart.push({ fg_code: product.fg_code, fg_name: product.fg_name, price: product.price, qty: 1 });
+  }
+  renderCart();
+  renderProducts();
+}
+
+function changeQty(code, delta){
+  const item = cart.find(row => row.fg_code === code);
+  if(!item) return;
+  const max = productRows().find(row => row.fg_code === code)?.stock || 0;
+  item.qty = Math.max(0, item.qty + delta);
+  if(item.qty > max) item.qty = max;
+  if(item.qty <= 0) cart = cart.filter(row => row.fg_code !== code);
+  renderCart();
+  renderProducts();
+}
+
+function removeItem(code){
+  cart = cart.filter(row => row.fg_code !== code);
+  renderCart();
+  renderProducts();
+}
+
+function getSubtotal(){
+  return cart.reduce((sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)), 0);
+}
+
+function renderCart(){
+  const area = document.getElementById('cart-area');
+  if(!cart.length){
+    area.innerHTML = `<div class="cart-empty">Belum ada item di keranjang.</div>`;
+  }else{
+    area.innerHTML = `<div class="cart-list">${cart.map(item => `
+      <div class="cart-item">
+        <div class="cart-row">
+          <div>
+            <div class="cart-code">${item.fg_code}</div>
+            <div class="cart-name">${item.fg_name}</div>
+            <div class="cart-sub">${fmtMoney(item.price)} / pcs</div>
+          </div>
+          <button class="danger" type="button" onclick="removeItem('${item.fg_code}')">Hapus</button>
+        </div>
+        <div class="cart-actions">
+          <div class="qty">
+            <button type="button" onclick="changeQty('${item.fg_code}',-1)">-</button>
+            <span>${item.qty}</span>
+            <button type="button" onclick="changeQty('${item.fg_code}',1)">+</button>
+          </div>
+          <b style="margin-left:auto">${fmtMoney(item.qty * item.price)}</b>
+        </div>
+      </div>
+    `).join('')}</div>`;
+  }
+  document.getElementById('sum-items').textContent = cart.reduce((sum, item) => sum + item.qty, 0) + ' pcs';
+  document.getElementById('sum-subtotal').textContent = fmtMoney(getSubtotal());
+  document.getElementById('sum-total').textContent = fmtMoney(getSubtotal());
+  document.getElementById('order-doc').textContent = `${selectedStore || '-'} / Draft`;
+}
+
+function clearCart(){
+  cart = [];
+  renderCart();
+  renderProducts();
+}
+
+function togglePayModal(show){
+  document.getElementById('pay-modal').classList.toggle('open', !!show);
+}
+
+function openPayModal(){
+  if(!cart.length) return;
+  document.getElementById('pay-store').textContent = getStoreName(selectedStore);
+  document.getElementById('pay-cashier').textContent = document.getElementById('cashier-select').value;
+  document.getElementById('pay-method-label').textContent = selectedPayment;
+  document.getElementById('pay-total').textContent = fmtMoney(getSubtotal());
+  document.getElementById('pay-items').innerHTML = cart.map(item => `
+    <div class="receipt-item">
+      <span>${item.fg_code} x ${item.qty}</span>
+      <b>${fmtMoney(item.qty * item.price)}</b>
+    </div>
+  `).join('');
+  togglePayModal(true);
+}
+
+function toggleDoneModal(show){
+  document.getElementById('done-modal').classList.toggle('open', !!show);
+}
+
+function submitPayment(){
+  if(!cart.length) return;
+  const salesNo = nextSalesNo();
+  const salesDate = '2026-03-23';
+  const store = STORES.find(row => row.store_code === selectedStore);
+  cart.forEach(item => {
+    RUNTIME.append('sales', {
+      sales_no: salesNo,
+      sales_date: salesDate,
+      store_code: store.store_code,
+      store_name: store.store_name,
+      fg_code: item.fg_code,
+      fg_name: item.fg_name,
+      qty: item.qty,
+      net_sales: item.qty * item.price,
+      payment_method: selectedPayment,
+      cashier_id: document.getElementById('cashier-select').value,
+      customer_name: String(document.getElementById('customer-name').value || '').trim() || 'Umum',
+      customer_phone: String(document.getElementById('customer-phone').value || '').trim(),
+      status: 'Posted'
+    });
+  });
+  lastSaved = {
+    sales_no: salesNo,
+    sales_date: salesDate,
+    store_name: store.store_name,
+    payment_method: selectedPayment,
+    total: getSubtotal(),
+    items: cart.map(item => ({ ...item }))
+  };
+  document.getElementById('done-receipt').innerHTML = `
+    <div class="sum-row"><span>No Penjualan</span><b class="mono">${lastSaved.sales_no}</b></div>
+    <div class="sum-row"><span>Tanggal</span><b>${lastSaved.sales_date}</b></div>
+    <div class="sum-row"><span>Toko</span><b>${lastSaved.store_name}</b></div>
+    <div class="sum-row"><span>Metode Bayar</span><b>${lastSaved.payment_method}</b></div>
+    <div style="margin:10px 0;border-top:1px dashed var(--line)"></div>
+    ${lastSaved.items.map(item => `<div class="receipt-item"><span>${item.fg_code} x ${item.qty}</span><b>${fmtMoney(item.qty * item.price)}</b></div>`).join('')}
+    <div style="margin:10px 0;border-top:1px dashed var(--line)"></div>
+    <div class="sum-row total"><span>Total</span><b>${fmtMoney(lastSaved.total)}</b></div>
+  `;
+  togglePayModal(false);
+  toggleDoneModal(true);
+  clearCart();
+}
+
+function newOrder(){
+  toggleDoneModal(false);
+  document.getElementById('customer-name').value = '';
+  document.getElementById('customer-phone').value = '';
+  renderProducts();
+}
+
+document.getElementById('store-select').addEventListener('change', e => {
+  selectedStore = e.target.value;
+  renderStorePill();
+  clearCart();
+  renderProducts();
+});
+document.getElementById('category-filter').addEventListener('change', renderProducts);
+document.getElementById('search-product').addEventListener('input', renderProducts);
+
+fillFilters();
+renderCart();
+renderProducts();
+</script>
+</body>
+</html>

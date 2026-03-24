@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Demo Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:var(--sbm);font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:10px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600}
+.nav-link:hover,.nav-link.active,.nav-item.active{background:rgba(212,175,55,.12);color:var(--gold)}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:58px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:5}
+.bc{font-size:13px;color:var(--muted)}
+.bc b{color:var(--text-d)}
+.btn{border:none;border-radius:10px;padding:9px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:20px}
+.card-pad{padding:22px}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:26px;font-weight:800;color:var(--text-d);margin:8px 0}
+.subtitle{font-size:13px;color:var(--muted);line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:18px 0 0}
+.kpi{padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:22px;font-weight:800;color:var(--text-d);margin-top:8px}
+.flow{display:grid;gap:14px}
+.step{padding:16px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.step-title{font-size:14px;font-weight:800;color:var(--text-d)}
+.step-sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.6}
+.step-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.mono{font-family:'IBM Plex Mono',monospace}
+@media (max-width:1200px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Demo Flow</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+      <div class="nav-sec-lbl">View</div>
+      <div class="nav-item active">Demo Flow</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><b>Demo Flow</b> / Trial Operasional Harian</div>
+      <div>
+        <button class="btn btn-ghost" onclick="location.href='./erp-shell.html'">Back to Shell</button>
+        <button class="btn btn-primary" onclick="location.href='./erp-reports.html'">Lihat Reports</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <section class="card card-pad">
+        <div class="eyebrow">Flow Harian</div>
+        <div class="title">Satu Halaman untuk Cek Alur Ujung ke Ujung</div>
+        <div class="subtitle">
+          Halaman ini merangkum jalur <span class="mono">PO -> Receipt -> Produksi -> GR FG -> DO -> Sales -> Finance</span>
+          supaya trial antar modul lebih cepat tanpa harus bolak-balik menebak urutannya.
+        </div>
+        <div class="grid" id="kpi-grid"></div>
+      </section>
+
+      <section class="card card-pad">
+        <div class="eyebrow">Step by Step</div>
+        <div class="flow">
+          <div class="step">
+            <div class="step-title">1. Purchasing</div>
+            <div class="step-sub">Buat `PO`, lanjutkan ke `Penerimaan RM`, lalu jika perlu `Retur Vendor`.</div>
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="location.href='./erp-purchasing.html'">Buka Purchasing</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-title">2. Manufacturing</div>
+            <div class="step-sub">Lihat `WO`, hasil produksi, dan hubungan ke hasil FG. BOM masih placeholder manual dari Accurate.</div>
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="location.href='./erp-manufacturing.html'">Buka Manufacturing</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-title">3. Inventory</div>
+            <div class="step-sub">Input `GR FG`, `DO`, `Transfer`, dan `Retur` untuk membentuk kartu stok per gudang.</div>
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="location.href='./erp-inventory.html'">Buka Inventory</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-title">4. POS</div>
+            <div class="step-sub">Jalankan `Sales`, `Retur Sales`, dan `Closing` agar stok toko dan omzet harian terbentuk.</div>
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="location.href='./erp-pos.html'">Buka POS</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-title">5. Finance & Reports</div>
+            <div class="step-sub">Pantau `AP`, `AR`, cashflow dasar, lalu cek ringkasan operasional di laporan.</div>
+            <div class="step-actions">
+              <button class="btn btn-ghost" onclick="location.href='./erp-finance.html'">Buka Finance</button>
+              <button class="btn btn-primary" onclick="location.href='./erp-reports.html'">Buka Reports</button>
+              <button class="btn btn-ghost" onclick="location.href='./erp-forecasting.html'">Buka Forecasting</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const TX = window.TRANSACTION_DATA || {};
+const kpis = [
+  ['PO', (TX.purchase_orders || []).length],
+  ['Receipt RM', (TX.receipts || []).length],
+  ['GR FG', (TX.gr_fg || []).length],
+  ['DO', (TX.delivery_orders || []).length],
+  ['Sales', (TX.sales || []).length]
+];
+document.getElementById('kpi-grid').innerHTML = kpis.map(([label, val]) => `<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-val">${val}</div></div>`).join('');
+</script>
+</body>
+</html>
+
+
