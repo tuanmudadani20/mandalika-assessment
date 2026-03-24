@@ -1,0 +1,2556 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Purchasing</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626;
+  --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:12px;overflow-x:hidden}
+body.has-inline-modal{overflow:hidden}
+body.has-inline-modal::before{content:'';position:fixed;inset:0;background:rgba(15,23,42,.52);z-index:24}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:#A1A1AA;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.nav-subwrap{margin:6px 8px 10px;padding:8px 6px 10px;border-left:2px solid rgba(212,175,55,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:0 14px 14px 0}
+.nav-group{margin:2px 0 0;padding:0;overflow:hidden;max-height:280px;transition:max-height .24s ease,opacity .2s ease,transform .2s ease,margin .18s ease}
+.nav-group.collapsed{max-height:0;opacity:0;transform:translateY(-6px);margin:0}
+.nav-parent{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 2px;padding:6px 8px;border-radius:10px;color:#B8BDC7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-parent:hover{background:rgba(255,255,255,.06);color:#F4F4F5;transform:translateX(1px)}
+.nav-parent.active{background:rgba(212,175,55,.12);color:#F6D365}
+.nav-parent small{font-size:9px;color:#8E95A3;font-weight:700;text-transform:none;letter-spacing:0}
+.nav-subwrap .nav-link,.nav-subwrap .nav-item{width:100%;margin:1px 0 0;padding:6px 8px 6px 16px;border-radius:9px;font-size:10.5px}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:8px 12px;min-height:34px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px;max-width:1380px;width:100%;margin:0 auto}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.tabs{display:none}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:14px}
+.card-pad{padding:18px}
+.grid-4{display:none}
+.kpi{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar-right,.toolbar-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search,.select{padding:8px 10px;min-height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:11.5px}
+.search{min-width:180px}
+.date-range-filter{position:relative}
+.date-range-filter[open]{z-index:12}
+.date-range-trigger{list-style:none;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.date-range-trigger::-webkit-details-marker{display:none}
+.date-range-pop{position:absolute;top:calc(100% + 6px);left:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(15,23,42,.12);min-width:290px}
+.date-range-pop label{display:grid;gap:4px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.date-range-pop .search{min-width:0;width:100%}
+.date-range-actions{grid-column:1 / -1;display:flex;justify-content:flex-end}
+.date-range-apply{min-width:92px}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-draft{background:#E5E7EB;color:#374151}.b-err{background:#FEE2E2;color:#B91C1C}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.tw{overflow:auto;max-height:560px}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle;white-space:nowrap}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC;position:sticky;top:0;z-index:1}
+tr:hover td{background:#FCFCFD}
+.mono{font-family:'IBM Plex Mono',monospace}
+.split{display:grid;grid-template-columns:1fr;gap:10px}
+.stack{display:grid;gap:10px}
+.note{padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(212,175,55,.06),rgba(255,255,255,.98));color:var(--text);font-size:10.5px;line-height:1.5}
+.mini-list{display:grid;gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+.inline-form{display:none;margin-bottom:14px}
+.inline-form.active{display:block;position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:26;width:min(1080px,calc(100vw - 40px));max-height:calc(100vh - 40px);overflow:auto;margin:0}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.form-grid.compact{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px}
+.field{display:grid;gap:6px}
+.field label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.empty{padding:32px 18px;color:var(--muted);text-align:center}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:24px;z-index:30}
+.modal.open{display:flex}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.modal-card{width:min(720px,92vw);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:18px}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.modal-title{font-size:18px;font-weight:800;color:var(--text-d)}
+.modal-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.check-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.card.compact .card-pad{padding:14px 16px}
+.tw.compact{max-height:560px}
+th.sticky{position:sticky;top:0;z-index:1}
+.po-form-card{max-width:980px;margin:0 auto 14px}
+.inline-form.active.po-form-card,.inline-form.active.receipt-form-card,.inline-form.active#vendor-return-form-card{max-width:none}
+.po-form-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.po-form-title{font-size:18px;font-weight:800;color:var(--text-d)}
+.po-form-sub{font-size:11px;color:var(--muted);line-height:1.5;margin-top:3px}
+.po-form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.po-bottom{display:grid;gap:12px;margin-top:12px}
+.rfq-form-card{width:min(1080px,calc(100vw - 40px));max-width:1120px;margin:0 auto 14px}
+.receipt-form-card{max-width:980px;margin:0 auto 14px}
+.receipt-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.builder-wrap{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.builder-wrap .tw{max-height:320px}
+.vendor-select{width:100%}
+.builder-topbar{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);background:#F8FAFC}
+.builder-summary{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;padding:12px 14px;border-top:1px solid var(--line);background:#F8FAFC}
+.builder-pill{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--text-d)}
+.qty-input{width:92px;min-height:32px}
+.terms-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.field-sm .search,.field-sm .select{max-width:120px}
+.pct-input{max-width:84px}
+.nowrap{white-space:nowrap}
+#table-outstanding{min-width:1240px}
+#table-outstanding td:nth-child(2),#table-outstanding th:nth-child(2){white-space:nowrap;width:96px}
+#table-outstanding td:nth-child(3),#table-outstanding th:nth-child(3){white-space:nowrap;width:82px}
+#table-outstanding td:nth-child(4),#table-outstanding th:nth-child(4){min-width:220px}
+#table-outstanding td:nth-child(10),#table-outstanding th:nth-child(10){white-space:nowrap;width:92px}
+#table-po td:nth-child(1),#table-po th:nth-child(1),#table-po td:nth-child(2),#table-po th:nth-child(2){white-space:nowrap}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)} .split{grid-template-columns:1fr}}
+@media (max-width:900px){.form-grid.compact,.receipt-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Purchasing</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <div class="nav-link active">Purchasing</div>
+      <div class="nav-subwrap">
+        <div class="nav-parent active" id="nav-parent-purchasing-trans" data-group="purchasing-trans">Transaksi <small>RFQ, PO, penerimaan, retur</small></div>
+        <div class="nav-group" id="nav-group-purchasing-trans">
+          <a class="nav-link" href="#" data-sec="rfq">RFQ</a>
+          <a class="nav-link active" href="#" data-sec="po">Purchase Order</a>
+          <a class="nav-link" href="#" data-sec="receive">Penerimaan</a>
+          <a class="nav-link" href="#" data-sec="return">Retur Vendor</a>
+        </div>
+        <div class="nav-parent active" id="nav-parent-purchasing-monitor" data-group="purchasing-monitor">Monitoring <small>tracking dan outstanding</small></div>
+        <div class="nav-group" id="nav-group-purchasing-monitor">
+          <a class="nav-link" href="#" data-sec="tracking">Purchase Tracking</a>
+          <a class="nav-link" href="#" data-sec="outstanding">Open PO</a>
+        </div>
+      </div>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+        Modul ini memakai master vendor, gudang, dan raw material dari <span class="mono">master-data.js</span>.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><small>Purchasing Workspace</small><div><b>Purchasing</b> / <b id="bc-child">Purchase Order</b></div></div>
+      <div>
+        <button class="btn btn-ghost" onclick="location.href='./erp-master.html'">Master Data</button>
+        <button class="btn btn-ghost" onclick="resetPurchasingModule()">Reset Purchasing</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-manufacturing.html'">Next: Manufacturing</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Fase 2</div>
+          <div class="title">Purchasing Dasar</div>
+          <div class="subtitle">
+            Fondasi pembelian ini dibuat untuk jalur <span class="mono">RFQ -> Purchase Order -> Purchase Tracking -> Penerimaan -> Retur Vendor</span>.
+            Semua pembelian, termasuk item umum/manual dan supplier baru, tetap direkap di purchasing yang sama.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section" id="sec-rfq">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-rfq" placeholder="Cari RFQ, supplier, atau item">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-rfq-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-rfq-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-rfq-status">
+              <option value="">Semua Status</option>
+              <option value="Draft">Draft</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Reviewed">Reviewed</option>
+              <option value="Approved">Approved</option>
+              <option value="Converted">Converted</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('rfq')">Export</button>
+            <button class="btn btn-primary" onclick="toggleRfqForm(true)">+ Buat RFQ</button>
+          </div>
+        </div>
+        <div class="modal" id="rfq-form-modal" onclick="if(event.target===this) toggleRfqForm(false)">
+          <div class="modal-card rfq-form-card" style="max-width:1120px">
+            <div class="po-form-head">
+              <div>
+                <div class="po-form-title">Request For Quotation</div>
+                <div class="po-form-sub">Dokumen permintaan penawaran multi-item sebelum dibuat menjadi purchase order. Struktur popup ini disamakan dengan dokumen purchasing lain agar ritme kerja konsisten.</div>
+              </div>
+              <div class="badge b-info">Pre-PO</div>
+            </div>
+            <div class="form-grid compact">
+              <div class="field"><label>Tanggal RFQ</label><input class="search" id="rfq-form-date" type="date" value="2026-03-24"></div>
+              <div class="field"><label>Mode Supplier</label><select class="select" id="rfq-form-vendor-mode"><option value="EXISTING">Supplier Existing</option><option value="NEW">Supplier Baru</option></select></div>
+              <div class="field" id="rfq-vendor-existing-wrap">
+                <label>Supplier</label>
+                <input class="search vendor-select" id="rfq-form-vendor-search" list="rfq-form-vendor-list" placeholder="Cari supplier">
+                <datalist id="rfq-form-vendor-list"></datalist>
+                <input id="rfq-form-vendor" type="hidden" value="">
+              </div>
+              <div class="field" id="rfq-vendor-new-wrap" style="display:none"><label>Nama Supplier Baru</label><input class="search" id="rfq-form-vendor-new" placeholder="Nama supplier"></div>
+              <div class="field"><label>Kategori Supplier</label><input class="search" id="rfq-form-vendor-category" placeholder="Kategori supplier"></div>
+              <div class="field"><label>Lokasi Tujuan</label><select class="select" id="rfq-form-location"></select></div>
+              <div class="field"><label>Status</label><select class="select" id="rfq-form-status"><option>Draft</option><option>Submitted</option><option>Reviewed</option><option>Approved</option></select></div>
+              <div class="field" style="grid-column:1 / -1"><label>Catatan</label><input class="search" id="rfq-form-note" placeholder="Catatan RFQ"></div>
+            </div>
+            <div class="receipt-summary">
+              <div class="field"><label>Total Item</label><input class="search" id="rfq-form-item-count" value="0" readonly></div>
+              <div class="field"><label>Total Qty</label><input class="search" id="rfq-form-total-qty" value="0" readonly></div>
+              <div class="field"><label>Mode Supplier</label><input class="search" id="rfq-form-vendor-mode-label" value="Supplier Existing" readonly></div>
+              <div class="field"><label>Tipe Dokumen</label><input class="search" value="Permintaan Penawaran" readonly></div>
+            </div>
+            <div class="card compact" style="margin-top:12px;box-shadow:none">
+              <div class="toolbar" style="padding:14px 14px 0">
+                <div class="toolbar-left">
+                  <div class="mini-k">Item Kebutuhan RFQ</div>
+                </div>
+                <div class="toolbar-right">
+                  <input class="search" id="rfq-builder-search" placeholder="Cari kode, nama item, atau kategori">
+                </div>
+              </div>
+              <div class="card-pad" style="padding-top:12px">
+                <div class="builder-wrap">
+                  <div class="builder-topbar">
+                    <div class="mini-k">Tambah Item RFQ</div>
+                    <div class="mini-v" id="rfq-builder-selected">Belum ada item di dokumen RFQ ini.</div>
+                  </div>
+                  <div class="form-grid compact" style="padding:12px">
+                    <div class="field"><label>Kode Item</label><input class="search" id="rfq-line-code" placeholder="Kode / referensi"></div>
+                    <div class="field"><label>Nama Item</label><input class="search" id="rfq-line-name" placeholder="Nama item / kebutuhan"></div>
+                    <div class="field"><label>Kategori Item</label><input class="search" id="rfq-line-category" placeholder="Kategori item"></div>
+                    <div class="field"><label>UOM</label><input class="search" id="rfq-line-uom" value="PCS"></div>
+                    <div class="field"><label>Qty RFQ</label><input class="search" id="rfq-line-qty" type="number" min="1" value="0"></div>
+                    <div class="field" style="align-content:end"><button class="btn btn-ghost" type="button" onclick="addRfqDraftItem()">Tambah Item</button></div>
+                  </div>
+                  <div class="tw compact" style="max-height:360px">
+                    <table>
+                      <thead><tr><th>Kode</th><th>Nama Item</th><th>Kategori</th><th>UOM</th><th>Qty</th><th>Aksi</th></tr></thead>
+                      <tbody id="rfq-draft-body"></tbody>
+                    </table>
+                  </div>
+                  <div class="builder-summary" id="rfq-builder-summary"></div>
+                </div>
+              </div>
+            </div>
+            <div class="po-form-actions" style="margin-top:14px;justify-content:flex-end">
+              <button class="btn btn-ghost" type="button" onclick="toggleRfqForm(false)">Batal</button>
+              <button class="btn btn-primary" type="button" onclick="submitRfqForm()">Simpan RFQ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card compact"><div class="tw compact"><table id="table-rfq"><thead><tr><th class="sticky">No RFQ</th><th class="sticky">Tanggal</th><th class="sticky">Supplier</th><th class="sticky">Kategori</th><th class="sticky">Item</th><th class="sticky">Qty</th><th class="sticky">Lokasi</th><th class="sticky">Status</th><th class="sticky">Aksi</th></tr></thead><tbody id="tbl-rfq"></tbody></table></div></div>
+      </section>
+
+      <section class="section active" id="sec-po">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-po" placeholder="Cari nomor PO, vendor, atau gudang">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-po-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-po-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-po-vendor"></select>
+            <select class="select" id="filter-po-type">
+              <option value="">Semua Tipe PO</option>
+              <option value="LOCAL">Lokal</option>
+              <option value="IMPORT">Import</option>
+              <option value="FO">FO</option>
+            </select>
+            <select class="select" id="filter-po-status">
+              <option value="">Semua Status</option>
+              <option value="Draft">Draft</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Approved">Approved</option>
+              <option value="Ordered">Ordered</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="toggleRfqForm(true)">+ RFQ</button>
+            <button class="btn btn-ghost" onclick="openColumnModal('po')">Atur Kolom</button>
+            <button class="btn btn-ghost" onclick="exportSection('po')">Export</button>
+            <button class="btn btn-primary" onclick="quickAddPo()">+ Buat PO</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form po-form-card" id="po-form-card">
+          <div class="po-form-head">
+            <div>
+              <div class="po-form-title">Panel Buat Purchase Order</div>
+              <div class="po-form-sub">Semua pembelian direkap di sini, termasuk item master dan item umum/manual. Vendor existing dan vendor baru bisa dipakai di dokumen yang sama.</div>
+            </div>
+            <div class="badge b-info">Header-Detail Ringkas</div>
+          </div>
+          <div class="form-grid compact">
+            <div class="field"><label>Tipe PO</label><select class="select" id="po-form-type"><option value="LOCAL">Lokal</option><option value="IMPORT">Import</option><option value="FO">FO</option></select></div>
+            <div class="field"><label>Mode Supplier</label><select class="select" id="po-form-vendor-mode"><option value="EXISTING">Supplier Existing</option><option value="NEW">Supplier Baru</option></select></div>
+            <div class="field" id="po-vendor-existing-wrap">
+              <label>Supplier</label>
+              <input class="search vendor-select" id="po-form-vendor-search" list="po-form-vendor-list" placeholder="Cari supplier berdasarkan tipe PO">
+              <datalist id="po-form-vendor-list"></datalist>
+              <input id="po-form-vendor" type="hidden" value="">
+            </div>
+            <div class="field" id="po-vendor-new-wrap" style="display:none"><label>Nama Supplier Baru</label><input class="search" id="po-form-vendor-new" placeholder="Nama supplier baru"></div>
+            <div class="field field-sm"><label>Tanggal PO</label><input class="search" id="po-form-date" type="date" value="2026-03-21"></div>
+            <div class="field"><label>Gudang RM</label><select class="select" id="po-form-warehouse"></select></div>
+            <div class="field"><label>Status</label><select class="select" id="po-form-status"><option>Draft</option><option>Submitted</option><option>Approved</option><option>Ordered</option></select></div>
+            <div class="field field-sm"><label>Currency</label><input class="search" id="po-form-currency" value="IDR" readonly></div>
+            <div class="field field-sm" id="po-rate-wrap" style="display:none"><label>Kurs Hari Ini</label><input class="search" id="po-form-exchange-rate" type="number" value="0"></div>
+            <input id="po-form-source-rfq" type="hidden" value="">
+            <div class="field" style="grid-column:1 / -1"><label>Catatan</label><input class="search" id="po-form-note" value=""></div>
+            <div class="field" style="grid-column:1 / -1">
+              <label>Item Vendor</label>
+              <div class="builder-wrap">
+                <div class="builder-topbar">
+                  <div class="mini-k">Daftar Item Vendor</div>
+                  <input class="search" id="po-builder-search" placeholder="Cari kode, nama item, kategori">
+                </div>
+                <div class="tw">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th class="sticky">Kode</th>
+                        <th class="sticky">Nama Item</th>
+                        <th class="sticky">Kategori</th>
+                        <th class="sticky">Satuan</th>
+                        <th class="sticky">MOQ</th>
+                        <th class="sticky">Harga Beli</th>
+                        <th class="sticky">Qty Beli</th>
+                        <th class="sticky">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody id="po-builder-body"></tbody>
+                  </table>
+                </div>
+                <div class="builder-summary" id="po-builder-summary"></div>
+              </div>
+            </div>
+            <div class="field" style="grid-column:1 / -1">
+              <label>Item Umum / Manual</label>
+              <div class="builder-wrap">
+                <div class="builder-topbar">
+                  <div class="mini-k">Tambah Item Manual</div>
+                </div>
+                <div class="form-grid compact" style="padding:12px">
+                  <div class="field"><label>Kode Item</label><input class="search" id="po-manual-code" placeholder="Kode / referensi"></div>
+                  <div class="field"><label>Nama Item</label><input class="search" id="po-manual-name" placeholder="Nama item umum"></div>
+                  <div class="field"><label>Kategori</label><input class="search" id="po-manual-category" placeholder="Kategori"></div>
+                  <div class="field"><label>UOM</label><input class="search" id="po-manual-uom" value="PCS"></div>
+                  <div class="field"><label>Harga Beli</label><input class="search" id="po-manual-rate" type="number" min="0" value="0"></div>
+                  <div class="field"><label>Qty Beli</label><input class="search" id="po-manual-qty" type="number" min="0" value="0"></div>
+                  <div class="field" style="align-content:end"><button class="btn btn-ghost" type="button" onclick="addManualPoItem()">Tambah Item Manual</button></div>
+                </div>
+                <div class="tw" style="max-height:180px">
+                  <table>
+                    <thead><tr><th>Kode</th><th>Nama Item</th><th>Kategori</th><th>UOM</th><th>Harga Beli</th><th>Qty Beli</th><th>Subtotal</th><th>Aksi</th></tr></thead>
+                    <tbody id="po-manual-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="field" style="grid-column:1 / -1">
+              <label>Termin Pembayaran</label>
+              <div class="terms-grid">
+                <div class="field field-sm"><label>DP (%)</label><input class="search pct-input po-term-input" id="po-form-dp-pct" type="number" placeholder="%"></div>
+                <div class="field field-sm"><label>Termin 2 (%)</label><input class="search pct-input po-term-input" id="po-form-term2-pct" type="number" placeholder="%"></div>
+                <div class="field field-sm"><label>Termin 3 (%)</label><input class="search pct-input po-term-input" id="po-form-term3-pct" type="number" placeholder="%"></div>
+                <div class="field"><label>Terms Note</label><input class="search" id="po-form-payment-note" value="Pembayaran bertahap sesuai termin"></div>
+              </div>
+            </div>
+            <div class="field" style="grid-column:1 / -1;align-content:end">
+              <div class="po-form-actions">
+                <button class="btn btn-ghost" type="button" onclick="togglePoForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitPoForm(false)">Simpan PO</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card compact"><div class="tw compact"><table id="table-po"><thead><tr><th class="sticky">No PO</th><th class="sticky">Tanggal</th><th class="sticky">Tipe</th><th class="sticky">Vendor</th><th class="sticky">Gudang</th><th class="sticky">Item</th><th class="sticky">Qty PO</th><th class="sticky">Open Qty</th><th class="sticky">Total Est.</th><th class="sticky">Pembuat</th><th class="sticky">Status</th><th class="sticky">Aksi</th></tr></thead><tbody id="tbl-po"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-receive">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-receive" placeholder="Cari nomor penerimaan, PO, vendor">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-receive-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-receive-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-receive-warehouse"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="openColumnModal('receive')">Atur Kolom</button>
+            <button class="btn btn-ghost" onclick="exportSection('receive')">Export</button>
+            <button class="btn btn-ghost" onclick="printReceivePdf()">Print PDF</button>
+            <button class="btn btn-primary" onclick="quickAddReceipt()">+ Penerimaan</button>
+          </div>
+        </div>
+        <div class="modal" id="receive-form-modal" onclick="if(event.target===this) toggleReceiveForm(false)">
+          <div class="modal-card" style="max-width:1120px">
+            <div class="po-form-head">
+              <div>
+                <div class="po-form-title">Penerimaan</div>
+                <div class="po-form-sub">Dokumen penerimaan multi-item dari PO open. Pilih item yang diterima dan isi qty realisasi.</div>
+              </div>
+              <div class="badge b-ok">Receipt from PO</div>
+            </div>
+            <div class="form-grid compact">
+              <div class="field"><label>Tanggal Penerimaan</label><input class="search" id="receive-form-date" type="date" value="2026-03-21"></div>
+              <div class="field"><label>Lokasi Penerimaan</label><select class="select" id="receive-form-warehouse"></select></div>
+              <div class="field"><label>Status</label><select class="select" id="receive-form-status"><option>Posted</option><option>Approved</option></select></div>
+              <div class="field"><label>Total Item</label><input class="search" id="receive-form-item-count" value="0" readonly></div>
+              <div class="field"><label>Total Qty</label><input class="search" id="receive-form-total-qty" value="0" readonly></div>
+              <div class="field"><label>Total Nilai</label><input class="search" id="receive-form-amount" value="Rp 0" readonly></div>
+            </div>
+            <div class="card compact" style="margin-top:12px;box-shadow:none">
+              <div class="toolbar" style="padding:14px 14px 0">
+                <div class="toolbar-left">
+                  <select class="select" id="receive-form-vendor-filter"><option value="">Semua Supplier</option></select>
+                  <input class="search" id="receive-form-search" placeholder="Cari PO, supplier, atau item">
+                </div>
+              </div>
+              <div class="tw compact" style="max-height:360px">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="sticky">No PO</th>
+                      <th class="sticky">Supplier</th>
+                      <th class="sticky">Lokasi</th>
+                      <th class="sticky">Item</th>
+                      <th class="sticky">UOM</th>
+                      <th class="sticky">Open Qty</th>
+                      <th class="sticky">Rate</th>
+                      <th class="sticky">Qty Terima</th>
+                    </tr>
+                  </thead>
+                  <tbody id="receive-pick-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="po-form-actions" style="margin-top:14px;justify-content:flex-end">
+              <button class="btn btn-ghost" type="button" onclick="toggleReceiveForm(false)">Batal</button>
+              <button class="btn btn-primary" type="button" onclick="submitReceiveForm()">Simpan Penerimaan</button>
+            </div>
+          </div>
+        </div>
+        <div class="card card-pad"><div class="receipt-summary" id="receive-recap"></div></div>
+        <div class="card compact"><div class="tw compact"><table id="table-receive"><thead><tr><th class="sticky">No Penerimaan</th><th class="sticky">Source PO</th><th class="sticky">Tanggal</th><th class="sticky">Vendor</th><th class="sticky">Lokasi</th><th class="sticky">Item</th><th class="sticky">Qty</th><th class="sticky">Nilai</th><th class="sticky">Pembuat</th><th class="sticky">Status</th><th class="sticky">Aksi</th></tr></thead><tbody id="tbl-receive"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-return">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-return" placeholder="Cari retur vendor">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-return-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-return-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-return-vendor"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="openColumnModal('return')">Atur Kolom</button>
+            <button class="btn btn-ghost" onclick="exportSection('return')">Export</button>
+            <button class="btn btn-primary" onclick="quickAddVendorReturn()">+ Retur Vendor</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form" id="vendor-return-form-card">
+          <div class="form-grid">
+            <div class="field"><label>Source Receipt</label><select class="select" id="vendor-return-form-receipt"></select></div>
+            <div class="field"><label>Tanggal Retur</label><input class="search" id="vendor-return-form-date" type="date" value="2026-03-21"></div>
+            <div class="field"><label>Qty Retur</label><input class="search" id="vendor-return-form-qty" type="number" value="2"></div>
+            <div class="field"><label>Status</label><select class="select" id="vendor-return-form-status"><option>Posted</option><option>Approved</option></select></div>
+            <div class="field"><label>Alasan</label><input class="search" id="vendor-return-form-reason" value="Tidak sesuai spesifikasi"></div>
+            <div class="field" style="grid-column:span 4;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="toggleVendorReturnForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitVendorReturnForm()">Simpan Retur</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card compact"><div class="tw compact"><table id="table-return"><thead><tr><th class="sticky">No Retur</th><th class="sticky">Tanggal</th><th class="sticky">Vendor</th><th class="sticky">Gudang</th><th class="sticky">Item</th><th class="sticky">Qty</th><th class="sticky">Alasan</th><th class="sticky">Pembuat</th><th class="sticky">Status</th><th class="sticky">Aksi</th></tr></thead><tbody id="tbl-return"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-tracking">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-tracking" placeholder="Cari PO, supplier, atau no tracking">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-tracking-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-tracking-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-tracking-order-status">
+              <option value="">Semua Status Order</option>
+              <option value="Draft">Draft</option>
+              <option value="Approved">Approved</option>
+              <option value="Ordered">Ordered</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Arrived">Arrived</option>
+              <option value="Partially Received">Partially Received</option>
+              <option value="Received">Received</option>
+              <option value="Closed">Closed</option>
+            </select>
+            <select class="select" id="filter-tracking-payment-status">
+              <option value="">Semua Status Bayar</option>
+              <option value="Unpaid">Unpaid</option>
+              <option value="DP Paid">DP Paid</option>
+              <option value="Partially Paid">Partially Paid</option>
+              <option value="Paid">Paid</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="openColumnModal('tracking')">Atur Kolom</button>
+            <button class="btn btn-ghost" onclick="exportSection('tracking')">Export</button>
+          </div>
+        </div>
+        <div class="modal" id="tracking-form-modal" onclick="if(event.target===this) toggleTrackingForm(false)">
+          <div class="modal-card" style="max-width:920px">
+            <div class="po-form-head">
+              <div>
+                <div class="po-form-title">Update Purchase Tracking</div>
+                <div class="po-form-sub">Monitoring progress pembelian per PO, termasuk pembayaran, pengiriman, ETA, dan penerimaan.</div>
+              </div>
+              <div class="badge b-info">PO Monitoring</div>
+            </div>
+            <div class="form-grid compact">
+              <div class="field"><label>No PO</label><input class="search mono" id="tracking-form-po-no" readonly></div>
+              <div class="field"><label>Supplier</label><input class="search" id="tracking-form-vendor" readonly></div>
+              <div class="field"><label>Lokasi Tujuan</label><input class="search" id="tracking-form-location" readonly></div>
+              <div class="field"><label>ETA</label><input class="search" id="tracking-form-eta" type="date"></div>
+              <div class="field"><label>Status Order</label><select class="select" id="tracking-form-order-status">
+                <option>Draft</option><option>Approved</option><option>Ordered</option><option>Shipped</option><option>Arrived</option><option>Partially Received</option><option>Received</option><option>Closed</option>
+              </select></div>
+              <div class="field"><label>Status Pembayaran</label><select class="select" id="tracking-form-payment-status">
+                <option>Unpaid</option><option>DP Paid</option><option>Partially Paid</option><option>Paid</option>
+              </select></div>
+              <div class="field"><label>Tanggal Bayar DP</label><input class="search" id="tracking-form-dp-date" type="date"></div>
+              <div class="field"><label>Tanggal Pelunasan</label><input class="search" id="tracking-form-paid-date" type="date"></div>
+              <div class="field"><label>Tanggal Kirim</label><input class="search" id="tracking-form-ship-date" type="date"></div>
+              <div class="field"><label>Tanggal Tiba</label><input class="search" id="tracking-form-arrive-date" type="date"></div>
+              <div class="field"><label>No Tracking / Resi</label><input class="search" id="tracking-form-tracking-no" placeholder="No tracking atau referensi kirim"></div>
+              <div class="field"><label>Open Qty</label><input class="search" id="tracking-form-open-qty" readonly></div>
+              <div class="field"><label>Qty Received</label><input class="search" id="tracking-form-received-qty" readonly></div>
+              <div class="field" style="grid-column:1 / -1"><label>Catatan Tracking</label><input class="search" id="tracking-form-note" placeholder="Catatan progress pembelian"></div>
+            </div>
+            <div class="po-form-actions" style="margin-top:14px;justify-content:flex-end">
+              <button class="btn btn-ghost" type="button" onclick="toggleTrackingForm(false)">Batal</button>
+              <button class="btn btn-primary" type="button" onclick="submitTrackingForm()">Simpan Tracking</button>
+            </div>
+          </div>
+        </div>
+        <div class="card compact"><div class="tw compact"><table id="table-tracking"><thead><tr><th class="sticky">No PO</th><th class="sticky">Tanggal PO</th><th class="sticky">Supplier</th><th class="sticky">Lokasi</th><th class="sticky">Qty PO</th><th class="sticky">Qty Received</th><th class="sticky">Open Qty</th><th class="sticky">ETA</th><th class="sticky">Status Bayar</th><th class="sticky">Status Order</th><th class="sticky">Tracking No</th><th class="sticky">Aksi</th></tr></thead><tbody id="tbl-tracking"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-outstanding">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-outstanding" placeholder="Cari open PO, vendor, item">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-outstanding-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-outstanding-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-outstanding-type">
+              <option value="">Semua Tipe PO</option>
+              <option value="LOCAL">Lokal</option>
+              <option value="IMPORT">Import</option>
+              <option value="FO">FO</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="openColumnModal('outstanding')">Atur Kolom</button>
+            <button class="btn btn-ghost" onclick="exportSection('outstanding')">Export</button>
+          </div>
+        </div>
+        <div class="card compact"><div class="tw compact"><table id="table-outstanding"><thead><tr><th class="sticky">No PO</th><th class="sticky">Tanggal</th><th class="sticky">Tipe</th><th class="sticky">Vendor</th><th class="sticky">Item</th><th class="sticky">Qty PO</th><th class="sticky">Qty Received</th><th class="sticky">Open Qty</th><th class="sticky">Outstanding Value</th><th class="sticky">Pembuat</th><th class="sticky">Status</th><th class="sticky">Aksi</th></tr></thead><tbody id="tbl-outstanding"></tbody></table></div></div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="modal" id="column-modal" onclick="if(event.target===this) closeColumnModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Atur Kolom Tabel</div>
+          <div class="modal-sub" id="column-modal-sub">Pilih kolom yang ingin ditampilkan.</div>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="closeColumnModal()">Tutup</button>
+      </div>
+      <div class="check-grid" id="column-modal-grid"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-ghost" type="button" onclick="resetColumnPrefs()">Reset</button>
+        <button class="btn btn-primary" type="button" onclick="saveColumnPrefs()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="detail-modal" onclick="if(event.target===this) closeDetailModal()">
+    <div class="modal-card" style="max-width:980px">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="detail-modal-title">Detail</div>
+          <div class="modal-sub" id="detail-modal-sub">Ringkasan dokumen.</div>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="closeDetailModal()">Tutup</button>
+      </div>
+      <div id="detail-modal-body"></div>
+    </div>
+  </div>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const TX = window.TRANSACTION_DATA || {};
+const RUNTIME = window.ERP_RUNTIME || {};
+const RM_WAREHOUSES = (DATA.gudangs || []).filter(x => x.warehouse_group === 'RM');
+const RECEIVE_STORES = DATA.tokos || [];
+const RECEIVE_LOCATIONS = RM_WAREHOUSES.map(w => ({
+  code: w.warehouse_code,
+  name: w.warehouse_name,
+  type: 'Gudang'
+})).concat(RECEIVE_STORES.map(s => ({
+  code: s.store_code,
+  name: s.store_name,
+  type: 'Toko'
+})));
+const VENDORS = DATA.vendors || [];
+const RMS = DATA.rm_items || [];
+const FGS = DATA.fg_items || [];
+const CATEGORIES = [...new Set(RMS.map(x => x.rm_category).filter(Boolean))].sort();
+
+function fmtMoney(n){
+  return new Intl.NumberFormat('id-ID').format(n || 0);
+}
+
+function badge(status){
+  const map = { Aktif:'b-ok', Draft:'b-draft', Submitted:'b-warn', Reviewed:'b-info', Approved:'b-info', Ordered:'b-ok', Posted:'b-ok', Open:'b-warn', Return:'b-err', Converted:'b-ok', Closed:'b-draft', Received:'b-ok', 'Partially Received':'b-warn', Unpaid:'b-draft', 'DP Paid':'b-info', 'Partially Paid':'b-warn', Paid:'b-ok', Shipped:'b-info', Arrived:'b-info' };
+  return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
+}
+
+const PURCHASE_ORDERS = TX.purchase_orders || [];
+const RECEIPTS = TX.receipts || [];
+const RETURNS = TX.vendor_returns || [];
+const CURRENT_USER_NAME = 'User Login';
+const COLUMN_PREFS_KEY = 'erp.purchasing.columnPrefs.v1';
+const IMPORT_RATE_KEY = 'erp.purchasing.lastImportRate.v1';
+let activeColumnSection = 'po';
+let columnPrefs = loadColumnPrefs();
+let poBuilderItems = [];
+let manualPoItems = [];
+let rfqDraftItems = [];
+let receiveQtyDraft = {};
+let RFQ_ROWS = readLocalRows('erp.purchasing.rfq');
+let TRACKING_ROWS = readLocalRows('erp.purchasing.tracking');
+let PO_STATUS_OVERRIDES = readLocalMap('erp.purchasing.po_statuses');
+const COLUMN_CONFIG = {
+  rfq: { tableId:'table-rfq', title:'RFQ', columns:['No RFQ','Tanggal','Supplier','Kategori','Item','Qty','Lokasi','Status','Aksi'] },
+  po: { tableId:'table-po', title:'Purchase Order', columns:['No PO','Tanggal','Tipe','Vendor','Gudang','Item','Qty PO','Open Qty','Total Est.','Pembuat','Status','Aksi'] },
+  receive: { tableId:'table-receive', title:'Penerimaan', columns:['No Penerimaan','Source PO','Tanggal','Vendor','Lokasi','Item','Qty','Nilai','Pembuat','Status','Aksi'] },
+  return: { tableId:'table-return', title:'Retur Vendor', columns:['No Retur','Tanggal','Vendor','Gudang','Item','Qty','Alasan','Pembuat','Status','Aksi'] },
+  tracking: { tableId:'table-tracking', title:'Purchase Tracking', columns:['No PO','Tanggal PO','Supplier','Lokasi','Qty PO','Qty Received','Open Qty','ETA','Status Bayar','Status Order','Tracking No','Aksi'] },
+  outstanding: { tableId:'table-outstanding', title:'Open PO', columns:['No PO','Tanggal','Tipe','Vendor','Item','Qty PO','Qty Received','Open Qty','Outstanding Value','Pembuat','Status','Aksi'] },
+};
+
+function loadColumnPrefs(){
+  try{
+    const raw = window.localStorage.getItem(COLUMN_PREFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(_err){
+    return {};
+  }
+}
+
+function persistColumnPrefs(){
+  window.localStorage.setItem(COLUMN_PREFS_KEY, JSON.stringify(columnPrefs));
+}
+
+function readLocalRows(key){
+  try{
+    const raw = window.localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(_err){
+    return [];
+  }
+}
+
+function writeLocalRows(key, rows){
+  window.localStorage.setItem(key, JSON.stringify(rows || []));
+}
+
+function readLocalMap(key){
+  try{
+    const raw = window.localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  }catch(_err){
+    return {};
+  }
+}
+
+function writeLocalMap(key, value){
+  window.localStorage.setItem(key, JSON.stringify(value || {}));
+}
+
+function shiftDate(dateStr, days){
+  const base = new Date(`${dateStr || '2026-03-24'}T00:00:00`);
+  if(Number.isNaN(base.getTime())) return dateStr || '2026-03-24';
+  base.setDate(base.getDate() + Number(days || 0));
+  return base.toISOString().slice(0, 10);
+}
+
+function appendFinanceAp(row){
+  const rows = readLocalRows('erp.extra.finance_ap');
+  rows.push(row);
+  writeLocalRows('erp.extra.finance_ap', rows);
+}
+
+function appendFinanceJournal(row){
+  const rows = readLocalRows('erp.extra.finance_journal');
+  rows.push(row);
+  writeLocalRows('erp.extra.finance_journal', rows);
+}
+
+function getVendorOrigin(vendorCode, vendorName){
+  const vendor = VENDORS.find(v => v.vendor_code === vendorCode) || VENDORS.find(v => v.vendor_name === vendorName);
+  return /LTD/i.test(vendor?.vendor_name || vendorName || '') ? 'IMPORT' : 'LOCAL';
+}
+
+function getPoVendorHeader(){
+  const mode = document.getElementById('po-form-vendor-mode')?.value || 'EXISTING';
+  if(mode === 'NEW'){
+    const vendorName = String(document.getElementById('po-form-vendor-new')?.value || '').trim();
+    return {
+      vendor_code: `NEWV-${normalizeDateCode(document.getElementById('po-form-date')?.value || '2026-03-21')}`,
+      vendor_name: vendorName,
+      is_new_vendor: true
+    };
+  }
+  const vendorCode = document.getElementById('po-form-vendor')?.value || '';
+  const vendor = VENDORS.find(v => v.vendor_code === vendorCode) || {};
+  return {
+    vendor_code: vendor.vendor_code || '',
+    vendor_name: vendor.vendor_name || '',
+    is_new_vendor: false
+  };
+}
+
+function togglePoVendorMode(){
+  const mode = document.getElementById('po-form-vendor-mode')?.value || 'EXISTING';
+  const existingWrap = document.getElementById('po-vendor-existing-wrap');
+  const newWrap = document.getElementById('po-vendor-new-wrap');
+  if(existingWrap) existingWrap.style.display = mode === 'EXISTING' ? '' : 'none';
+  if(newWrap) newWrap.style.display = mode === 'NEW' ? '' : 'none';
+  if(mode === 'EXISTING') populatePoVendorOptions();
+  renderPoBuilder();
+}
+
+function getEligibleVendorsForPo(type){
+  return VENDORS.filter(vendor => getVendorItemsForPo(type, vendor.vendor_code).length > 0);
+}
+
+function populatePoVendorOptions(){
+  const type = document.getElementById('po-form-type')?.value || 'LOCAL';
+  const input = document.getElementById('po-form-vendor-search');
+  const list = document.getElementById('po-form-vendor-list');
+  const hidden = document.getElementById('po-form-vendor');
+  if(!input || !list || !hidden) return;
+  const eligible = getEligibleVendorsForPo(type);
+  list.innerHTML = eligible.map(v => `<option value="${v.vendor_code} - ${v.vendor_name}"></option>`).join('');
+  const current = eligible.find(v => v.vendor_code === hidden.value);
+  if(current){
+    input.value = `${current.vendor_code} - ${current.vendor_name}`;
+  }else if(eligible[0]){
+    hidden.value = eligible[0].vendor_code;
+    input.value = `${eligible[0].vendor_code} - ${eligible[0].vendor_name}`;
+  }else{
+    hidden.value = '';
+    input.value = '';
+  }
+}
+
+function syncPoVendorSelection(){
+  const input = document.getElementById('po-form-vendor-search');
+  const hidden = document.getElementById('po-form-vendor');
+  if(!input || !hidden) return;
+  const raw = String(input.value || '').trim().toLowerCase();
+  const type = document.getElementById('po-form-type')?.value || 'LOCAL';
+  const eligible = getEligibleVendorsForPo(type);
+  const match = eligible.find(v => {
+    const label = `${v.vendor_code} - ${v.vendor_name}`.toLowerCase();
+    return label === raw || String(v.vendor_code || '').toLowerCase() === raw || String(v.vendor_name || '').toLowerCase() === raw;
+  });
+  hidden.value = match?.vendor_code || '';
+  renderPoBuilder();
+}
+
+function renderManualPoItems(){
+  const body = document.getElementById('po-manual-body');
+  if(!body) return;
+  body.innerHTML = manualPoItems.length ? manualPoItems.map((item, index) => `
+    <tr>
+      <td class="mono">${item.item_code || '-'}</td>
+      <td>${item.item_name}</td>
+      <td>${item.item_category || '-'}</td>
+      <td>${item.uom_code || '-'}</td>
+      <td>Rp ${fmtMoney(item.rate || 0)}</td>
+      <td>${fmtMoney(item.qty || 0)}</td>
+      <td>Rp ${fmtMoney((item.qty || 0) * (item.rate || 0))}</td>
+      <td><button class="btn btn-ghost" type="button" onclick="removeManualPoItem(${index})">Hapus</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Belum ada item manual.</td></tr>`;
+}
+
+function addManualPoItem(){
+  const item = {
+    item_code: String(document.getElementById('po-manual-code')?.value || '').trim() || `MAN-${manualPoItems.length + 1}`,
+    item_name: String(document.getElementById('po-manual-name')?.value || '').trim(),
+    item_category: String(document.getElementById('po-manual-category')?.value || '').trim(),
+    uom_code: String(document.getElementById('po-manual-uom')?.value || 'PCS').trim() || 'PCS',
+    rate: Number(document.getElementById('po-manual-rate')?.value || 0),
+    qty: Number(document.getElementById('po-manual-qty')?.value || 0),
+    moq: 0,
+    item_type: 'MANUAL'
+  };
+  if(!item.item_name || !item.qty) return toast('Lengkapi item manual dan qty beli.');
+  manualPoItems.push(item);
+  ['po-manual-code','po-manual-name','po-manual-category','po-manual-uom','po-manual-rate','po-manual-qty'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(id === 'po-manual-uom') el.value = 'PCS';
+    else if(id === 'po-manual-rate' || id === 'po-manual-qty') el.value = '0';
+    else el.value = '';
+  });
+  renderManualPoItems();
+  updatePoBuilderSummary();
+}
+
+function removeManualPoItem(index){
+  manualPoItems.splice(index, 1);
+  renderManualPoItems();
+  updatePoBuilderSummary();
+}
+
+function getPoType(po){
+  if(po.po_type) return po.po_type;
+  if(/FRAGRANCE OIL/i.test(po.item_category || '') || /^FO-/i.test(po.item_code || '')) return 'FO';
+  return getVendorOrigin(po.vendor_code, po.vendor_name);
+}
+
+function getPoLineKey(po){
+  return po.po_line_key || `${po.po_no}__${po.item_code}`;
+}
+
+function getReceiptQtyByPoLine(poLineKey){
+  return RECEIPTS.filter(r => (r.source_po_line || `${r.source_po}__${r.item_code}`) === poLineKey).reduce((sum, r) => sum + Number(r.qty || 0), 0);
+}
+
+function getReturnQtyByReceipt(receiveNo){
+  return RETURNS.filter(r => r.source_receipt === receiveNo || r.receive_no === receiveNo).reduce((sum, r) => sum + Number(r.qty || 0), 0);
+}
+
+function getReceiptMasterMeta(itemCode){
+  const item = RMS.find(r => r.rm_code === itemCode) || {};
+  const vendorCode = item.default_vendor_code || '';
+  const vendor = VENDORS.find(v => v.vendor_code === vendorCode || v.vendor_name === item.primary_supplier) || {};
+  return {
+    item_name: item.rm_name || '',
+    uom_code: item.uom_code || '',
+    vendor_code: vendorCode || vendor.vendor_code || '',
+    vendor_name: vendor.vendor_name || item.primary_supplier || '',
+    purchase_price: Number(item.purchase_price || 0),
+    minimum_buy: Number(item.minimum_buy || 0)
+  };
+}
+
+function getReceiveLocationLabel(code){
+  const location = RECEIVE_LOCATIONS.find(x => x.code === code);
+  if(!location) return code || '-';
+  return `${location.code} - ${location.name}`;
+}
+
+function getReceiveRows(){
+  return RECEIPTS.map(row => {
+    const meta = getReceiptMasterMeta(row.item_code);
+    const vendorMismatch = !!(meta.vendor_name && row.vendor_name && meta.vendor_name !== row.vendor_name);
+    return {
+      ...row,
+      item_name: row.item_name || meta.item_name || row.item_code || '-',
+      vendor_code: meta.vendor_code || row.vendor_code || '',
+      vendor_name: meta.vendor_name || row.vendor_name || '-',
+      purchase_price: meta.purchase_price,
+      minimum_buy: meta.minimum_buy,
+      vendor_mismatch: vendorMismatch
+    };
+  });
+}
+
+function getOpenQty(po){
+  return Math.max(0, Number(po.qty || 0) - getReceiptQtyByPoLine(getPoLineKey(po)));
+}
+
+function getOutstandingRows(){
+  return PURCHASE_ORDERS.map(po => {
+    const poLineKey = getPoLineKey(po);
+    const receivedQty = getReceiptQtyByPoLine(poLineKey);
+    const openQty = Math.max(0, Number(po.qty || 0) - receivedQty);
+    const unitRate = Number(po.rate || 0) || Math.round((po.total_est || 0) / Math.max(1, Number(po.qty || 0)));
+    return {
+      ...po,
+      po_line_key: poLineKey,
+      po_type: getPoType(po),
+      received_qty: receivedQty,
+      open_qty: openQty,
+      outstanding_value: openQty * unitRate,
+      status: PO_STATUS_OVERRIDES[po.po_no] || po.status
+    };
+  });
+}
+
+function getTrackingRows(){
+  const poGroups = new Map();
+  getOutstandingRows().forEach(row => {
+    const current = poGroups.get(row.po_no) || {
+      po_no: row.po_no,
+      po_date: row.po_date,
+      vendor_code: row.vendor_code,
+      vendor_name: row.vendor_name,
+      location_code: row.warehouse_code,
+      qty: 0,
+      received_qty: 0,
+      open_qty: 0,
+      outstanding_value: 0,
+      status: row.status
+    };
+    current.qty += Number(row.qty || 0);
+    current.received_qty += Number(row.received_qty || 0);
+    current.open_qty += Number(row.open_qty || 0);
+    current.outstanding_value += Number(row.outstanding_value || 0);
+    if(String(row.po_date || '') > String(current.po_date || '')) current.po_date = row.po_date;
+    poGroups.set(row.po_no, current);
+  });
+
+  return Array.from(poGroups.values()).map(row => {
+    const override = TRACKING_ROWS.find(x => x.po_no === row.po_no) || {};
+    let orderStatus = override.order_status || '';
+    if(!orderStatus){
+      if(row.open_qty <= 0) orderStatus = 'Received';
+      else if(row.received_qty > 0) orderStatus = 'Partially Received';
+      else if(row.status === 'Draft') orderStatus = 'Draft';
+      else if(row.status === 'Approved') orderStatus = 'Approved';
+      else orderStatus = 'Ordered';
+    }
+    let paymentStatus = override.payment_status || '';
+    if(!paymentStatus){
+      if(override.final_paid_date) paymentStatus = 'Paid';
+      else if(override.dp_paid_date && Number(override.dp_paid_pct || 0) > 0) paymentStatus = 'Partially Paid';
+      else if(override.dp_paid_date) paymentStatus = 'DP Paid';
+      else paymentStatus = 'Unpaid';
+    }
+    return {
+      ...row,
+      eta_date: override.eta_date || '',
+      ship_date: override.ship_date || '',
+      arrive_date: override.arrive_date || '',
+      dp_paid_date: override.dp_paid_date || '',
+      final_paid_date: override.final_paid_date || '',
+      payment_status: paymentStatus,
+      order_status: orderStatus,
+      tracking_no: override.tracking_no || '',
+      note: override.note || ''
+    };
+  });
+}
+
+function getPoDocumentSummaries(){
+  const map = new Map();
+  getOutstandingRows().forEach(row => {
+    const current = map.get(row.po_no) || {
+      po_no: row.po_no,
+      po_date: row.po_date,
+      po_type: row.po_type,
+      vendor_code: row.vendor_code,
+      vendor_name: row.vendor_name,
+      warehouse_code: row.warehouse_code,
+      qty: 0,
+      open_qty: 0,
+      total_est: 0,
+      line_count: 0,
+      item_preview: [],
+      item_search: '',
+      created_by: row.created_by || CURRENT_USER_NAME,
+      status: row.status
+    };
+    current.qty += Number(row.qty || 0);
+    current.open_qty += Number(row.open_qty || 0);
+    current.total_est += Number(row.total_est || 0);
+    current.line_count += 1;
+    if(current.item_preview.length < 3){
+      current.item_preview.push(`${row.item_code || '-'}${row.item_name ? ` - ${row.item_name}` : ''}`);
+    }
+    current.item_search += ` ${row.item_code || ''} ${row.item_name || ''}`;
+    map.set(row.po_no, current);
+  });
+  return Array.from(map.values());
+}
+
+function getReceiveDocumentSummaries(){
+  const map = new Map();
+  getReceiveRows().forEach(row => {
+    const current = map.get(row.receive_no) || {
+      receive_no: row.receive_no,
+      source_po: row.source_po,
+      receive_date: row.receive_date,
+      vendor_code: row.vendor_code,
+      vendor_name: row.vendor_name,
+      warehouse_code: row.warehouse_code,
+      qty: 0,
+      amount: 0,
+      line_count: 0,
+      item_preview: [],
+      item_search: '',
+      created_by: row.created_by || CURRENT_USER_NAME,
+      status: row.status
+    };
+    current.qty += Number(row.qty || 0);
+    current.amount += Number(row.amount || 0);
+    current.line_count += 1;
+    if(current.item_preview.length < 3){
+      current.item_preview.push(`${row.item_code || '-'}${row.item_name ? ` - ${row.item_name}` : ''}`);
+    }
+    current.item_search += ` ${row.item_code || ''} ${row.item_name || ''}`;
+    map.set(row.receive_no, current);
+  });
+  return Array.from(map.values());
+}
+
+function getRfqDocumentSummaries(){
+  const map = new Map();
+  RFQ_ROWS.forEach(row => {
+    const current = map.get(row.rfq_no) || {
+      rfq_no: row.rfq_no,
+      rfq_date: row.rfq_date,
+      vendor_code: row.vendor_code,
+      vendor_name: row.vendor_name,
+      vendor_category: row.vendor_category,
+      location_code: row.location_code,
+      status: row.status,
+      line_count: 0,
+      total_qty: 0,
+      item_preview: [],
+      item_search: '',
+      is_new_vendor: row.is_new_vendor,
+      note: row.note || ''
+    };
+    current.line_count += 1;
+    current.total_qty += Number(row.qty || 0);
+    if(current.item_preview.length < 3){
+      current.item_preview.push(`${row.item_code || '-'}${row.item_name ? ` - ${row.item_name}` : ''}`);
+    }
+    current.item_search += ` ${row.item_code || ''} ${row.item_name || ''}`;
+    map.set(row.rfq_no, current);
+  });
+  return Array.from(map.values());
+}
+
+function getPoDocumentRows(poNo){
+  return PURCHASE_ORDERS.filter(x => x.po_no === poNo);
+}
+
+function getReceiptDocumentRows(receiveNo){
+  return getReceiveRows().filter(x => x.receive_no === receiveNo);
+}
+
+function getReturnDocumentRows(returnNo){
+  return RETURNS.filter(x => x.return_no === returnNo);
+}
+
+function openDetailModal(title, sub, html){
+  document.getElementById('detail-modal-title').textContent = title;
+  document.getElementById('detail-modal-sub').textContent = sub || '';
+  document.getElementById('detail-modal-body').innerHTML = html;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function closeDetailModal(){
+  document.getElementById('detail-modal').classList.remove('open');
+}
+
+function renderMetaGrid(items){
+  return `<div class="receipt-summary" style="margin:0 0 14px">${items.map(item => `
+    <div class="mini-item">
+      <div class="mini-k">${item.label}</div>
+      <div class="mini-v">${item.value}</div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function viewRfqDetail(rfqNo){
+  const rows = RFQ_ROWS.filter(x => x.rfq_no === rfqNo);
+  if(!rows.length) return;
+  const row = rows[0];
+  openDetailModal(
+    `Detail RFQ ${row.rfq_no}`,
+    'Dokumen permintaan penawaran sebelum dibuat menjadi purchase order.',
+    renderMetaGrid([
+      { label:'Tanggal RFQ', value: row.rfq_date || '-' },
+      { label:'Supplier', value: row.vendor_name || '-' },
+      { label:'Lokasi', value: getReceiveLocationLabel(row.location_code) },
+      { label:'Status', value: row.status || '-' },
+      { label:'Total Item', value: fmtMoney(rows.length) },
+      { label:'Total Qty', value: fmtMoney(rows.reduce((sum, item) => sum + Number(item.qty || 0), 0)) }
+    ]) + `
+      <div class="card compact"><div class="tw compact"><table><thead><tr><th>Item</th><th>Kategori</th><th>UOM</th><th>Qty</th><th>Catatan</th></tr></thead>
+      <tbody>${rows.map(item => `<tr><td><span class="mono">${item.item_code || '-'}</span><br>${item.item_name || '-'}</td><td>${item.item_category || item.vendor_category || '-'}</td><td>${item.uom_code || '-'}</td><td>${fmtMoney(item.qty || 0)}</td><td>${item.note || '-'}</td></tr>`).join('')}</tbody></table></div></div>
+    `
+  );
+}
+
+function viewPoDetail(poNo){
+  const rows = getPoDocumentRows(poNo);
+  if(!rows.length) return;
+  const head = rows[0];
+  openDetailModal(
+    `Detail PO ${poNo}`,
+    'Dokumen purchase order beserta line item, termin, dan status outstanding.',
+    renderMetaGrid([
+      { label:'Tanggal PO', value: head.po_date || '-' },
+      { label:'Supplier', value: head.vendor_name || '-' },
+      { label:'Lokasi Tujuan', value: getReceiveLocationLabel(head.warehouse_code) },
+      { label:'Tipe PO', value: head.po_type || '-' },
+      { label:'Total Qty', value: fmtMoney(rows.reduce((sum, r) => sum + Number(r.qty || 0), 0)) },
+      { label:'Open Qty', value: fmtMoney(rows.reduce((sum, r) => sum + getOpenQty(r), 0)) },
+      { label:'Total Est.', value: `Rp ${fmtMoney(rows.reduce((sum, r) => sum + Number(r.total_est || 0), 0))}` },
+      { label:'Status', value: head.status || '-' }
+    ]) + `
+      <div class="card compact"><div class="tw compact"><table><thead><tr><th>Kode</th><th>Item</th><th>UOM</th><th>Qty PO</th><th>Received</th><th>Open</th><th>Rate</th><th>Subtotal</th></tr></thead>
+      <tbody>${rows.map(r => `
+        <tr>
+          <td class="mono">${r.item_code || '-'}</td>
+          <td>${r.item_name || '-'}</td>
+          <td>${r.uom_code || '-'}</td>
+          <td>${fmtMoney(r.qty || 0)}</td>
+          <td>${fmtMoney(getReceiptQtyByPoLine(getPoLineKey(r)) || 0)}</td>
+          <td>${fmtMoney(getOpenQty(r) || 0)}</td>
+          <td>Rp ${fmtMoney(r.rate || 0)}</td>
+          <td>Rp ${fmtMoney(r.total_est || 0)}</td>
+        </tr>`).join('')}</tbody></table></div></div>
+    `
+  );
+}
+
+function viewReceiveDetail(receiveNo){
+  const rows = getReceiptDocumentRows(receiveNo);
+  if(!rows.length) return;
+  const head = rows[0];
+  openDetailModal(
+    `Detail Penerimaan ${receiveNo}`,
+    'Dokumen receipt multi-item dari purchase order.',
+    renderMetaGrid([
+      { label:'Tanggal', value: head.receive_date || '-' },
+      { label:'Source PO', value: head.source_po || '-' },
+      { label:'Supplier', value: head.vendor_name || '-' },
+      { label:'Lokasi', value: getReceiveLocationLabel(head.warehouse_code) },
+      { label:'Total Qty', value: fmtMoney(rows.reduce((sum, r) => sum + Number(r.qty || 0), 0)) },
+      { label:'Total Nilai', value: `Rp ${fmtMoney(rows.reduce((sum, r) => sum + Number(r.amount || 0), 0))}` }
+    ]) + `
+      <div class="card compact"><div class="tw compact"><table><thead><tr><th>Kode</th><th>Item</th><th>UOM</th><th>Qty</th><th>Nilai</th><th>Status</th></tr></thead>
+      <tbody>${rows.map(r => `
+        <tr>
+          <td class="mono">${r.item_code || '-'}</td>
+          <td>${r.item_name || '-'}</td>
+          <td>${r.uom_code || '-'}</td>
+          <td>${fmtMoney(r.qty || 0)}</td>
+          <td>Rp ${fmtMoney(r.amount || 0)}</td>
+          <td>${r.status || '-'}</td>
+        </tr>`).join('')}</tbody></table></div></div>
+    `
+  );
+}
+
+function printReceiveDoc(receiveNo){
+  const rows = getReceiptDocumentRows(receiveNo);
+  if(!rows.length) return toast('Dokumen penerimaan tidak ditemukan.');
+  const head = rows[0];
+  const html = `
+    <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Penerimaan ${receiveNo}</title>
+    <style>
+      body{font-family:Arial,sans-serif;color:#0f172a;margin:0;background:#fff}.page{padding:28px 32px}
+      .head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:18px}
+      .brand{font-size:22px;font-weight:800}.meta{font-size:12px;line-height:1.6;color:#475569}
+      .title{font-size:28px;font-weight:800;text-align:right;margin-bottom:10px}
+      .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+      .box{border:1px solid #CBD5E1;padding:10px 12px}.box b{display:block;font-size:11px;color:#64748B;text-transform:uppercase;margin-bottom:6px}
+      table{width:100%;border-collapse:collapse}.items th,.items td{border:1px solid #CBD5E1;padding:8px 10px;font-size:12px}
+      .items th{background:#1E3A8A;color:#fff;text-align:left}.mono{font-family:'Courier New',monospace}
+    </style></head><body><div class="page">
+      <div class="head">
+        <div><div class="brand">ERP Mandalika</div><div class="meta">Purchasing Receipt Document<br>Tanggal cetak: 2026-03-24</div></div>
+        <div><div class="title">PENERIMAAN</div><div class="meta">No Dokumen: ${receiveNo}<br>Source PO: ${head.source_po || '-'}</div></div>
+      </div>
+      <div class="summary">
+        <div class="box"><b>Tanggal</b>${head.receive_date || '-'}</div>
+        <div class="box"><b>Vendor</b>${head.vendor_name || '-'}</div>
+        <div class="box"><b>Lokasi</b>${getReceiveLocationLabel(head.warehouse_code)}</div>
+        <div class="box"><b>Status</b>${head.status || '-'}</div>
+      </div>
+      <table class="items">
+        <thead><tr><th>Kode</th><th>Item</th><th>UOM</th><th>Qty</th><th>Nilai</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td class="mono">${r.item_code || '-'}</td><td>${r.item_name || '-'}</td><td>${r.uom_code || '-'}</td><td>${fmtMoney(r.qty || 0)}</td><td>Rp ${fmtMoney(r.amount || 0)}</td></tr>`).join('')}</tbody>
+      </table>
+    </div></body></html>`;
+  const win = window.open('', '_blank', 'width=1200,height=860');
+  if(!win) return toast('Popup print diblokir browser.');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 250);
+}
+
+function viewReturnDetail(returnNo){
+  const rows = getReturnDocumentRows(returnNo);
+  if(!rows.length) return;
+  const head = rows[0];
+  openDetailModal(
+    `Detail Retur ${returnNo}`,
+    'Dokumen retur vendor dari penerimaan yang sudah masuk.',
+    renderMetaGrid([
+      { label:'Tanggal Retur', value: head.return_date || '-' },
+      { label:'Vendor', value: head.vendor_name || '-' },
+      { label:'Lokasi', value: getReceiveLocationLabel(head.warehouse_code) },
+      { label:'Source Receipt', value: head.source_receipt || '-' },
+      { label:'Total Qty', value: fmtMoney(rows.reduce((sum, r) => sum + Number(r.qty || 0), 0)) },
+      { label:'Status', value: head.status || '-' }
+    ]) + `
+      <div class="card compact"><div class="tw compact"><table><thead><tr><th>Kode</th><th>Item</th><th>Qty</th><th>Alasan</th></tr></thead>
+      <tbody>${rows.map(r => `
+        <tr>
+          <td class="mono">${r.item_code || '-'}</td>
+          <td>${r.item_name || '-'}</td>
+          <td>${fmtMoney(r.qty || 0)}</td>
+          <td>${r.reason || '-'}</td>
+        </tr>`).join('')}</tbody></table></div></div>
+    `
+  );
+}
+
+function viewTrackingDetail(poNo){
+  const row = getTrackingRows().find(x => x.po_no === poNo);
+  if(!row) return;
+  openDetailModal(
+    `Tracking ${poNo}`,
+    'Monitoring pembayaran, pengiriman, ETA, dan penerimaan purchase order.',
+    renderMetaGrid([
+      { label:'Supplier', value: row.vendor_name || '-' },
+      { label:'Lokasi', value: getReceiveLocationLabel(row.location_code) },
+      { label:'Qty PO', value: fmtMoney(row.qty || 0) },
+      { label:'Qty Received', value: fmtMoney(row.received_qty || 0) },
+      { label:'Open Qty', value: fmtMoney(row.open_qty || 0) },
+      { label:'ETA', value: row.eta_date || '-' },
+      { label:'Status Bayar', value: row.payment_status || '-' },
+      { label:'Status Order', value: row.order_status || '-' }
+    ]) + `
+      <div class="card compact"><div class="card-pad">
+        <div class="mini-list">
+          <div class="mini-item"><div class="mini-k">Tanggal Bayar DP</div><div class="mini-v">${row.dp_paid_date || '-'}</div></div>
+          <div class="mini-item"><div class="mini-k">Tanggal Pelunasan</div><div class="mini-v">${row.final_paid_date || '-'}</div></div>
+          <div class="mini-item"><div class="mini-k">Tanggal Kirim</div><div class="mini-v">${row.ship_date || '-'}</div></div>
+          <div class="mini-item"><div class="mini-k">Tanggal Tiba</div><div class="mini-v">${row.arrive_date || '-'}</div></div>
+          <div class="mini-item"><div class="mini-k">Tracking No</div><div class="mini-v mono">${row.tracking_no || '-'}</div></div>
+          <div class="mini-item"><div class="mini-k">Catatan</div><div class="mini-v">${row.note || '-'}</div></div>
+        </div>
+      </div></div>
+    `
+  );
+}
+
+function jumpToSection(sec){
+  showSection(sec);
+}
+
+function jumpToTracking(poNo){
+  showSection('tracking');
+  setTimeout(() => toggleTrackingForm(true, poNo), 40);
+}
+
+function jumpToReceive(poNo=''){
+  showSection('receive');
+  setTimeout(() => {
+    toggleReceiveForm(true);
+    if(poNo){
+      const search = document.getElementById('receive-form-search');
+      if(search){
+        search.value = poNo;
+        renderReceivePicker();
+      }
+    }
+  }, 40);
+}
+
+function getItemLabel(po){
+  return po.item_code && po.item_name ? `<span class="mono">${po.item_code}</span><br>${po.item_name}` : '-';
+}
+
+function bySearch(arr, keys, q){
+  const term = (q || '').trim().toLowerCase();
+  if(!term) return arr;
+  return arr.filter(row => keys.some(k => String(row[k] || '').toLowerCase().includes(term)));
+}
+
+function normalizeDateCode(dateStr){
+  return String(dateStr || '2026-03-21').replace(/-/g,'');
+}
+
+function nextDailyDoc(prefix, rows, field, dateStr){
+  const dateCode = normalizeDateCode(dateStr);
+  const matches = rows
+    .map(r => String(r[field] || ''))
+    .filter(v => v.startsWith(`${prefix}-${dateCode}-`))
+    .map(v => Number(v.split('-').pop()))
+    .filter(n => !Number.isNaN(n));
+  const seq = (matches.length ? Math.max(...matches) : 0) + 1;
+  return `${prefix}-${dateCode}-${String(seq).padStart(3,'0')}`;
+}
+
+function openColumnModal(section){
+  activeColumnSection = section;
+  const config = COLUMN_CONFIG[section];
+  const prefs = columnPrefs[section] || {};
+  document.getElementById('column-modal-sub').textContent = `Atur kolom yang tampil untuk ${config.title}.`;
+  document.getElementById('column-modal-grid').innerHTML = config.columns.map((label, index) => {
+    const checked = prefs[index] !== false;
+    return `<label class="check-item"><input type="checkbox" data-col-index="${index}" ${checked ? 'checked' : ''}> <span>${label}</span></label>`;
+  }).join('');
+  document.getElementById('column-modal').classList.add('open');
+}
+
+function closeColumnModal(){
+  document.getElementById('column-modal').classList.remove('open');
+}
+
+function saveColumnPrefs(){
+  const picks = {};
+  document.querySelectorAll('#column-modal-grid input[type="checkbox"]').forEach(input => {
+    picks[input.dataset.colIndex] = input.checked;
+  });
+  columnPrefs[activeColumnSection] = picks;
+  persistColumnPrefs();
+  applyColumnVisibility(activeColumnSection);
+  closeColumnModal();
+}
+
+function resetColumnPrefs(){
+  delete columnPrefs[activeColumnSection];
+  persistColumnPrefs();
+  openColumnModal(activeColumnSection);
+  applyColumnVisibility(activeColumnSection);
+}
+
+function applyColumnVisibility(section){
+  const config = COLUMN_CONFIG[section];
+  const table = document.getElementById(config.tableId);
+  if(!table) return;
+  const prefs = columnPrefs[section] || {};
+  Array.from(table.rows).forEach(row => {
+    Array.from(row.cells).forEach((cell, index) => {
+      cell.style.display = prefs[index] === false ? 'none' : '';
+    });
+  });
+}
+
+function renderKpis(){
+  const outstanding = getOutstandingRows();
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Vendor Aktif</div><div class="kpi-val">${VENDORS.length}</div></div>
+    <div class="kpi"><div class="kpi-label">RFQ Aktif</div><div class="kpi-val">${RFQ_ROWS.filter(x => x.status !== 'Converted').length}</div></div>
+    <div class="kpi"><div class="kpi-label">PO Open</div><div class="kpi-val">${outstanding.filter(x => x.open_qty > 0).length}</div></div>
+    <div class="kpi"><div class="kpi-label">Outstanding Qty</div><div class="kpi-val">${fmtMoney(outstanding.reduce((sum, x) => sum + x.open_qty, 0))}</div></div>
+    <div class="kpi"><div class="kpi-label">Tracking Aktif</div><div class="kpi-val">${getTrackingRows().filter(x => !['Received','Closed'].includes(x.order_status)).length}</div></div>
+  `;
+}
+
+function toggleRfqVendorMode(){
+  const mode = document.getElementById('rfq-form-vendor-mode')?.value || 'EXISTING';
+  const existingWrap = document.getElementById('rfq-vendor-existing-wrap');
+  const newWrap = document.getElementById('rfq-vendor-new-wrap');
+  const modeLabel = document.getElementById('rfq-form-vendor-mode-label');
+  if(existingWrap) existingWrap.style.display = mode === 'EXISTING' ? '' : 'none';
+  if(newWrap) newWrap.style.display = mode === 'NEW' ? '' : 'none';
+  if(modeLabel) modeLabel.value = mode === 'NEW' ? 'Supplier Baru' : 'Supplier Existing';
+  if(mode === 'EXISTING') populateRfqVendorOptions();
+}
+
+function populateRfqVendorOptions(){
+  const input = document.getElementById('rfq-form-vendor-search');
+  const list = document.getElementById('rfq-form-vendor-list');
+  const hidden = document.getElementById('rfq-form-vendor');
+  if(!input || !list || !hidden) return;
+  const eligible = VENDORS.slice(0, 120);
+  list.innerHTML = eligible.map(v => `<option value="${v.vendor_code} - ${v.vendor_name}"></option>`).join('');
+  const current = eligible.find(v => v.vendor_code === hidden.value);
+  if(current){
+    input.value = `${current.vendor_code} - ${current.vendor_name}`;
+  }else if(eligible[0]){
+    hidden.value = eligible[0].vendor_code;
+    input.value = `${eligible[0].vendor_code} - ${eligible[0].vendor_name}`;
+  }else{
+    hidden.value = '';
+    input.value = '';
+  }
+}
+
+function syncRfqVendorSelection(){
+  const input = document.getElementById('rfq-form-vendor-search');
+  const hidden = document.getElementById('rfq-form-vendor');
+  if(!input || !hidden) return;
+  const raw = String(input.value || '').trim().toLowerCase();
+  const match = VENDORS.find(v => {
+    const label = `${v.vendor_code} - ${v.vendor_name}`.toLowerCase();
+    return label === raw || String(v.vendor_code || '').toLowerCase() === raw || String(v.vendor_name || '').toLowerCase() === raw;
+  });
+  hidden.value = match?.vendor_code || '';
+}
+
+function renderRfqDraftItems(){
+  const body = document.getElementById('rfq-draft-body');
+  if(!body) return;
+  const keyword = String(document.getElementById('rfq-builder-search')?.value || '').trim().toLowerCase();
+  const visibleItems = keyword
+    ? rfqDraftItems.filter(item => [item.item_code, item.item_name, item.item_category, item.uom_code].join(' ').toLowerCase().includes(keyword))
+    : rfqDraftItems;
+  body.innerHTML = visibleItems.length ? visibleItems.map((item) => `
+    <tr>
+      <td class="mono">${item.item_code || '-'}</td>
+      <td>${item.item_name || '-'}</td>
+      <td>${item.item_category || '-'}</td>
+      <td>${item.uom_code || '-'}</td>
+      <td>${fmtMoney(item.qty || 0)}</td>
+      <td><button class="btn btn-ghost" type="button" onclick="removeRfqDraftItem(${rfqDraftItems.indexOf(item)})">Hapus</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">${rfqDraftItems.length ? 'Tidak ada item yang cocok dengan pencarian.' : 'Belum ada item RFQ.'}</td></tr>`;
+  const totalQty = rfqDraftItems.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+  const itemCount = rfqDraftItems.length;
+  const countEl = document.getElementById('rfq-form-item-count');
+  const qtyEl = document.getElementById('rfq-form-total-qty');
+  const summaryEl = document.getElementById('rfq-builder-summary');
+  const selectedEl = document.getElementById('rfq-builder-selected');
+  if(countEl) countEl.value = String(itemCount);
+  if(qtyEl) qtyEl.value = fmtMoney(totalQty);
+  if(selectedEl) selectedEl.textContent = itemCount
+    ? `${itemCount} item tersusun di dokumen RFQ.`
+    : 'Belum ada item di dokumen RFQ ini.';
+  if(summaryEl){
+    summaryEl.innerHTML = `
+      <div class="builder-pill">Total Item: ${itemCount}</div>
+      <div class="builder-pill">Total Qty: ${fmtMoney(totalQty)}</div>
+      <div class="builder-pill">Tampil: ${visibleItems.length}</div>
+    `;
+  }
+}
+
+function addRfqDraftItem(){
+  const item = {
+    item_code: String(document.getElementById('rfq-line-code')?.value || '').trim() || `REQ-${rfqDraftItems.length + 1}`,
+    item_name: String(document.getElementById('rfq-line-name')?.value || '').trim(),
+    item_category: String(document.getElementById('rfq-line-category')?.value || '').trim(),
+    uom_code: String(document.getElementById('rfq-line-uom')?.value || 'PCS').trim() || 'PCS',
+    qty: Number(document.getElementById('rfq-line-qty')?.value || 0)
+  };
+  if(!item.item_name || !item.qty) return toast('Lengkapi item RFQ dan qty.');
+  rfqDraftItems.push(item);
+  ['rfq-line-code','rfq-line-name','rfq-line-category'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  const qtyEl = document.getElementById('rfq-line-qty');
+  if(qtyEl) qtyEl.value = '0';
+  renderRfqDraftItems();
+}
+
+function removeRfqDraftItem(index){
+  rfqDraftItems.splice(index, 1);
+  renderRfqDraftItems();
+}
+
+function toggleRfqForm(show){
+  const modal = document.getElementById('rfq-form-modal');
+  if(!modal) return;
+  modal.classList.toggle('open', !!show);
+  if(show){
+    rfqDraftItems = [];
+    document.getElementById('rfq-form-location').innerHTML = RECEIVE_LOCATIONS.map(x => `<option value="${x.code}">${x.code} - ${x.name}</option>`).join('');
+    const searchEl = document.getElementById('rfq-builder-search');
+    if(searchEl) searchEl.value = '';
+    populateRfqVendorOptions();
+    toggleRfqVendorMode();
+    renderRfqDraftItems();
+  }else{
+    rfqDraftItems = [];
+  }
+}
+
+function submitRfqForm(){
+  const vendorMode = document.getElementById('rfq-form-vendor-mode').value;
+  const vendorCode = vendorMode === 'EXISTING' ? document.getElementById('rfq-form-vendor').value : `NEWV-${normalizeDateCode(document.getElementById('rfq-form-date').value || '2026-03-24')}`;
+  const vendorName = vendorMode === 'EXISTING'
+    ? (VENDORS.find(v => v.vendor_code === vendorCode)?.vendor_name || '')
+    : String(document.getElementById('rfq-form-vendor-new').value || '').trim();
+  const rfqNo = nextDailyDoc('RFQ', RFQ_ROWS, 'rfq_no', document.getElementById('rfq-form-date').value || '2026-03-24');
+  if(!vendorName || !rfqDraftItems.length) return toast('Form RFQ belum lengkap.');
+  const rows = rfqDraftItems.map((item, index) => ({
+    rfq_no: rfqNo,
+    rfq_line_key: `${rfqNo}__${item.item_code}__${String(index + 1).padStart(2,'0')}`,
+    rfq_date: document.getElementById('rfq-form-date').value || '2026-03-24',
+    vendor_code: vendorCode,
+    vendor_name: vendorName,
+    vendor_category: String(document.getElementById('rfq-form-vendor-category').value || '').trim(),
+    item_code: item.item_code,
+    item_name: item.item_name,
+    item_category: item.item_category,
+    uom_code: item.uom_code,
+    qty: Number(item.qty || 0),
+    location_code: document.getElementById('rfq-form-location').value,
+    note: String(document.getElementById('rfq-form-note').value || '').trim(),
+    status: document.getElementById('rfq-form-status').value,
+    is_new_vendor: vendorMode === 'NEW'
+  }));
+  RFQ_ROWS = rows.concat(RFQ_ROWS);
+  writeLocalRows('erp.purchasing.rfq', RFQ_ROWS);
+  toggleRfqForm(false);
+  renderKpis();
+  renderRfq();
+}
+
+function convertRfqToPo(rfqNo){
+  const rows = RFQ_ROWS.filter(x => x.rfq_no === rfqNo);
+  if(!rows.length) return;
+  const row = rows[0];
+  if(!['Approved','Converted'].includes(row.status)) return toast('RFQ harus Approved sebelum dibuat menjadi PO.');
+  togglePoForm(true);
+  document.getElementById('po-form-type').value = getVendorOrigin(row.vendor_code, row.vendor_name);
+  document.getElementById('po-form-vendor-mode').value = row.is_new_vendor ? 'NEW' : 'EXISTING';
+  togglePoVendorMode();
+  if(row.is_new_vendor) document.getElementById('po-form-vendor-new').value = row.vendor_name || '';
+  else document.getElementById('po-form-vendor').value = row.vendor_code || '';
+  document.getElementById('po-form-source-rfq').value = row.rfq_no || '';
+  document.getElementById('po-form-note').value = `Source RFQ ${row.rfq_no}${row.note ? ` | ${row.note}` : ''}`;
+  manualPoItems = rows.map(item => ({
+    item_code: item.item_code || `MAN-${item.rfq_no}`,
+    item_name: item.item_name,
+    item_category: item.item_category || item.vendor_category || 'GENERAL',
+    uom_code: item.uom_code || 'PCS',
+    moq: 0,
+    rate: 0,
+    qty: Number(item.qty || 0),
+    item_type: 'MANUAL'
+  }));
+  renderManualPoItems();
+  updatePoBuilderSummary();
+}
+
+function renderRfq(){
+  let rows = bySearch(getRfqDocumentSummaries(), ['rfq_no','vendor_name','vendor_category','item_search'], document.getElementById('search-rfq').value);
+  const dateFrom = document.getElementById('filter-rfq-date-from').value;
+  const dateTo = document.getElementById('filter-rfq-date-to').value;
+  const status = document.getElementById('filter-rfq-status').value;
+  if(dateFrom) rows = rows.filter(x => String(x.rfq_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.rfq_date || '') <= dateTo);
+  if(status) rows = rows.filter(x => x.status === status);
+  rows = rows.sort((a,b) => String(b.rfq_date || '').localeCompare(String(a.rfq_date || '')) || String(b.rfq_no || '').localeCompare(String(a.rfq_no || '')));
+  document.getElementById('tbl-rfq').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.rfq_no}</td>
+      <td>${r.rfq_date}</td>
+      <td>${r.vendor_name}</td>
+      <td>${r.vendor_category || '-'}</td>
+      <td>${r.line_count} item<br><span class="mono">${r.item_preview.join('<br>')}</span></td>
+      <td>${fmtMoney(r.total_qty)}</td>
+      <td>${getReceiveLocationLabel(r.location_code)}</td>
+      <td>${badge(r.status)}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost" type="button" onclick="viewRfqDetail('${r.rfq_no}')">Detail</button>
+        ${r.status === 'Draft' || r.status === 'Submitted' || r.status === 'Reviewed'
+          ? `<button class="btn btn-ghost" type="button" onclick="updateRfqStatus('${r.rfq_no}','Approved')">Approve</button>`
+          : ''}
+        ${['Approved','Converted'].includes(r.status)
+          ? `<button class="btn btn-primary" type="button" onclick="convertRfqToPo('${r.rfq_no}')">Buat PO</button>`
+          : ''}
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="9" class="empty">Belum ada data RFQ.</td></tr>`;
+}
+
+function updateRfqStatus(rfqNo, status){
+  RFQ_ROWS = RFQ_ROWS.map(row => row.rfq_no === rfqNo ? { ...row, status } : row);
+  writeLocalRows('erp.purchasing.rfq', RFQ_ROWS);
+  renderRfq();
+}
+
+function updatePoStatus(poNo, status){
+  PO_STATUS_OVERRIDES[poNo] = status;
+  writeLocalMap('erp.purchasing.po_statuses', PO_STATUS_OVERRIDES);
+  renderPo();
+  renderOutstanding();
+  renderTracking();
+}
+
+function isFoItem(item){
+  return /FRAGRANCE OIL/i.test(item.rm_category || '') || /^FO-/i.test(item.rm_code || '');
+}
+
+function getVendorItemsForPo(type, vendorCode){
+  const vendor = VENDORS.find(v => v.vendor_code === vendorCode);
+  if(!vendor) return [];
+  return RMS.filter(item => {
+    const matchesVendor = item.default_vendor_code === vendor.vendor_code || item.primary_supplier === vendor.vendor_name;
+    if(!matchesVendor) return false;
+    if(type === 'FO') return isFoItem(item);
+    if(type === 'LOCAL' || type === 'IMPORT'){
+      if(isFoItem(item)) return false;
+      return getVendorOrigin(vendor.vendor_code, vendor.vendor_name) === type;
+    }
+    return false;
+  }).slice(0, 250);
+}
+
+function renderPoBuilder(){
+  const type = document.getElementById('po-form-type').value;
+  const vendorMode = document.getElementById('po-form-vendor-mode')?.value || 'EXISTING';
+  if(vendorMode === 'EXISTING') populatePoVendorOptions();
+  const vendorCode = document.getElementById('po-form-vendor').value;
+  const vendor = VENDORS.find(v => v.vendor_code === vendorCode);
+  const currency = vendor?.currency_code || (type === 'IMPORT' ? 'USD' : 'IDR');
+  document.getElementById('po-form-currency').value = currency;
+  document.getElementById('po-rate-wrap').style.display = type === 'IMPORT' ? '' : 'none';
+  if(type === 'IMPORT'){
+    const savedRate = window.localStorage.getItem(IMPORT_RATE_KEY);
+    if(savedRate && Number(document.getElementById('po-form-exchange-rate').value || 0) <= 0){
+      document.getElementById('po-form-exchange-rate').value = savedRate;
+    }
+  }else{
+    document.getElementById('po-form-exchange-rate').value = '0';
+  }
+  poBuilderItems = vendorMode === 'EXISTING' ? getVendorItemsForPo(type, vendorCode) : [];
+  renderPoBuilderRows();
+}
+
+function renderPoBuilderRows(){
+  const query = (document.getElementById('po-builder-search')?.value || '').trim().toLowerCase();
+  const items = !query ? poBuilderItems : poBuilderItems.filter(item =>
+    [item.rm_code, item.rm_name, item.rm_category].some(val => String(val || '').toLowerCase().includes(query))
+  );
+  const tbody = document.getElementById('po-builder-body');
+  if(!items.length){
+    tbody.innerHTML = `<tr><td colspan="8" class="empty">Tidak ada item master yang cocok. Gunakan item manual bila diperlukan.</td></tr>`;
+    updatePoBuilderSummary();
+    return;
+  }
+  tbody.innerHTML = items.map(item => `
+    <tr data-item-code="${item.rm_code}">
+      <td class="mono">${item.rm_code}</td>
+      <td>${item.rm_name}</td>
+      <td>${item.rm_category || '-'}</td>
+      <td>${item.uom_code || item.purchase_uom || '-'}</td>
+      <td>${fmtMoney(item.minimum_buy || 0)}</td>
+      <td>Rp ${fmtMoney(item.purchase_price || 0)}</td>
+      <td><input class="search qty-input po-builder-qty" type="number" min="0" placeholder="Qty" data-item-code="${item.rm_code}" data-rate="${Number(item.purchase_price || 0)}" data-moq="${Number(item.minimum_buy || 0)}"></td>
+      <td class="mono" id="po-subtotal-${item.rm_code}">Rp 0</td>
+    </tr>
+  `).join('');
+  const qtyInputs = Array.from(document.querySelectorAll('.po-builder-qty'));
+  qtyInputs.forEach((input, index) => {
+    input.addEventListener('input', updatePoBuilderSummary);
+    input.addEventListener('keydown', event => {
+      if(event.key !== 'Enter') return;
+      event.preventDefault();
+      updatePoBuilderSummary();
+      const next = qtyInputs[index + 1];
+      if(next){
+        next.focus();
+        next.select();
+      }
+    });
+  });
+  updatePoBuilderSummary();
+}
+
+function updatePoBuilderSummary(){
+  const qtyInputs = Array.from(document.querySelectorAll('.po-builder-qty'));
+  let lineCount = 0;
+  let totalQty = 0;
+  let grandTotal = 0;
+  qtyInputs.forEach(input => {
+    const qty = Number(input.value || 0);
+    const rate = Number(input.dataset.rate || 0);
+    const subtotal = qty * rate;
+    const target = document.getElementById(`po-subtotal-${input.dataset.itemCode}`);
+    if(target) target.textContent = `Rp ${fmtMoney(subtotal)}`;
+    if(qty > 0){
+      lineCount += 1;
+      totalQty += qty;
+      grandTotal += subtotal;
+    }
+  });
+  manualPoItems.forEach(item => {
+    if(Number(item.qty || 0) > 0){
+      lineCount += 1;
+      totalQty += Number(item.qty || 0);
+      grandTotal += Number(item.qty || 0) * Number(item.rate || 0);
+    }
+  });
+  document.getElementById('po-builder-summary').innerHTML = `
+    <div class="builder-pill">Item Dipilih: ${lineCount}</div>
+    <div class="builder-pill">Total Qty: ${fmtMoney(totalQty)}</div>
+    <div class="builder-pill">Grand Total: Rp ${fmtMoney(grandTotal)}</div>
+  `;
+}
+
+function bindPoTermInputs(){
+  const order = [
+    document.getElementById('po-form-dp-pct'),
+    document.getElementById('po-form-term2-pct'),
+    document.getElementById('po-form-term3-pct'),
+    document.getElementById('po-form-payment-note')
+  ].filter(Boolean);
+  order.forEach((input, index) => {
+    if(input.dataset.enterBound === '1') return;
+    input.dataset.enterBound = '1';
+    input.addEventListener('keydown', event => {
+      if(event.key !== 'Enter') return;
+      event.preventDefault();
+      const next = order[index + 1];
+      if(next){
+        next.focus();
+        if(typeof next.select === 'function') next.select();
+      }else{
+        submitPoForm(false);
+      }
+    });
+  });
+}
+
+function syncReturnReceiptOptions(){
+  const eligibleReceipts = RECEIPTS.filter(rcv => Number(rcv.qty || 0) - getReturnQtyByReceipt(rcv.receive_no) > 0);
+  document.getElementById('vendor-return-form-receipt').innerHTML = eligibleReceipts.slice(0, 120).map(rcv => `<option value="${rcv.receive_no}">${rcv.receive_no} - ${rcv.vendor_name}</option>`).join('');
+}
+
+function fillFilters(){
+  const vendorOpts = ['<option value="">Semua Vendor</option>'].concat(VENDORS.slice(0, 80).map(v => `<option value="${v.vendor_code}">${v.vendor_code} - ${v.vendor_name}</option>`));
+  document.getElementById('filter-po-vendor').innerHTML = vendorOpts.join('');
+  document.getElementById('filter-return-vendor').innerHTML = vendorOpts.join('');
+  const whOpts = ['<option value="">Semua Lokasi</option>'].concat(RECEIVE_LOCATIONS.map(w => `<option value="${w.code}">${w.code} - ${w.name} (${w.type})</option>`));
+  document.getElementById('filter-receive-warehouse').innerHTML = whOpts.join('');
+  document.getElementById('po-form-warehouse').innerHTML = RM_WAREHOUSES.map(w => `<option value="${w.warehouse_code}">${w.warehouse_code} - ${w.warehouse_name}</option>`).join('');
+  document.getElementById('receive-form-warehouse').innerHTML = RECEIVE_LOCATIONS.map(w => `<option value="${w.code}">${w.code} - ${w.name} (${w.type})</option>`).join('');
+  document.getElementById('receive-form-vendor-filter').innerHTML = ['<option value=\"\">Semua Supplier</option>'].concat(VENDORS.slice(0,80).map(v => `<option value="${v.vendor_code}">${v.vendor_code} - ${v.vendor_name}</option>`)).join('');
+  populatePoVendorOptions();
+  renderPoBuilder();
+  renderReceivePicker();
+  syncReturnReceiptOptions();
+}
+
+function updateReceiveQtyDraft(poLineKey, value){
+  const qty = Number(value || 0);
+  if(qty > 0) receiveQtyDraft[poLineKey] = qty;
+  else delete receiveQtyDraft[poLineKey];
+  syncReceiveFormDetails();
+}
+
+function syncReceiveFormDetails(){
+  const picked = getOutstandingRows().filter(x => Number(receiveQtyDraft[x.po_line_key] || 0) > 0);
+  const totalQty = picked.reduce((sum, row) => sum + Number(receiveQtyDraft[row.po_line_key] || 0), 0);
+  const totalAmount = picked.reduce((sum, row) => {
+    const rate = Number(row.rate || 0) || Math.round((row.total_est || 0) / Math.max(1, Number(row.qty || 0)));
+    return sum + (Number(receiveQtyDraft[row.po_line_key] || 0) * rate);
+  }, 0);
+  document.getElementById('receive-form-item-count').value = String(picked.length);
+  document.getElementById('receive-form-total-qty').value = fmtMoney(totalQty);
+  document.getElementById('receive-form-amount').value = `Rp ${fmtMoney(totalAmount)}`;
+}
+
+function renderReceivePicker(){
+  let rows = getOutstandingRows().filter(po => po.open_qty > 0);
+  const vendor = document.getElementById('receive-form-vendor-filter')?.value || '';
+  const q = String(document.getElementById('receive-form-search')?.value || '').toLowerCase();
+  if(vendor) rows = rows.filter(po => po.vendor_code === vendor);
+  if(q) rows = rows.filter(po => `${po.po_no} ${po.vendor_name} ${po.item_code} ${po.item_name}`.toLowerCase().includes(q));
+  rows = rows.slice(0, 200);
+  const body = document.getElementById('receive-pick-body');
+  if(!body) return;
+  body.innerHTML = rows.length ? rows.map(po => {
+    const rate = Number(po.rate || 0) || Math.round((po.total_est || 0) / Math.max(1, Number(po.qty || 0)));
+    return `
+      <tr>
+        <td class="mono">${po.po_no}</td>
+        <td>${po.vendor_name}</td>
+        <td>${getReceiveLocationLabel(po.warehouse_code)}</td>
+        <td><span class="mono">${po.item_code}</span><br>${po.item_name}</td>
+        <td>${po.uom_code || '-'}</td>
+        <td>${fmtMoney(po.open_qty)}</td>
+        <td>Rp ${fmtMoney(rate)}</td>
+        <td><input class="search" type="number" min="0" max="${Number(po.open_qty || 0)}" placeholder="Qty" value="${receiveQtyDraft[po.po_line_key] ?? ''}" oninput="updateReceiveQtyDraft('${po.po_line_key}', this.value)"></td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="8" class="empty">Tidak ada PO open yang cocok.</td></tr>`;
+  syncReceiveFormDetails();
+}
+
+function renderPo(){
+  let rows = bySearch(getPoDocumentSummaries(), ['po_no','vendor_name','warehouse_code','po_type','item_search'], document.getElementById('search-po').value);
+  const vendor = document.getElementById('filter-po-vendor').value;
+  const poType = document.getElementById('filter-po-type').value;
+  const status = document.getElementById('filter-po-status').value;
+  const dateFrom = document.getElementById('filter-po-date-from').value;
+  const dateTo = document.getElementById('filter-po-date-to').value;
+  if(vendor) rows = rows.filter(x => x.vendor_code === vendor);
+  if(poType) rows = rows.filter(x => x.po_type === poType);
+  if(status) rows = rows.filter(x => x.status === status);
+  if(dateFrom) rows = rows.filter(x => String(x.po_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.po_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.po_date || '').localeCompare(String(a.po_date || '')) || String(b.po_no || '').localeCompare(String(a.po_no || '')));
+  document.getElementById('tbl-po').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono nowrap">${r.po_no}</td>
+      <td class="nowrap">${r.po_date}</td>
+      <td>${badge(r.po_type)}</td>
+      <td class="nowrap">${r.vendor_name}</td>
+      <td>${getReceiveLocationLabel(r.warehouse_code)}</td>
+      <td>${r.line_count} item<br><span class="mono">${r.item_preview.join('<br>')}</span></td>
+      <td>${fmtMoney(r.qty)}</td>
+      <td>${fmtMoney(r.open_qty)}</td>
+      <td>Rp ${fmtMoney(r.total_est)}</td>
+      <td>${r.created_by || CURRENT_USER_NAME}</td>
+      <td>${badge(r.status)}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost" type="button" onclick="viewPoDetail('${r.po_no}')">Detail</button>
+        ${(r.status === 'Draft' || r.status === 'Submitted') ? `<button class="btn btn-ghost" type="button" onclick="updatePoStatus('${r.po_no}','Approved')">Approve</button>` : ''}
+        ${r.status === 'Approved' ? `<button class="btn btn-ghost" type="button" onclick="updatePoStatus('${r.po_no}','Ordered')">Order</button>` : ''}
+        <button class="btn btn-ghost" type="button" onclick="jumpToTracking('${r.po_no}')">Tracking</button>
+        ${Number(r.open_qty || 0) > 0 ? `<button class="btn btn-primary" type="button" onclick="jumpToReceive('${r.po_no}')">Terima</button>` : `<button class="btn btn-ghost" type="button" onclick="jumpToSection('receive')">Receipt</button>`}
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="12" class="empty">Tidak ada data PO.</td></tr>`;
+
+  const poSide = document.getElementById('po-side');
+  if(poSide){poSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Alur</div><div class="mini-v">PO -> Tracking -> Penerimaan -> Open PO</div></div>
+    <div class="mini-item"><div class="mini-k">PO Lokal / Import / FO</div><div class="mini-v">${rows.filter(x => x.po_type === 'LOCAL').length} / ${rows.filter(x => x.po_type === 'IMPORT').length} / ${rows.filter(x => x.po_type === 'FO').length}</div></div>
+    <div class="mini-item"><div class="mini-k">Outstanding Value</div><div class="mini-v">Rp ${fmtMoney(rows.reduce((sum, row) => sum + row.outstanding_value, 0))}</div></div>
+  `;}
+  applyColumnVisibility('po');
+}
+
+function renderReceive(){
+  let rows = bySearch(getReceiveDocumentSummaries(), ['receive_no','source_po','vendor_name','warehouse_code','item_search'], document.getElementById('search-receive').value);
+  const warehouse = document.getElementById('filter-receive-warehouse').value;
+  const dateFrom = document.getElementById('filter-receive-date-from').value;
+  const dateTo = document.getElementById('filter-receive-date-to').value;
+  if(warehouse) rows = rows.filter(x => x.warehouse_code === warehouse);
+  if(dateFrom) rows = rows.filter(x => String(x.receive_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.receive_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.receive_date || '').localeCompare(String(a.receive_date || '')) || String(b.receive_no || '').localeCompare(String(a.receive_no || '')));
+  const receiveRecap = document.getElementById('receive-recap');
+  if(receiveRecap){
+    const docCount = new Set(rows.map(r => r.receive_no)).size;
+    const vendorCount = new Set(rows.map(r => r.vendor_name)).size;
+    const totalQty = rows.reduce((sum, r) => sum + Number(r.qty || 0), 0);
+    const totalAmount = rows.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+    receiveRecap.innerHTML = `
+      <div class="mini-item"><div class="mini-k">Dokumen</div><div class="mini-v">${fmtMoney(docCount)}</div></div>
+      <div class="mini-item"><div class="mini-k">Vendor</div><div class="mini-v">${fmtMoney(vendorCount)}</div></div>
+      <div class="mini-item"><div class="mini-k">Total Qty</div><div class="mini-v">${fmtMoney(totalQty)}</div></div>
+      <div class="mini-item"><div class="mini-k">Total Nilai</div><div class="mini-v">Rp ${fmtMoney(totalAmount)}</div></div>
+    `;
+  }
+  document.getElementById('tbl-receive').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.receive_no}</td>
+      <td class="mono">${r.source_po}</td>
+      <td>${r.receive_date}</td>
+      <td>${r.vendor_name}</td>
+      <td>${getReceiveLocationLabel(r.warehouse_code)}</td>
+      <td>${r.line_count} item<br><span class="mono">${r.item_preview.join('<br>')}</span></td>
+      <td>${fmtMoney(r.qty)}</td>
+      <td>Rp ${fmtMoney(r.amount)}</td>
+      <td>${r.created_by || CURRENT_USER_NAME}</td>
+      <td>${badge(r.status)}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost" type="button" onclick="viewReceiveDetail('${r.receive_no}')">Detail</button>
+        <button class="btn btn-ghost" type="button" onclick="printReceiveDoc('${r.receive_no}')">Print</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="11" class="empty">Tidak ada data penerimaan.</td></tr>`;
+  applyColumnVisibility('receive');
+}
+
+function printReceivePdf(){
+  let rows = bySearch(getReceiveRows(), ['receive_no','source_po','vendor_name','warehouse_code','item_code','item_name'], document.getElementById('search-receive').value);
+  const warehouse = document.getElementById('filter-receive-warehouse').value;
+  const dateFrom = document.getElementById('filter-receive-date-from').value;
+  const dateTo = document.getElementById('filter-receive-date-to').value;
+  if(warehouse) rows = rows.filter(x => x.warehouse_code === warehouse);
+  if(dateFrom) rows = rows.filter(x => String(x.receive_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.receive_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.receive_date || '').localeCompare(String(a.receive_date || '')) || String(b.receive_no || '').localeCompare(String(a.receive_no || '')));
+  if(!rows.length) return toast('Tidak ada data penerimaan untuk dicetak.');
+  const html = `
+    <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Penerimaan</title>
+    <style>
+      body{font-family:Arial,sans-serif;color:#0f172a;margin:0;background:#fff}.page{padding:28px 32px}
+      .head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:18px}
+      .brand{font-size:22px;font-weight:800}.meta{font-size:12px;line-height:1.6;color:#475569}
+      .title{font-size:28px;font-weight:800;text-align:right;margin-bottom:10px}
+      .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+      .box{border:1px solid #CBD5E1;padding:10px 12px}.box b{display:block;font-size:11px;color:#64748B;text-transform:uppercase;margin-bottom:6px}
+      table{width:100%;border-collapse:collapse}.items th,.items td{border:1px solid #CBD5E1;padding:8px 10px;font-size:12px}
+      .items th{background:#1E3A8A;color:#fff;text-align:left}.mono{font-family:'Courier New',monospace}
+    </style></head><body><div class="page">
+      <div class="head">
+        <div><div class="brand">ERP Mandalika</div><div class="meta">Purchasing Receipt Report<br>Tanggal cetak: 2026-03-24</div></div>
+        <div><div class="title">PENERIMAAN</div><div class="meta">Filter lokasi: ${warehouse ? getReceiveLocationLabel(warehouse) : 'Semua Lokasi'}<br>Periode: ${dateFrom || '-'} s/d ${dateTo || '-'}</div></div>
+      </div>
+      <div class="summary">
+        <div class="box"><b>Dokumen</b>${fmtMoney(new Set(rows.map(r => r.receive_no)).size)}</div>
+        <div class="box"><b>Vendor</b>${fmtMoney(new Set(rows.map(r => r.vendor_name)).size)}</div>
+        <div class="box"><b>Total Qty</b>${fmtMoney(rows.reduce((sum, r) => sum + Number(r.qty || 0), 0))}</div>
+        <div class="box"><b>Total Nilai</b>Rp ${fmtMoney(rows.reduce((sum, r) => sum + Number(r.amount || 0), 0))}</div>
+      </div>
+      <table class="items">
+        <thead><tr><th>No Penerimaan</th><th>Source PO</th><th>Tanggal</th><th>Vendor</th><th>Lokasi</th><th>Item</th><th>Qty</th><th>Nilai</th><th>Status</th></tr></thead>
+        <tbody>
+          ${rows.map(r => `<tr><td class="mono">${r.receive_no}</td><td class="mono">${r.source_po}</td><td>${r.receive_date}</td><td>${r.vendor_name}</td><td>${getReceiveLocationLabel(r.warehouse_code)}</td><td><span class="mono">${r.item_code}</span><br>${r.item_name}</td><td>${fmtMoney(r.qty)}</td><td>Rp ${fmtMoney(r.amount)}</td><td>${r.status}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div></body></html>
+  `;
+  const win = window.open('', '_blank', 'width=1200,height=860');
+  if(!win) return toast('Popup print diblokir browser.');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 250);
+}
+
+function renderReturn(){
+  let rows = bySearch(RETURNS, ['return_no','vendor_name','warehouse_code','item_code','reason'], document.getElementById('search-return').value);
+  const vendor = document.getElementById('filter-return-vendor').value;
+  const dateFrom = document.getElementById('filter-return-date-from').value;
+  const dateTo = document.getElementById('filter-return-date-to').value;
+  if(vendor) rows = rows.filter(x => x.vendor_code === vendor);
+  if(dateFrom) rows = rows.filter(x => String(x.return_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.return_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.return_date || '').localeCompare(String(a.return_date || '')) || String(b.return_no || '').localeCompare(String(a.return_no || '')));
+  document.getElementById('tbl-return').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.return_no}</td>
+      <td>${r.return_date}</td>
+      <td>${r.vendor_name}</td>
+      <td>${r.warehouse_code}</td>
+      <td class="mono">${r.item_code}</td>
+      <td>${fmtMoney(r.qty)}</td>
+      <td>${r.reason}</td>
+      <td>${r.created_by || CURRENT_USER_NAME}</td>
+      <td>${badge(r.status)}</td>
+      <td><button class="btn btn-ghost" type="button" onclick="viewReturnDetail('${r.return_no}')">Detail</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="10" class="empty">Tidak ada data retur.</td></tr>`;
+  applyColumnVisibility('return');
+}
+
+function renderTracking(){
+  let rows = bySearch(getTrackingRows(), ['po_no','vendor_name','tracking_no','location_code'], document.getElementById('search-tracking').value);
+  const dateFrom = document.getElementById('filter-tracking-date-from').value;
+  const dateTo = document.getElementById('filter-tracking-date-to').value;
+  const orderStatus = document.getElementById('filter-tracking-order-status').value;
+  const paymentStatus = document.getElementById('filter-tracking-payment-status').value;
+  if(dateFrom) rows = rows.filter(x => String(x.po_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.po_date || '') <= dateTo);
+  if(orderStatus) rows = rows.filter(x => x.order_status === orderStatus);
+  if(paymentStatus) rows = rows.filter(x => x.payment_status === paymentStatus);
+  rows = rows.sort((a,b) => String(b.po_date || '').localeCompare(String(a.po_date || '')) || String(b.po_no || '').localeCompare(String(a.po_no || '')));
+  document.getElementById('tbl-tracking').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.po_no}</td>
+      <td>${r.po_date}</td>
+      <td>${r.vendor_name}</td>
+      <td>${getReceiveLocationLabel(r.location_code)}</td>
+      <td>${fmtMoney(r.qty)}</td>
+      <td>${fmtMoney(r.received_qty)}</td>
+      <td>${fmtMoney(r.open_qty)}</td>
+      <td>${r.eta_date || '-'}</td>
+      <td>${badge(r.payment_status)}</td>
+      <td>${badge(r.order_status)}</td>
+      <td class="mono">${r.tracking_no || '-'}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost" type="button" onclick="viewTrackingDetail('${r.po_no}')">Detail</button>
+        <button class="btn btn-ghost" type="button" onclick="toggleTrackingForm(true,'${r.po_no}')">Update</button>
+        ${Number(r.open_qty || 0) > 0 ? `<button class="btn btn-primary" type="button" onclick="jumpToReceive('${r.po_no}')">Terima</button>` : `<button class="btn btn-ghost" type="button" onclick="jumpToSection('receive')">Receipt</button>`}
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="12" class="empty">Belum ada purchase tracking.</td></tr>`;
+  applyColumnVisibility('tracking');
+}
+
+function renderOutstanding(){
+  let rows = bySearch(getOutstandingRows().filter(row => row.open_qty > 0), ['po_no','vendor_name','item_code','item_name','po_type'], document.getElementById('search-outstanding').value);
+  const type = document.getElementById('filter-outstanding-type').value;
+  const dateFrom = document.getElementById('filter-outstanding-date-from').value;
+  const dateTo = document.getElementById('filter-outstanding-date-to').value;
+  if(type) rows = rows.filter(x => x.po_type === type);
+  if(dateFrom) rows = rows.filter(x => String(x.po_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.po_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.po_date || '').localeCompare(String(a.po_date || '')) || String(b.po_no || '').localeCompare(String(a.po_no || '')));
+  document.getElementById('tbl-outstanding').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono nowrap">${r.po_no}</td>
+      <td class="nowrap">${r.po_date}</td>
+      <td>${badge(r.po_type)}</td>
+      <td class="nowrap">${r.vendor_name}</td>
+      <td>${getItemLabel(r)}</td>
+      <td>${fmtMoney(r.qty)}</td>
+      <td>${fmtMoney(r.received_qty)}</td>
+      <td>${fmtMoney(r.open_qty)}</td>
+      <td>Rp ${fmtMoney(r.outstanding_value)}</td>
+      <td>${r.created_by || CURRENT_USER_NAME}</td>
+      <td>${badge(r.status)}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost" type="button" onclick="viewPoDetail('${r.po_no}')">Detail</button>
+        <button class="btn btn-ghost" type="button" onclick="jumpToTracking('${r.po_no}')">Tracking</button>
+        <button class="btn btn-primary" type="button" onclick="jumpToReceive('${r.po_no}')">Terima</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="12" class="empty">Tidak ada open PO.</td></tr>`;
+  applyColumnVisibility('outstanding');
+}
+
+function showSection(sec){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  setPurchasingNavState(sec);
+  document.getElementById('sec-' + sec).classList.add('active');
+  document.getElementById('bc-child').textContent = ({
+    rfq: 'RFQ',
+    po: 'Purchase Order',
+    receive: 'Penerimaan',
+    return: 'Retur Vendor',
+    tracking: 'Purchase Tracking',
+    outstanding: 'Open PO',
+  })[sec];
+}
+
+function exportSection(sec){
+  const maps = {
+    rfq: RFQ_ROWS,
+    po: getOutstandingRows().map(r => ({ ...r })),
+    receive: RECEIPTS,
+    return: RETURNS,
+    tracking: getTrackingRows().map(r => ({ ...r })),
+    outstanding: getOutstandingRows().filter(r => r.open_qty > 0)
+  };
+  const rows = maps[sec] || [];
+  if(!rows.length) return toast('Belum ada data untuk diexport.');
+  const headers = Object.keys(rows[0]);
+  const csv = [headers.join(',')].concat(rows.map(row => headers.map(key => `"${String(row[key] ?? '').replace(/"/g,'""')}"`).join(','))).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `purchasing-${sec}-2026-03-21.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  toast(`Export ${sec.toUpperCase()} dimulai.`);
+}
+
+function toast(msg){ alert(msg); }
+
+function initDateRangeFilters(){
+  document.querySelectorAll('.date-range-filter').forEach(filter => {
+    const pop = filter.querySelector('.date-range-pop');
+    if(!pop || pop.querySelector('.date-range-actions')) return;
+    const actions = document.createElement('div');
+    actions.className = 'date-range-actions';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary date-range-apply';
+    btn.textContent = 'Terapkan';
+    btn.addEventListener('click', () => {
+      pop.querySelectorAll('input, select').forEach(el => {
+        el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles:true }));
+      });
+      filter.open = false;
+    });
+    actions.appendChild(btn);
+    pop.appendChild(actions);
+  });
+}
+
+function quickAddPo(){
+  togglePoForm(true);
+}
+
+function quickAddReceipt(){
+  toggleReceiveForm(true);
+}
+
+function quickAddVendorReturn(){
+  toggleVendorReturnForm(true);
+}
+
+function toggleTrackingForm(show, poNo=''){
+  const modal = document.getElementById('tracking-form-modal');
+  if(!modal) return;
+  modal.classList.toggle('open', !!show);
+  if(!show) return;
+  const row = getTrackingRows().find(x => x.po_no === poNo);
+  if(!row) return;
+  document.getElementById('tracking-form-po-no').value = row.po_no;
+  document.getElementById('tracking-form-vendor').value = row.vendor_name;
+  document.getElementById('tracking-form-location').value = getReceiveLocationLabel(row.location_code);
+  document.getElementById('tracking-form-eta').value = row.eta_date || '';
+  document.getElementById('tracking-form-order-status').value = row.order_status || 'Ordered';
+  document.getElementById('tracking-form-payment-status').value = row.payment_status || 'Unpaid';
+  document.getElementById('tracking-form-dp-date').value = row.dp_paid_date || '';
+  document.getElementById('tracking-form-paid-date').value = row.final_paid_date || '';
+  document.getElementById('tracking-form-ship-date').value = row.ship_date || '';
+  document.getElementById('tracking-form-arrive-date').value = row.arrive_date || '';
+  document.getElementById('tracking-form-tracking-no').value = row.tracking_no || '';
+  document.getElementById('tracking-form-open-qty').value = fmtMoney(row.open_qty);
+  document.getElementById('tracking-form-received-qty').value = fmtMoney(row.received_qty);
+  document.getElementById('tracking-form-note').value = row.note || '';
+}
+
+function submitTrackingForm(){
+  const poNo = document.getElementById('tracking-form-po-no').value;
+  if(!poNo) return toast('PO belum dipilih.');
+  const row = {
+    po_no: poNo,
+    eta_date: document.getElementById('tracking-form-eta').value || '',
+    order_status: document.getElementById('tracking-form-order-status').value,
+    payment_status: document.getElementById('tracking-form-payment-status').value,
+    dp_paid_date: document.getElementById('tracking-form-dp-date').value || '',
+    final_paid_date: document.getElementById('tracking-form-paid-date').value || '',
+    ship_date: document.getElementById('tracking-form-ship-date').value || '',
+    arrive_date: document.getElementById('tracking-form-arrive-date').value || '',
+    tracking_no: String(document.getElementById('tracking-form-tracking-no').value || '').trim(),
+    note: String(document.getElementById('tracking-form-note').value || '').trim()
+  };
+  TRACKING_ROWS = TRACKING_ROWS.filter(x => x.po_no !== poNo).concat(row);
+  writeLocalRows('erp.purchasing.tracking', TRACKING_ROWS);
+  toggleTrackingForm(false);
+  renderKpis();
+  renderTracking();
+}
+
+function refreshPurchasingModalState(){
+  document.body.classList.toggle('has-inline-modal', !!document.querySelector('.inline-form.active'));
+}
+
+function resetPurchasingModule(){
+  if(!window.confirm('Hapus simulasi Purchasing lokal?')) return;
+  ['purchase_orders','receipts','vendor_returns'].forEach(key => window.localStorage.removeItem(`erp.extra.${key}`));
+  window.localStorage.removeItem('erp.purchasing.rfq');
+  window.localStorage.removeItem('erp.purchasing.tracking');
+  window.localStorage.removeItem('erp.purchasing.po_statuses');
+  location.reload();
+}
+
+function togglePoForm(show){
+  document.getElementById('po-form-card').classList.toggle('active', !!show);
+  if(show){
+    manualPoItems = [];
+    document.getElementById('po-form-source-rfq').value = '';
+    renderManualPoItems();
+    togglePoVendorMode();
+    renderPoBuilder();
+    bindPoTermInputs();
+  }
+  refreshPurchasingModalState();
+}
+
+function submitPoForm(exportAfterSave){
+  const poType = document.getElementById('po-form-type').value;
+  const poDate = document.getElementById('po-form-date').value || '2026-03-21';
+  const warehouseCode = document.getElementById('po-form-warehouse').value;
+  const status = document.getElementById('po-form-status').value;
+  const currencyCode = document.getElementById('po-form-currency').value || 'IDR';
+  const exchangeRate = Number(document.getElementById('po-form-exchange-rate').value || 0);
+  const note = document.getElementById('po-form-note').value.trim();
+  const dpPct = Number(document.getElementById('po-form-dp-pct').value || 0);
+  const term2Pct = Number(document.getElementById('po-form-term2-pct').value || 0);
+  const term3Pct = Number(document.getElementById('po-form-term3-pct').value || 0);
+  const paymentNote = document.getElementById('po-form-payment-note').value.trim();
+  const sourceRfqNo = document.getElementById('po-form-source-rfq').value || '';
+  const vendorHeader = getPoVendorHeader();
+  if(!vendorHeader.vendor_name || !warehouseCode) return toast('Header PO belum lengkap.');
+  if(poType === 'IMPORT' && exchangeRate <= 0) return toast('Isi kurs hari ini untuk PO import.');
+  if(dpPct + term2Pct + term3Pct > 100) return toast('Total termin pembayaran tidak boleh lebih dari 100%.');
+  if(poType === 'IMPORT') window.localStorage.setItem(IMPORT_RATE_KEY, String(exchangeRate));
+  const selectedLines = Array.from(document.querySelectorAll('.po-builder-qty'))
+    .map(input => ({
+      input,
+      qty: Number(input.value || 0),
+      rate: Number(input.dataset.rate || 0),
+      moq: Number(input.dataset.moq || 0),
+      itemCode: input.dataset.itemCode
+    }))
+    .filter(line => line.qty > 0);
+  const selectedManualLines = manualPoItems.filter(line => Number(line.qty || 0) > 0).map(line => ({
+    itemCode: line.item_code,
+    itemName: line.item_name,
+    itemCategory: line.item_category,
+    uomCode: line.uom_code,
+    qty: Number(line.qty || 0),
+    rate: Number(line.rate || 0),
+    moq: Number(line.moq || 0),
+    manual: true
+  }));
+  if(!selectedLines.length && !selectedManualLines.length) return toast('Isi minimal satu qty beli.');
+  const belowMoq = selectedLines.find(line => line.moq && line.qty < line.moq);
+  if(belowMoq) return toast(`Qty item ${belowMoq.itemCode} tidak boleh di bawah MOQ ${belowMoq.moq}.`);
+  const belowManualMoq = selectedManualLines.find(line => line.moq && line.qty < line.moq);
+  if(belowManualMoq) return toast(`Qty item manual ${belowManualMoq.itemCode} tidak boleh di bawah MOQ ${belowManualMoq.moq}.`);
+  const poNo = nextDailyDoc('PO', PURCHASE_ORDERS, 'po_no', poDate);
+  selectedLines.forEach((line, index) => {
+    const item = RMS.find(r => r.rm_code === line.itemCode);
+    if(!item) return;
+    const row = {
+      po_no: poNo,
+      po_line_key: `${poNo}__${item.rm_code}__${String(index + 1).padStart(2,'0')}`,
+      po_date: poDate,
+      po_type: poType,
+      vendor_code: vendorHeader.vendor_code,
+      vendor_name: vendorHeader.vendor_name,
+      warehouse_code: warehouseCode,
+      item_code: item.rm_code,
+      item_name: item.rm_name,
+      item_category: item.rm_category,
+      item_type: 'RM',
+      uom_code: item.uom_code || item.purchase_uom || 'PCS',
+      qty: line.qty,
+      rate: line.rate,
+      moq: line.moq,
+      total_est: line.qty * line.rate,
+      status,
+      note,
+      created_by: CURRENT_USER_NAME,
+      currency_code: currencyCode,
+      exchange_rate: exchangeRate,
+      dp_pct: dpPct,
+      term2_pct: term2Pct,
+      term3_pct: term3Pct,
+      payment_note: paymentNote,
+      is_new_vendor: vendorHeader.is_new_vendor,
+      source_rfq_no: sourceRfqNo
+    };
+    RUNTIME.append('purchase_orders', row);
+  });
+  selectedManualLines.forEach((line, index) => {
+    const row = {
+      po_no: poNo,
+      po_line_key: `${poNo}__${line.itemCode}__M${String(index + 1).padStart(2,'0')}`,
+      po_date: poDate,
+      po_type: poType,
+      vendor_code: vendorHeader.vendor_code,
+      vendor_name: vendorHeader.vendor_name,
+      warehouse_code: warehouseCode,
+      item_code: line.itemCode,
+      item_name: line.itemName,
+      item_category: line.itemCategory,
+      item_type: 'MANUAL',
+      uom_code: line.uomCode || 'PCS',
+      qty: line.qty,
+      rate: line.rate,
+      moq: line.moq,
+      total_est: line.qty * line.rate,
+      status,
+      note,
+      created_by: CURRENT_USER_NAME,
+      currency_code: currencyCode,
+      exchange_rate: exchangeRate,
+      dp_pct: dpPct,
+      term2_pct: term2Pct,
+      term3_pct: term3Pct,
+      payment_note: paymentNote,
+      is_new_vendor: vendorHeader.is_new_vendor,
+      source_rfq_no: sourceRfqNo
+    };
+    RUNTIME.append('purchase_orders', row);
+  });
+  if(sourceRfqNo){
+    RFQ_ROWS = RFQ_ROWS.map(row => row.rfq_no === sourceRfqNo ? { ...row, status:'Converted' } : row);
+    writeLocalRows('erp.purchasing.rfq', RFQ_ROWS);
+  }
+  manualPoItems = [];
+  location.reload();
+}
+
+function toggleReceiveForm(show){
+  const modal = document.getElementById('receive-form-modal');
+  if(!modal) return;
+  modal.classList.toggle('open', !!show);
+  if(show){
+    receiveQtyDraft = {};
+    renderReceivePicker();
+    syncReceiveFormDetails();
+  } else {
+    receiveQtyDraft = {};
+  }
+}
+
+function submitReceiveForm(){
+  const receiveDate = document.getElementById('receive-form-date').value || '2026-03-21';
+  const warehouseCode = document.getElementById('receive-form-warehouse').value;
+  const status = document.getElementById('receive-form-status').value;
+  const picked = getOutstandingRows()
+    .filter(x => Number(receiveQtyDraft[x.po_line_key] || 0) > 0)
+    .map(po => ({ po, qty:Number(receiveQtyDraft[po.po_line_key] || 0) }));
+  if(!warehouseCode || !picked.length) return toast('Form penerimaan belum lengkap.');
+  for(const row of picked){
+    if(row.qty > Number(row.po.open_qty || 0)) return toast(`Qty terima ${row.po.item_code} melebihi Open Qty (${row.po.open_qty}).`);
+  }
+  const receiveNo = nextDailyDoc('RCV', RECEIPTS, 'receive_no', receiveDate);
+  let receiveAmount = 0;
+  let receiveVendorCode = '';
+  let receiveVendorName = '';
+  picked.forEach(({po, qty}) => {
+    const rate = Number(po.rate || 0) || Math.round((po.total_est || 0) / Math.max(1, Number(po.qty || 0)));
+    const lineAmount = qty * rate;
+    receiveAmount += lineAmount;
+    receiveVendorCode = po.vendor_code || receiveVendorCode;
+    receiveVendorName = po.vendor_name || receiveVendorName;
+    RUNTIME.append('receipts', {
+      receive_no: receiveNo,
+      source_po: po.po_no,
+      source_po_line: po.po_line_key,
+      receive_date: receiveDate,
+      vendor_code: po.vendor_code,
+      vendor_name: po.vendor_name,
+      warehouse_code: warehouseCode,
+      item_code: po.item_code,
+      item_name: po.item_name,
+      qty,
+      amount: lineAmount,
+      status,
+      created_by: CURRENT_USER_NAME
+    });
+  });
+  const apRows = readLocalRows('erp.extra.finance_ap');
+  const journalRows = readLocalRows('erp.extra.finance_journal');
+  const apNo = nextDailyDoc('AP', (TX.ap_rows || []).concat(apRows), 'ap_no', receiveDate);
+  const journalNo = nextDailyDoc('JV', (TX.journal_rows || []).concat(journalRows), 'journal_no', receiveDate);
+  appendFinanceAp({
+    ap_no: apNo,
+    vendor_code: receiveVendorCode,
+    vendor_name: receiveVendorName || '-',
+    source_doc: receiveNo,
+    due_date: shiftDate(receiveDate, 30),
+    amount: receiveAmount,
+    balance: receiveAmount,
+    status: 'Open',
+    ap_type: 'Receipt'
+  });
+  appendFinanceJournal({
+    journal_no: journalNo,
+    journal_date: receiveDate,
+    source: receiveNo,
+    desc: `Penerimaan pembelian ${receiveVendorName || '-'}`,
+    debit: receiveAmount,
+    credit: receiveAmount,
+    status: 'Posted'
+  });
+  toggleReceiveForm(false);
+  location.reload();
+}
+
+function toggleVendorReturnForm(show){
+  document.getElementById('vendor-return-form-card').classList.toggle('active', !!show);
+  refreshPurchasingModalState();
+}
+
+function submitVendorReturnForm(){
+  const receiptNo = document.getElementById('vendor-return-form-receipt').value;
+  const returnDate = document.getElementById('vendor-return-form-date').value || '2026-03-21';
+  const qty = Number(document.getElementById('vendor-return-form-qty').value);
+  const status = document.getElementById('vendor-return-form-status').value;
+  const reason = document.getElementById('vendor-return-form-reason').value.trim();
+  const receipt = RECEIPTS.find(x => x.receive_no === receiptNo);
+  if(!receipt || !qty || !reason) return toast('Form retur vendor belum lengkap.');
+  const availableQty = Number(receipt.qty || 0) - getReturnQtyByReceipt(receiptNo);
+  if(qty > availableQty) return toast(`Qty retur melebihi sisa receipt (${availableQty}).`);
+  const returnNo = nextDailyDoc('RTV', RETURNS, 'return_no', returnDate);
+  const unitAmount = Number(receipt.amount || 0) / Math.max(1, Number(receipt.qty || 0));
+  const returnAmount = qty * unitAmount;
+  RUNTIME.append('vendor_returns', {
+    return_no: returnNo,
+    return_date: returnDate,
+    source_receipt: receipt.receive_no,
+    vendor_code: receipt.vendor_code,
+    vendor_name: receipt.vendor_name,
+    warehouse_code: receipt.warehouse_code,
+    item_code: receipt.item_code,
+    item_name: receipt.item_name,
+    qty,
+    reason,
+    status,
+    created_by: CURRENT_USER_NAME
+  });
+  const apRows = readLocalRows('erp.extra.finance_ap');
+  const journalRows = readLocalRows('erp.extra.finance_journal');
+  const apNo = nextDailyDoc('AP', (TX.ap_rows || []).concat(apRows), 'ap_no', returnDate);
+  const journalNo = nextDailyDoc('JV', (TX.journal_rows || []).concat(journalRows), 'journal_no', returnDate);
+  appendFinanceAp({
+    ap_no: apNo,
+    vendor_code: receipt.vendor_code,
+    vendor_name: receipt.vendor_name || '-',
+    source_doc: returnNo,
+    due_date: returnDate,
+    amount: -returnAmount,
+    balance: -returnAmount,
+    status: 'Credit',
+    ap_type: 'Vendor Return'
+  });
+  appendFinanceJournal({
+    journal_no: journalNo,
+    journal_date: returnDate,
+    source: returnNo,
+    desc: `Reverse AP retur vendor ${receipt.vendor_name || '-'}`,
+    debit: returnAmount,
+    credit: returnAmount,
+    status: 'Posted'
+  });
+  location.reload();
+}
+
+function setPurchasingNavState(activeSec='po'){
+  const transSecs = ['rfq','po','receive','return'];
+  const monitorSecs = ['tracking','outstanding'];
+  const transOpen = transSecs.includes(activeSec);
+  const monitorOpen = monitorSecs.includes(activeSec);
+  document.getElementById('nav-parent-purchasing-trans')?.classList.toggle('active', transOpen);
+  document.getElementById('nav-group-purchasing-trans')?.classList.toggle('collapsed', false);
+  document.getElementById('nav-parent-purchasing-monitor')?.classList.toggle('active', monitorOpen);
+  document.getElementById('nav-group-purchasing-monitor')?.classList.toggle('collapsed', false);
+}
+
+document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    showSection(el.dataset.sec);
+  });
+});
+
+document.getElementById('nav-parent-purchasing-trans')?.addEventListener('click', e => {
+  e.preventDefault();
+  showSection('rfq');
+});
+
+document.getElementById('nav-parent-purchasing-monitor')?.addEventListener('click', e => {
+  e.preventDefault();
+  showSection('tracking');
+});
+
+[
+  ['search-rfq', renderRfq], ['filter-rfq-date-from', renderRfq], ['filter-rfq-date-to', renderRfq], ['filter-rfq-status', renderRfq],
+  ['search-po', renderPo], ['filter-po-date-from', renderPo], ['filter-po-date-to', renderPo], ['filter-po-vendor', renderPo], ['filter-po-type', renderPo], ['filter-po-status', renderPo],
+  ['search-receive', renderReceive], ['filter-receive-date-from', renderReceive], ['filter-receive-date-to', renderReceive], ['filter-receive-warehouse', renderReceive],
+  ['search-return', renderReturn], ['filter-return-date-from', renderReturn], ['filter-return-date-to', renderReturn], ['filter-return-vendor', renderReturn],
+  ['search-tracking', renderTracking], ['filter-tracking-date-from', renderTracking], ['filter-tracking-date-to', renderTracking], ['filter-tracking-order-status', renderTracking], ['filter-tracking-payment-status', renderTracking],
+  ['search-outstanding', renderOutstanding], ['filter-outstanding-date-from', renderOutstanding], ['filter-outstanding-date-to', renderOutstanding], ['filter-outstanding-type', renderOutstanding],
+  ['po-form-type', renderPoBuilder], ['po-form-vendor-mode', togglePoVendorMode], ['po-builder-search', renderPoBuilderRows],
+  ['rfq-form-vendor-mode', toggleRfqVendorMode], ['rfq-builder-search', renderRfqDraftItems],
+  ['receive-form-vendor-filter', renderReceivePicker], ['receive-form-search', renderReceivePicker]
+].forEach(([id, fn]) => {
+  const el = document.getElementById(id);
+  el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn);
+});
+
+document.getElementById('po-form-vendor-search')?.addEventListener('input', syncPoVendorSelection);
+document.getElementById('po-form-vendor-search')?.addEventListener('change', syncPoVendorSelection);
+document.getElementById('rfq-form-vendor-search')?.addEventListener('input', syncRfqVendorSelection);
+document.getElementById('rfq-form-vendor-search')?.addEventListener('change', syncRfqVendorSelection);
+
+initDateRangeFilters();
+fillFilters();
+renderKpis();
+renderRfq();
+renderPo();
+renderReceive();
+renderReturn();
+renderTracking();
+renderOutstanding();
+setPurchasingNavState('po');
+</script>
+</body>
+</html>
+
+

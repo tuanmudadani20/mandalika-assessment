@@ -1,0 +1,1370 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika POS</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626;
+  --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+body.has-inline-modal{overflow:hidden}
+body.has-inline-modal::before{content:'';position:fixed;inset:0;background:rgba(15,23,42,.52);z-index:24}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:#A1A1AA;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.nav-subwrap{margin:6px 8px 10px;padding:8px 6px 10px;border-left:2px solid rgba(212,175,55,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:0 14px 14px 0}
+.nav-group{margin:2px 0 0;padding:0;overflow:hidden;max-height:240px;transition:max-height .24s ease,opacity .2s ease,transform .2s ease,margin .18s ease}
+.nav-group.collapsed{max-height:0;opacity:0;transform:translateY(-6px);margin:0}
+.nav-parent{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 2px;padding:6px 8px;border-radius:10px;color:#B8BDC7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-parent:hover{background:rgba(255,255,255,.06);color:#F4F4F5;transform:translateX(1px)}
+.nav-parent.active{background:rgba(212,175,55,.12);color:#F6D365}
+.nav-parent small{font-size:9px;color:#8E95A3;font-weight:700;text-transform:none;letter-spacing:0}
+.nav-subwrap .nav-link,.nav-subwrap .nav-item{width:100%;margin:1px 0 0;padding:6px 8px 6px 16px;border-radius:9px;font-size:10.5px}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:8px 12px;min-height:34px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.tabs{display:none}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:14px}
+.card-pad{padding:18px}
+.grid-4{display:none}
+.kpi{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar-right,.toolbar-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search,.select{padding:8px 10px;min-height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:11.5px}
+.search{min-width:240px}
+.date-range-filter{position:relative}
+.date-range-filter[open]{z-index:12}
+.date-range-trigger{list-style:none;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.date-range-trigger::-webkit-details-marker{display:none}
+.date-range-pop{position:absolute;top:calc(100% + 6px);left:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(15,23,42,.12);min-width:290px}
+.date-range-pop label{display:grid;gap:4px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.date-range-pop .search{min-width:0;width:100%}
+.date-range-actions{grid-column:1 / -1;display:flex;justify-content:flex-end}
+.date-range-apply{min-width:92px}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-draft{background:#E5E7EB;color:#374151}.b-err{background:#FEE2E2;color:#B91C1C}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.tw{overflow:auto;max-height:560px}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle;white-space:nowrap}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC;position:sticky;top:0;z-index:1}
+tr:hover td{background:#FCFCFD}
+.mono{font-family:'IBM Plex Mono',monospace}
+.split{display:grid;grid-template-columns:1fr;gap:10px}
+.stack{display:grid;gap:10px}
+.note{padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(212,175,55,.06),rgba(255,255,255,.98));color:var(--text);font-size:10.5px;line-height:1.5}
+.mini-list{display:grid;gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+.inline-form{display:none;margin-bottom:14px}
+.inline-form.active{display:block;position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:26;width:min(860px,calc(100vw - 40px));max-height:calc(100vh - 40px);overflow:auto;margin:0}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.field{display:grid;gap:6px}
+.field label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.empty{padding:32px 18px;color:var(--muted);text-align:center}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:24px;z-index:30}
+.modal.open{display:flex}
+.modal-card{width:min(720px,92vw);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:18px}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.modal-title{font-size:18px;font-weight:800;color:var(--text-d)}
+.modal-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.check-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.pane{display:none}
+.pane.active{display:block}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)} .split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">POS</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <div class="nav-link active">POS</div>
+      <div class="nav-subwrap">
+        <div class="nav-parent active" id="nav-parent-pos-trx" data-group="pos-trx" data-default-sec="sales">Transaksi <small>Penjualan toko</small></div>
+        <div class="nav-group" id="nav-group-pos-trx">
+          <a class="nav-link active" href="#" data-sec="sales">Penjualan</a>
+          <a class="nav-link" href="#" data-sec="return">Retur Penjualan</a>
+          <a class="nav-link" href="#" data-sec="closing">Closing Kasir</a>
+        </div>
+        <div class="nav-parent" id="nav-parent-pos-mon" data-group="pos-mon" data-default-sec="store">Monitoring <small>Stok toko</small></div>
+        <div class="nav-group collapsed" id="nav-group-pos-mon">
+          <a class="nav-link" href="#" data-sec="receipt">Penerimaan DO Toko</a>
+          <a class="nav-link" href="#" data-sec="store">Stok Toko</a>
+          <a class="nav-link" href="#" data-sec="movement">Pergerakan Stok Toko</a>
+        </div>
+      </div>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+        POS memakai toko dan FG dari <span class="mono">master-data.js</span>, lalu nanti disambungkan ke finance.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><small>POS Workspace</small><div><b>POS</b> / <b id="bc-child">Penjualan</b></div></div>
+      <div>
+        <button class="btn btn-ghost" onclick="openColumnModal()">Atur Kolom</button>
+        <button class="btn btn-ghost" onclick="location.href='./pos-cashier.html'">POS Kasir</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-master.html'">Master Data</button>
+        <button class="btn btn-ghost" onclick="resetPosModule()">Reset POS</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-finance.html'">Next: Finance</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Fase 5</div>
+          <div class="title">POS Dasar</div>
+          <div class="subtitle">
+            POS ini menyiapkan alur <span class="mono">Penjualan -> Retur Penjualan -> Closing Kasir</span> berbasis toko aktif.
+            Tahap ini fokus ke fondasi operasional harian toko dan koneksi awal ke stok toko.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section active" id="sec-sales">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-sales" placeholder="Cari nomor sales, toko, atau FG">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-sales-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-sales-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-sales-store"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('sales')">Export</button>
+            <button class="btn btn-primary" onclick="quickAddSale()">+ Penjualan</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form" id="sales-form-card">
+          <div class="form-grid">
+            <div class="field"><label>Toko</label><select class="select" id="sales-form-store"></select></div>
+            <div class="field"><label>FG</label><select class="select" id="sales-form-fg"></select></div>
+            <div class="field"><label>Qty</label><input class="search" id="sales-form-qty" type="number" value="2"></div>
+            <div class="field"><label>Harga Net / Unit</label><input class="search" id="sales-form-price" type="number" value="95000"></div>
+            <div class="field"><label>Metode Bayar</label><select class="select" id="sales-form-payment"><option>Cash</option><option>Transfer</option><option>QRIS</option><option>Piutang</option></select></div>
+            <div class="field" style="grid-column:span 4;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="toggleSalesForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitSalesForm()">Simpan Penjualan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Penjualan</th><th>Tanggal</th><th>Toko</th><th>FG</th><th>Qty</th><th>Net Sales</th><th>Status</th></tr></thead><tbody id="tbl-sales"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-return">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-return" placeholder="Cari retur sales"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-return-date-from" type="date"></label><label>Sampai<input class="search" id="filter-return-date-to" type="date"></label></div></details></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('return')">Export</button>
+            <button class="btn btn-primary" onclick="togglePosReturnForm(true)">+ Retur Penjualan</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form" id="pos-return-form-card">
+          <div class="form-grid">
+            <div class="field"><label>Source Penjualan</label><select class="select" id="pos-return-form-sales"></select></div>
+            <div class="field"><label>Qty</label><input class="search" id="pos-return-form-qty" type="number" value="1"></div>
+            <div class="field"><label>Status</label><select class="select" id="pos-return-form-status"><option>Posted</option><option>Draft</option></select></div>
+            <div class="field"><label>Alasan</label><input class="search" id="pos-return-form-reason" value="Customer berubah pikiran"></div>
+            <div class="field"><label>Metode Refund</label><select class="select" id="pos-return-form-refund-method"><option>Cash</option><option>Transfer</option><option>Store Credit</option><option>Tukar Barang</option></select></div>
+            <div class="field"><label>Nominal Refund</label><input class="search" id="pos-return-form-refund-amount" type="number" value="0"></div>
+            <div class="field" style="grid-column:span 4;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="togglePosReturnForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitPosReturnForm()">Simpan Retur</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Retur</th><th>Tanggal</th><th>Toko</th><th>FG</th><th>Qty</th><th>Alasan</th><th>Status</th></tr></thead><tbody id="tbl-return"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-closing">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-closing" placeholder="Cari closing toko">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-closing-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-closing-date-to" type="date"></label>
+              </div>
+            </details>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('closing')">Export</button>
+            <button class="btn btn-primary" onclick="toggleClosingForm(true)">+ Closing Kasir</button>
+          </div>
+        </div>
+        <div class="card card-pad inline-form" id="closing-form-card">
+          <div class="form-grid">
+            <div class="field"><label>Toko</label><select class="select" id="closing-form-store"></select></div>
+            <div class="field"><label>Status</label><select class="select" id="closing-form-status"><option>Closed</option><option>Review</option></select></div>
+            <div class="field"><label>Expected Cash</label><input class="search" id="closing-form-expected-cash" type="number" value="0"></div>
+            <div class="field"><label>Actual Cash</label><input class="search" id="closing-form-actual-cash" type="number" value="0"></div>
+            <div class="field" style="grid-column:span 4;align-content:end">
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="toggleClosingForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitClosingForm()">Simpan Closing</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Closing</th><th>Tanggal</th><th>Toko</th><th>Transaksi</th><th>Qty Terjual</th><th>Net Sales</th><th>Status</th></tr></thead><tbody id="tbl-closing"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-store">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-store" placeholder="Cari stok toko berdasarkan toko atau FG">
+            <select class="select" id="filter-store-store"></select>
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-store-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-store-date-to" type="date"></label>
+              </div>
+            </details>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="openStoreAdjustment()">Adjustment Toko</button>
+            <button class="btn btn-ghost" onclick="exportSection('store')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>Toko</th><th>Kode FG</th><th>Nama FG</th><th>Kategori</th><th>Stok Toko</th><th>Status</th></tr></thead><tbody id="tbl-store"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-receipt">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-receipt" placeholder="Cari nomor DO, toko, atau FG">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-receipt-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-receipt-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-receipt-store"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="openStoreAdjustment()">Adjustment Toko</button>
+            <button class="btn btn-ghost" onclick="exportSection('receipt')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>Tanggal Terima</th><th>No DO</th><th>Toko</th><th>Gudang Asal</th><th>FG</th><th>Qty Terima</th><th>Status</th></tr></thead><tbody id="tbl-receipt"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-movement">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-movement" placeholder="Cari toko, FG, atau dokumen">
+            <details class="date-range-filter">
+              <summary class="date-range-trigger">Rentang Tanggal</summary>
+              <div class="date-range-pop">
+                <label>Dari<input class="search" id="filter-movement-date-from" type="date"></label>
+                <label>Sampai<input class="search" id="filter-movement-date-to" type="date"></label>
+              </div>
+            </details>
+            <select class="select" id="filter-movement-store"></select>
+          </div>
+          <div class="toolbar-right">
+            <div class="stage-chip-group">
+              <button class="stage-chip" id="movement-view-toggle" title="Rekap Pergerakan Stok Toko" aria-label="Rekap Pergerakan Stok Toko" onclick="toggleMovementViewMode()">≣</button>
+            </div>
+            <button class="btn btn-ghost" onclick="openStoreAdjustment()">Adjustment Toko</button>
+            <button class="btn btn-ghost" onclick="exportSection('movement')">Export</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="pane active" id="movement-pane-recap"><div class="tw"><table><thead><tr><th>Tanggal</th><th>Toko</th><th>Dokumen</th><th>Tipe</th><th>FG</th><th>Masuk</th><th>Keluar</th><th>Saldo</th></tr></thead><tbody id="tbl-movement"></tbody></table></div></div>
+          <div class="pane" id="movement-pane-table"><div class="tw"><table><thead><tr id="hd-movement-table"></tr></thead><tbody id="tbl-movement-table"></tbody></table></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal" id="column-modal" onclick="if(event.target===this) closeColumnModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Atur Kolom Tabel</div>
+          <div class="modal-sub" id="column-modal-sub">Pilih kolom yang ingin ditampilkan.</div>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="closeColumnModal()">Tutup</button>
+      </div>
+      <div class="check-grid" id="column-modal-grid"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-ghost" type="button" onclick="resetColumnPrefs()">Reset</button>
+        <button class="btn btn-primary" type="button" onclick="saveColumnPrefs()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="sales-detail-modal" onclick="if(event.target===this) toggleSalesDetail(false)">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="sales-detail-title">Detail Penjualan</div>
+          <div class="modal-sub">Audit transaksi penjualan toko dari POS frontliner dan back office.</div>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="toggleSalesDetail(false)">Tutup</button>
+      </div>
+      <div class="mini-list" id="sales-detail-body"></div>
+    </div>
+  </div>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const TX = window.TRANSACTION_DATA || {};
+const RUNTIME = window.ERP_RUNTIME || {};
+const TOKOS = DATA.tokos || [];
+const FG = DATA.fg_items || [];
+const COLUMN_PREFS_KEY = 'erp.pos.columnPrefs';
+const COLUMN_CONFIG = {
+  sales:{ title:'Penjualan', bodyId:'tbl-sales', columns:['No Penjualan','Tanggal','Toko','FG','Qty','Net Sales','Status'] },
+  return:{ title:'Retur Penjualan', bodyId:'tbl-return', columns:['No Retur','Tanggal','Toko','FG','Qty','Alasan','Status'] },
+  closing:{ title:'Closing Kasir', bodyId:'tbl-closing', columns:['No Closing','Tanggal','Toko','Transaksi','Qty Terjual','Net Sales','Status'] },
+  receipt:{ title:'Penerimaan DO Toko', bodyId:'tbl-receipt', columns:['Tanggal Terima','No DO','Toko','Gudang Asal','FG','Qty Terima','Status'] },
+  store:{ title:'Stok Toko', bodyId:'tbl-store', columns:['Toko','Kode FG','Nama FG','Kategori','Stok Toko','Status'] },
+  movement:{ title:'Pergerakan Stok Toko', bodyId:'tbl-movement', columns:['Tanggal','Toko','Dokumen','Tipe','FG','Masuk','Keluar','Saldo'] }
+};
+let columnPrefs = loadColumnPrefs();
+let activeColumnSection = 'sales';
+const POS_RETURN_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_return') || '[]');
+const POS_CLOSING_EXTRA = JSON.parse(window.localStorage.getItem('erp.extra.pos_closing') || '[]');
+let selectedSalesNo = '';
+let selectedReceiptNo = '';
+let selectedMovementKey = '';
+let selectedClosingNo = '';
+let selectedReturnNo = '';
+let movementViewMode = 'RECAP';
+
+function badge(status){
+  const map = { Aktif:'b-ok', Draft:'b-draft', Posted:'b-ok', Closed:'b-ok', Review:'b-info', Open:'b-warn' };
+  return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
+}
+function pickStore(i){ return TOKOS[(i * 3) % TOKOS.length]; }
+function pickFg(i){ return FG[(i * 7) % FG.length]; }
+function fmtMoney(n){ return new Intl.NumberFormat('id-ID').format(n || 0); }
+function getStoreName(storeCode){ return TOKOS.find(x => x.store_code === storeCode)?.store_name || storeCode || '-'; }
+
+const SALES_ROWS = [...(TX.sales || []), ...RUNTIME.read('sales')].map(r => ({
+  sales_no: r.sales_no,
+  sales_date: r.sales_date,
+  store_code: r.store_code,
+  store_name: r.store_name,
+  fg_code: r.fg_code,
+  fg_name: r.fg_name,
+  qty: r.qty,
+  net_sales: r.net_sales,
+  payment_method: r.payment_method || '-',
+  cashier_id: r.cashier_id || '-',
+  customer_name: r.customer_name || 'Umum',
+  customer_phone: r.customer_phone || '',
+  status: r.status
+}));
+
+const RETURN_ROWS = SALES_ROWS.slice(0,7).map((s, i) => ({
+  return_no: `RTS-202603-${String(i + 1).padStart(3,'0')}`,
+  sales_no: s.sales_no,
+  return_date: `2026-03-${String((i % 18) + 4).padStart(2,'0')}`,
+  store_name: s.store_name,
+  store_code: s.store_code,
+  fg_code: s.fg_code,
+  fg_name: s.fg_name,
+  qty: 1,
+  reason: i % 2 === 0 ? 'Customer berubah pikiran' : 'Barang defect',
+  refund_method: i % 2 === 0 ? 'Cash' : 'Store Credit',
+  refund_amount: Math.round(Number(s.net_sales || 0) / Math.max(1, Number(s.qty || 1))),
+  status: i < 4 ? 'Posted' : 'Draft'
+})).concat(POS_RETURN_EXTRA);
+
+const CLOSING_ROWS = TOKOS.slice(0,10).map((store, i) => {
+  const rows = SALES_ROWS.filter(x => x.store_code === store.store_code);
+  const cashSales = rows.filter(x => String(x.payment_method || '').toLowerCase() === 'cash').reduce((a,b)=>a+Number(b.net_sales || 0),0);
+  return {
+    closing_no: `CLS-202603-${String(i + 1).padStart(3,'0')}`,
+    closing_date: `2026-03-${String((i % 18) + 10).padStart(2,'0')}`,
+    store_name: store.store_name,
+    store_code: store.store_code,
+    trx_count: rows.length,
+    qty_sold: rows.reduce((a,b)=>a+b.qty,0),
+    net_sales: rows.reduce((a,b)=>a+b.net_sales,0),
+    expected_cash: cashSales,
+    actual_cash: cashSales,
+    cash_diff: 0,
+    status: i < 6 ? 'Closed' : 'Review'
+  };
+}).concat(POS_CLOSING_EXTRA);
+
+function bySearch(arr, keys, q){
+  const term = (q || '').trim().toLowerCase();
+  if(!term) return arr;
+  return arr.filter(row => keys.some(k => String(row[k] || '').toLowerCase().includes(term)));
+}
+
+function stockAtStore(storeCode, fgCode){
+  const doIn = (TX.delivery_orders || []).filter(x => x.store_code === storeCode && x.fg_code === fgCode && ['Received','Posted'].includes(x.status || '')).reduce((a,b)=>a+Number(b.qty || 0),0);
+  const outSales = SALES_ROWS.filter(x => x.store_code === storeCode && x.fg_code === fgCode && x.status === 'Posted').reduce((a,b)=>a+b.qty,0);
+  const inReturn = RETURN_ROWS.filter(x => x.store_code === storeCode && x.fg_code === fgCode && x.status === 'Posted').reduce((a,b)=>a+b.qty,0);
+  return Math.max(0, doIn - outSales + inReturn);
+}
+
+function renderKpis(){
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Toko Aktif</div><div class="kpi-val">${TOKOS.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Sales Posted</div><div class="kpi-val">${SALES_ROWS.filter(x => x.status === 'Posted').length}</div></div>
+    <div class="kpi"><div class="kpi-label">Closing Closed</div><div class="kpi-val">${CLOSING_ROWS.filter(x => x.status === 'Closed').length}</div></div>
+    <div class="kpi"><div class="kpi-label">Retur Posted</div><div class="kpi-val">${RETURN_ROWS.filter(x => x.status === 'Posted').length}</div></div>
+  `;
+}
+
+function fillStoreFilters(){
+  const opts = ['<option value="">Semua Toko</option>'].concat(TOKOS.map(s => `<option value="${s.store_code}">${s.store_code} - ${s.store_name}</option>`));
+  document.getElementById('filter-sales-store').innerHTML = opts.join('');
+  document.getElementById('filter-receipt-store').innerHTML = opts.join('');
+  document.getElementById('filter-store-store').innerHTML = opts.join('');
+  document.getElementById('filter-movement-store').innerHTML = opts.join('');
+  document.getElementById('sales-form-store').innerHTML = TOKOS.slice(0, 40).map(s => `<option value="${s.store_code}">${s.store_code} - ${s.store_name}</option>`).join('');
+  document.getElementById('sales-form-fg').innerHTML = FG.slice(0, 60).map(f => `<option value="${f.fg_code}">${f.fg_code} - ${f.fg_name}</option>`).join('');
+  document.getElementById('pos-return-form-sales').innerHTML = SALES_ROWS.slice(0, 60).map(s => `<option value="${s.sales_no}">${s.sales_no} - ${s.store_name}</option>`).join('');
+  document.getElementById('closing-form-store').innerHTML = TOKOS.slice(0, 40).map(s => `<option value="${s.store_code}">${s.store_code} - ${s.store_name}</option>`).join('');
+}
+
+function renderSales(){
+  let rows = bySearch(SALES_ROWS, ['sales_no','store_name','fg_code','fg_name'], document.getElementById('search-sales').value);
+  const store = document.getElementById('filter-sales-store').value;
+  const dateFrom = document.getElementById('filter-sales-date-from').value;
+  const dateTo = document.getElementById('filter-sales-date-to').value;
+  if(store) rows = rows.filter(x => x.store_code === store);
+  if(dateFrom) rows = rows.filter(x => String(x.sales_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.sales_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.sales_date || '').localeCompare(String(a.sales_date || '')) || String(b.sales_no || '').localeCompare(String(a.sales_no || '')));
+  if(!selectedSalesNo && rows[0]) selectedSalesNo = rows[0].sales_no;
+  if(selectedSalesNo && !rows.some(r => r.sales_no === selectedSalesNo)) selectedSalesNo = rows[0]?.sales_no || '';
+  document.getElementById('tbl-sales').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.sales_no === selectedSalesNo ? 'sel-row' : ''}">
+      <td class="mono">${r.sales_no}</td>
+      <td>${r.sales_date}</td>
+      <td>${r.store_name}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
+      <td>${r.qty}</td>
+      <td>Rp ${fmtMoney(r.net_sales)}</td>
+      <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleSalesDetail(true,'${r.sales_no}')">Detail</button></div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data penjualan.</td></tr>`;
+}
+
+function renderReturn(){
+  let rows = bySearch(RETURN_ROWS, ['return_no','store_name','fg_code','fg_name','reason'], document.getElementById('search-return').value);
+  const dateFrom = document.getElementById('filter-return-date-from').value;
+  const dateTo = document.getElementById('filter-return-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.return_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.return_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.return_date || '').localeCompare(String(a.return_date || '')) || String(b.return_no || '').localeCompare(String(a.return_no || '')));
+  if(!selectedReturnNo && rows[0]) selectedReturnNo = rows[0].return_no;
+  if(selectedReturnNo && !rows.some(r => r.return_no === selectedReturnNo)) selectedReturnNo = rows[0]?.return_no || '';
+  document.getElementById('tbl-return').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.return_no === selectedReturnNo ? 'sel-row' : ''}">
+      <td class="mono">${r.return_no}</td>
+      <td>${r.return_date}</td>
+      <td>${r.store_name}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
+      <td>${r.qty}</td>
+      <td>${r.reason}</td>
+      <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleReturnDetail(true,'${r.return_no}')">Detail</button></div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data retur penjualan.</td></tr>`;
+}
+
+function renderClosing(){
+  let rows = bySearch(CLOSING_ROWS, ['closing_no','store_name','store_code'], document.getElementById('search-closing').value);
+  const dateFrom = document.getElementById('filter-closing-date-from').value;
+  const dateTo = document.getElementById('filter-closing-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.closing_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.closing_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.closing_date || '').localeCompare(String(a.closing_date || '')) || String(b.closing_no || '').localeCompare(String(a.closing_no || '')));
+  if(!selectedClosingNo && rows[0]) selectedClosingNo = rows[0].closing_no;
+  if(selectedClosingNo && !rows.some(r => r.closing_no === selectedClosingNo)) selectedClosingNo = rows[0]?.closing_no || '';
+  document.getElementById('tbl-closing').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.closing_no === selectedClosingNo ? 'sel-row' : ''}">
+      <td class="mono">${r.closing_no}</td>
+      <td>${r.closing_date}</td>
+      <td>${r.store_name}</td>
+      <td>${r.trx_count}</td>
+      <td>${r.qty_sold}</td>
+      <td>Rp ${fmtMoney(r.net_sales)}</td>
+      <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleClosingDetail(true,'${r.closing_no}')">Detail</button></div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada data closing kasir.</td></tr>`;
+}
+
+function buildStoreStockRows(){
+  const selectedStore = document.getElementById('filter-store-store').value;
+  const dateFrom = document.getElementById('filter-store-date-from')?.value || '';
+  const dateTo = document.getElementById('filter-store-date-to')?.value || '';
+  let rows = [];
+  const stores = selectedStore ? TOKOS.filter(x => x.store_code === selectedStore) : TOKOS.slice(0,8);
+  stores.forEach(store => {
+    FG.slice(0, 16).forEach(fg => {
+      const doIn = buildStoreReceiptRows()
+        .filter(x => x.store_code === store.store_code && x.fg_code === fg.fg_code)
+        .filter(x => !dateFrom || String(x.receipt_date || '') >= dateFrom)
+        .filter(x => !dateTo || String(x.receipt_date || '') <= dateTo)
+        .reduce((sum, row) => sum + Number(row.qty || 0), 0);
+      const outSales = SALES_ROWS.filter(x => x.store_code === store.store_code && x.fg_code === fg.fg_code && x.status === 'Posted')
+        .filter(x => !dateFrom || String(x.sales_date || '') >= dateFrom)
+        .filter(x => !dateTo || String(x.sales_date || '') <= dateTo)
+        .reduce((sum, row) => sum + Number(row.qty || 0), 0);
+      const inReturn = RETURN_ROWS.filter(x => x.store_code === store.store_code && x.fg_code === fg.fg_code && x.status === 'Posted')
+        .filter(x => !dateFrom || String(x.return_date || '') >= dateFrom)
+        .filter(x => !dateTo || String(x.return_date || '') <= dateTo)
+        .reduce((sum, row) => sum + Number(row.qty || 0), 0);
+      rows.push({
+        store_name: store.store_name,
+        store_code: store.store_code,
+        fg_code: fg.fg_code,
+        fg_name: fg.fg_name,
+        fg_category: fg.fg_category,
+        stock: Math.max(0, doIn - outSales + inReturn)
+      });
+    });
+  });
+  return rows;
+}
+
+function renderStore(){
+  const term = document.getElementById('search-store').value;
+  let rows = bySearch(buildStoreStockRows(), ['store_name','store_code','fg_code','fg_name','fg_category'], term);
+  document.getElementById('tbl-store').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td>${r.store_name}</td>
+      <td class="mono">${r.fg_code}</td>
+      <td>${r.fg_name}</td>
+      <td>${r.fg_category}</td>
+      <td>${r.stock}</td>
+      <td>${badge(r.stock <= 0 ? 'Habis' : r.stock < 4 ? 'Tipis' : 'Aktif')}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">Tidak ada data stok toko.</td></tr>`;
+}
+
+function buildStoreReceiptRows(){
+  return (TX.delivery_orders || [])
+    .filter(x => ['Received','Posted'].includes(x.status || '') && x.store_code)
+    .map(row => ({
+      receipt_date: row.do_date,
+      do_no: row.do_no,
+      store_code: row.store_code,
+      store_name: row.dest_name || getStoreName(row.store_code),
+      from_warehouse: row.from_warehouse || '-',
+      fg_code: row.fg_code,
+      fg_name: row.fg_name,
+      qty: Number(row.qty || 0),
+      status: row.status || 'Received'
+    }));
+}
+
+function renderReceipt(){
+  let rows = bySearch(buildStoreReceiptRows(), ['do_no','store_name','store_code','fg_code','fg_name','from_warehouse'], document.getElementById('search-receipt').value);
+  const store = document.getElementById('filter-receipt-store').value;
+  const dateFrom = document.getElementById('filter-receipt-date-from').value;
+  const dateTo = document.getElementById('filter-receipt-date-to').value;
+  if(store) rows = rows.filter(x => x.store_code === store);
+  if(dateFrom) rows = rows.filter(x => String(x.receipt_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.receipt_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.receipt_date || '').localeCompare(String(a.receipt_date || '')) || String(b.do_no || '').localeCompare(String(a.do_no || '')));
+  if(!selectedReceiptNo && rows[0]) selectedReceiptNo = rows[0].do_no;
+  if(selectedReceiptNo && !rows.some(r => r.do_no === selectedReceiptNo)) selectedReceiptNo = rows[0]?.do_no || '';
+  document.getElementById('tbl-receipt').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.do_no === selectedReceiptNo ? 'sel-row' : ''}">
+      <td>${r.receipt_date}</td>
+      <td class="mono">${r.do_no}</td>
+      <td>${r.store_name}</td>
+      <td class="mono">${r.from_warehouse}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
+      <td>${r.qty}</td>
+      <td>${badge(r.status)}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleReceiptDetail(true,'${r.do_no}')">Detail</button></div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Belum ada penerimaan DO toko.</td></tr>`;
+}
+
+function buildStoreMovementRows(){
+  const rows = [];
+  (TX.delivery_orders || []).filter(x => ['Received','Posted'].includes(x.status || '')).forEach(row => {
+    rows.push({
+      move_date: row.do_date,
+      store_code: row.store_code,
+      store_name: row.dest_name || getStoreName(row.store_code),
+      doc_no: row.do_no,
+      move_type: 'DO Masuk',
+      fg_code: row.fg_code,
+      fg_name: row.fg_name,
+      qty_in: Number(row.qty || 0),
+      qty_out: 0
+    });
+  });
+  SALES_ROWS.filter(x => x.status === 'Posted').forEach(row => {
+    rows.push({
+      move_date: row.sales_date,
+      store_code: row.store_code,
+      store_name: row.store_name,
+      doc_no: row.sales_no,
+      move_type: 'Penjualan',
+      fg_code: row.fg_code,
+      fg_name: row.fg_name,
+      qty_in: 0,
+      qty_out: Number(row.qty || 0)
+    });
+  });
+  RETURN_ROWS.filter(x => x.status === 'Posted').forEach(row => {
+    rows.push({
+      move_date: row.return_date,
+      store_code: row.store_code,
+      store_name: row.store_name,
+      doc_no: row.return_no,
+      move_type: 'Retur Penjualan',
+      fg_code: row.fg_code,
+      fg_name: row.fg_name,
+      qty_in: Number(row.qty || 0),
+      qty_out: 0
+    });
+  });
+  return rows;
+}
+
+function renderMovement(){
+  let rows = bySearch(buildStoreMovementRows(), ['store_name','store_code','doc_no','fg_code','fg_name','move_type'], document.getElementById('search-movement').value);
+  const store = document.getElementById('filter-movement-store').value;
+  const dateFrom = document.getElementById('filter-movement-date-from').value;
+  const dateTo = document.getElementById('filter-movement-date-to').value;
+  if(store) rows = rows.filter(x => x.store_code === store);
+  if(dateFrom) rows = rows.filter(x => String(x.move_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.move_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(a.move_date || '').localeCompare(String(b.move_date || '')) || String(a.doc_no || '').localeCompare(String(b.doc_no || '')) || String(a.fg_code || '').localeCompare(String(b.fg_code || '')));
+  const balanceMap = new Map();
+  rows.forEach(row => {
+    const key = `${row.store_code}|${row.fg_code}`;
+    const current = Number(balanceMap.get(key) || 0) + Number(row.qty_in || 0) - Number(row.qty_out || 0);
+    balanceMap.set(key, current);
+    row.balance = current;
+  });
+  rows = rows.sort((a,b) => String(b.move_date || '').localeCompare(String(a.move_date || '')) || String(b.doc_no || '').localeCompare(String(a.doc_no || '')));
+  const movementToggle = document.getElementById('movement-view-toggle');
+  if(movementToggle){
+    movementToggle.textContent = movementViewMode === 'RECAP' ? '≣' : '▦';
+    movementToggle.title = movementViewMode === 'RECAP' ? 'Rekap Pergerakan Stok Toko' : 'Tabel Per Tanggal';
+    movementToggle.setAttribute('aria-label', movementToggle.title);
+  }
+  document.getElementById('movement-pane-recap').classList.toggle('active', movementViewMode === 'RECAP');
+  document.getElementById('movement-pane-table').classList.toggle('active', movementViewMode === 'TABLE');
+  if(!selectedMovementKey && rows[0]) selectedMovementKey = `${rows[0].doc_no}|${rows[0].store_code}|${rows[0].fg_code}|${rows[0].move_type}`;
+  if(selectedMovementKey && !rows.some(r => `${r.doc_no}|${r.store_code}|${r.fg_code}|${r.move_type}` === selectedMovementKey)) selectedMovementKey = rows[0] ? `${rows[0].doc_no}|${rows[0].store_code}|${rows[0].fg_code}|${rows[0].move_type}` : '';
+  document.getElementById('tbl-movement').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${`${r.doc_no}|${r.store_code}|${r.fg_code}|${r.move_type}` === selectedMovementKey ? 'sel-row' : ''}">
+      <td>${r.move_date}</td>
+      <td>${r.store_name}</td>
+      <td class="mono">${r.doc_no}</td>
+      <td>${r.move_type}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
+      <td>${r.qty_in || '-'}</td>
+      <td>${r.qty_out || '-'}</td>
+      <td>${r.balance}<div class="muted-line"><button class="btn btn-ghost" type="button" onclick="toggleMovementDetail(true,'${r.doc_no}','${r.store_code}','${r.fg_code}','${r.move_type}')">Detail</button></div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Tidak ada pergerakan stok toko.</td></tr>`;
+  const ascRows = rows.slice().reverse();
+  const dates = [...new Set(ascRows.map(r => String(r.move_date || '')).filter(Boolean))].sort().reverse();
+  const grouped = Array.from(ascRows.reduce((map, row) => {
+    const key = row.fg_code;
+    if(!map.has(key)){
+      map.set(key, { fg_code: row.fg_code, fg_name: row.fg_name, total_in: 0, total_out: 0, by_date_in: {}, by_date_out: {} });
+    }
+    const curr = map.get(key);
+    curr.total_in += Number(row.qty_in || 0);
+    curr.total_out += Number(row.qty_out || 0);
+    curr.by_date_in[row.move_date] = (curr.by_date_in[row.move_date] || 0) + Number(row.qty_in || 0);
+    curr.by_date_out[row.move_date] = (curr.by_date_out[row.move_date] || 0) + Number(row.qty_out || 0);
+    return map;
+  }, new Map()).values()).sort((a,b) => String(a.fg_code).localeCompare(String(b.fg_code)));
+  document.getElementById('hd-movement-table').innerHTML = `<tr><th rowspan="2">Kode FG</th><th rowspan="2">Nama FG</th><th rowspan="2">Total Masuk</th><th rowspan="2">Total Keluar</th>${dates.map(d => `<th colspan="2">${d}</th>`).join('')}</tr><tr>${dates.map(() => `<th>In</th><th>Out</th>`).join('')}</tr>`;
+  document.getElementById('tbl-movement-table').innerHTML = grouped.length ? grouped.map(r => `
+    <tr>
+      <td class="mono">${r.fg_code}</td>
+      <td>${r.fg_name}</td>
+      <td>${r.total_in || ''}</td>
+      <td>${r.total_out || ''}</td>
+      ${dates.map(d => {
+        const inVal = Number(r.by_date_in[d] || 0);
+        const outVal = Number(r.by_date_out[d] || 0);
+        return `<td class="${inVal > 0 ? 'num-pos' : ''}">${inVal > 0 ? `+${inVal}` : ''}</td><td class="${outVal > 0 ? 'num-neg' : ''}">${outVal > 0 ? `-${outVal}` : ''}</td>`;
+      }).join('')}
+    </tr>
+  `).join('') : `<tr><td colspan="${4 + (dates.length * 2)}" class="empty">Tidak ada pergerakan stok toko.</td></tr>`;
+}
+
+function toggleMovementViewMode(){
+  movementViewMode = movementViewMode === 'RECAP' ? 'TABLE' : 'RECAP';
+  renderMovement();
+}
+
+function toggleSalesDetail(show, salesNo = ''){
+  const modal = document.getElementById('sales-detail-modal');
+  if(show && salesNo) selectedSalesNo = salesNo;
+  if(show){
+    const rows = SALES_ROWS.filter(x => x.sales_no === selectedSalesNo);
+    if(!rows.length) return;
+    const head = rows[0];
+    document.getElementById('sales-detail-title').textContent = `Detail ${head.sales_no}`;
+    document.getElementById('sales-detail-body').innerHTML = `
+      <div class="mini-item"><div class="mini-k">Informasi Dokumen</div><div class="mini-v">${head.sales_date}<div class="muted-line">${head.store_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Pelanggan</div><div class="mini-v">${head.customer_name || 'Umum'}<div class="muted-line">${head.customer_phone || '-'}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Kasir / Metode Bayar</div><div class="mini-v">${head.cashier_id || '-'}<div class="muted-line">${head.payment_method || '-'}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Item Penjualan</div><div class="mini-v">${rows.map(row => `<div class="muted-line"><span class="mono">${row.fg_code}</span> ${row.fg_name} x ${row.qty} = Rp ${fmtMoney(row.net_sales)}</div>`).join('')}</div></div>
+    `;
+    modal.classList.add('open');
+  }else{
+    modal.classList.remove('open');
+  }
+}
+
+function toggleReturnDetail(show, returnNo = ''){
+  const modal = document.getElementById('sales-detail-modal');
+  if(show && returnNo) selectedReturnNo = returnNo;
+  if(show){
+    const row = RETURN_ROWS.find(x => x.return_no === selectedReturnNo);
+    if(!row) return;
+    document.getElementById('sales-detail-title').textContent = `Detail ${row.return_no}`;
+    document.getElementById('sales-detail-body').innerHTML = `
+      <div class="mini-item"><div class="mini-k">Informasi Retur</div><div class="mini-v">${row.return_date}<div class="muted-line">${row.store_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Referensi Penjualan</div><div class="mini-v">${row.sales_no || '-'}<div class="muted-line">${row.status}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Item / Qty</div><div class="mini-v"><span class="mono">${row.fg_code}</span><div class="muted-line">${row.fg_name} x ${row.qty}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Refund</div><div class="mini-v">Rp ${fmtMoney(row.refund_amount || 0)}<div class="muted-line">${row.refund_method || '-'}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Alasan</div><div class="mini-v">${row.reason || '-'}</div></div>
+    `;
+    modal.classList.add('open');
+  }else{
+    modal.classList.remove('open');
+  }
+}
+
+function toggleReceiptDetail(show, doNo = ''){
+  const modal = document.getElementById('sales-detail-modal');
+  if(show && doNo) selectedReceiptNo = doNo;
+  if(show){
+    const rows = buildStoreReceiptRows().filter(x => x.do_no === selectedReceiptNo);
+    if(!rows.length) return;
+    const head = rows[0];
+    document.getElementById('sales-detail-title').textContent = `Detail ${head.do_no}`;
+    document.getElementById('sales-detail-body').innerHTML = `
+      <div class="mini-item"><div class="mini-k">Informasi Penerimaan</div><div class="mini-v">${head.receipt_date}<div class="muted-line">${head.store_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Gudang Asal / Status</div><div class="mini-v">${head.from_warehouse}<div class="muted-line">${head.status}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Ringkasan Qty</div><div class="mini-v">${rows.reduce((sum, row) => sum + Number(row.qty || 0), 0)}<div class="muted-line">total item diterima</div></div></div>
+      <div class="mini-item"><div class="mini-k">Item Diterima</div><div class="mini-v">${rows.map(row => `<div class="muted-line"><span class="mono">${row.fg_code}</span> ${row.fg_name} x ${row.qty}</div>`).join('')}</div></div>
+    `;
+    modal.classList.add('open');
+  }else{
+    modal.classList.remove('open');
+  }
+}
+
+function toggleMovementDetail(show, docNo = '', storeCode = '', fgCode = '', moveType = ''){
+  const modal = document.getElementById('sales-detail-modal');
+  if(show && docNo) selectedMovementKey = `${docNo}|${storeCode}|${fgCode}|${moveType}`;
+  if(show){
+    const rows = buildStoreMovementRows();
+    const row = rows.find(x => `${x.doc_no}|${x.store_code}|${x.fg_code}|${x.move_type}` === selectedMovementKey);
+    if(!row) return;
+    document.getElementById('sales-detail-title').textContent = `Detail ${row.doc_no}`;
+    document.getElementById('sales-detail-body').innerHTML = `
+      <div class="mini-item"><div class="mini-k">Informasi Pergerakan</div><div class="mini-v">${row.move_date}<div class="muted-line">${row.store_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Tipe / Dokumen</div><div class="mini-v">${row.move_type}<div class="muted-line">${row.doc_no}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Item FG</div><div class="mini-v"><span class="mono">${row.fg_code}</span><div class="muted-line">${row.fg_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Masuk / Keluar / Saldo</div><div class="mini-v">${row.qty_in || 0} / ${row.qty_out || 0}<div class="muted-line">Saldo ${row.balance}</div></div></div>
+    `;
+    modal.classList.add('open');
+  }else{
+    modal.classList.remove('open');
+  }
+}
+
+function toggleClosingDetail(show, closingNo = ''){
+  const modal = document.getElementById('sales-detail-modal');
+  if(show && closingNo) selectedClosingNo = closingNo;
+  if(show){
+    const row = CLOSING_ROWS.find(x => x.closing_no === selectedClosingNo);
+    if(!row) return;
+    const salesRows = SALES_ROWS.filter(x => x.store_code === row.store_code);
+    const cashSales = salesRows.filter(x => String(x.payment_method || '').toLowerCase() === 'cash').reduce((sum, x) => sum + Number(x.net_sales || 0), 0);
+    const nonCashSales = salesRows.reduce((sum, x) => sum + Number(x.net_sales || 0), 0) - cashSales;
+    document.getElementById('sales-detail-title').textContent = `Detail ${row.closing_no}`;
+    document.getElementById('sales-detail-body').innerHTML = `
+      <div class="mini-item"><div class="mini-k">Informasi Closing</div><div class="mini-v">${row.closing_date}<div class="muted-line">${row.store_name}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Transaksi / Qty</div><div class="mini-v">${row.trx_count}<div class="muted-line">${row.qty_sold} qty terjual</div></div></div>
+      <div class="mini-item"><div class="mini-k">Net Sales</div><div class="mini-v">Rp ${fmtMoney(row.net_sales)}<div class="muted-line">${row.status}</div></div></div>
+      <div class="mini-item"><div class="mini-k">Cash / Non Cash</div><div class="mini-v">Rp ${fmtMoney(cashSales)} / Rp ${fmtMoney(nonCashSales)}</div></div>
+      <div class="mini-item"><div class="mini-k">Expected / Actual Cash</div><div class="mini-v">Rp ${fmtMoney(row.expected_cash || 0)} / Rp ${fmtMoney(row.actual_cash || 0)}</div></div>
+      <div class="mini-item"><div class="mini-k">Selisih Cash</div><div class="mini-v">${Number(row.cash_diff || 0) >= 0 ? '+' : ''}Rp ${fmtMoney(row.cash_diff || 0)}</div></div>
+    `;
+    modal.classList.add('open');
+  }else{
+    modal.classList.remove('open');
+  }
+}
+
+function showSection(sec){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  syncPosNavBySection(sec);
+  activeColumnSection = sec;
+  document.getElementById('sec-' + sec).classList.add('active');
+  document.getElementById('bc-child').textContent = ({
+    sales: 'Penjualan',
+    return: 'Retur Penjualan',
+    closing: 'Closing Kasir',
+    receipt: 'Penerimaan DO Toko',
+    store: 'Stok Toko',
+    movement: 'Pergerakan Stok Toko'
+  })[sec];
+  applyColumnVisibility(sec);
+}
+
+function exportSection(sec){
+  const toCsv = rows => rows.map(row => row.map(value => {
+    const text = String(value ?? '');
+    return `"${text.replace(/"/g, '""')}"`;
+  }).join(',')).join('\n');
+  const downloadCsv = (filename, rows) => {
+    const blob = new Blob([toCsv(rows)], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  if(sec === 'sales'){
+    let rows = bySearch(SALES_ROWS, ['sales_no','store_name','fg_code','fg_name'], document.getElementById('search-sales').value);
+    const store = document.getElementById('filter-sales-store').value;
+    const dateFrom = document.getElementById('filter-sales-date-from').value;
+    const dateTo = document.getElementById('filter-sales-date-to').value;
+    if(store) rows = rows.filter(x => x.store_code === store);
+    if(dateFrom) rows = rows.filter(x => String(x.sales_date || '') >= dateFrom);
+    if(dateTo) rows = rows.filter(x => String(x.sales_date || '') <= dateTo);
+    rows = rows.sort((a,b) => String(b.sales_date || '').localeCompare(String(a.sales_date || '')) || String(b.sales_no || '').localeCompare(String(a.sales_no || '')));
+    return downloadCsv('penjualan-pos.csv', [
+      ['No Penjualan','Tanggal','Toko','Kode FG','Nama FG','Qty','Net Sales','Metode Bayar','Kasir','Customer','Status'],
+      ...rows.map(r => [r.sales_no, r.sales_date, r.store_name, r.fg_code, r.fg_name, r.qty, r.net_sales, r.payment_method, r.cashier_id, r.customer_name, r.status])
+    ]);
+  }
+
+  if(sec === 'return'){
+    let rows = bySearch(RETURN_ROWS, ['return_no','store_name','fg_code','fg_name','reason'], document.getElementById('search-return').value);
+    const dateFrom = document.getElementById('filter-return-date-from').value;
+    const dateTo = document.getElementById('filter-return-date-to').value;
+    if(dateFrom) rows = rows.filter(x => String(x.return_date || '') >= dateFrom);
+    if(dateTo) rows = rows.filter(x => String(x.return_date || '') <= dateTo);
+    rows = rows.sort((a,b) => String(b.return_date || '').localeCompare(String(a.return_date || '')) || String(b.return_no || '').localeCompare(String(a.return_no || '')));
+    return downloadCsv('retur-penjualan-pos.csv', [
+      ['No Retur','Tanggal','Toko','Ref Sales','Kode FG','Nama FG','Qty','Metode Refund','Nominal Refund','Alasan','Status'],
+      ...rows.map(r => [r.return_no, r.return_date, r.store_name, r.sales_no || '-', r.fg_code, r.fg_name, r.qty, r.refund_method || '-', r.refund_amount || 0, r.reason, r.status])
+    ]);
+  }
+
+  if(sec === 'closing'){
+    let rows = bySearch(CLOSING_ROWS, ['closing_no','store_name','store_code'], document.getElementById('search-closing').value);
+    const dateFrom = document.getElementById('filter-closing-date-from').value;
+    const dateTo = document.getElementById('filter-closing-date-to').value;
+    if(dateFrom) rows = rows.filter(x => String(x.closing_date || '') >= dateFrom);
+    if(dateTo) rows = rows.filter(x => String(x.closing_date || '') <= dateTo);
+    rows = rows.sort((a,b) => String(b.closing_date || '').localeCompare(String(a.closing_date || '')) || String(b.closing_no || '').localeCompare(String(a.closing_no || '')));
+    return downloadCsv('closing-kasir-pos.csv', [
+      ['No Closing','Tanggal','Toko','Transaksi','Qty Terjual','Net Sales','Expected Cash','Actual Cash','Selisih','Status'],
+      ...rows.map(r => [r.closing_no, r.closing_date, r.store_name, r.trx_count, r.qty_sold, r.net_sales, r.expected_cash || 0, r.actual_cash || 0, r.cash_diff || 0, r.status])
+    ]);
+  }
+
+  if(sec === 'receipt'){
+    let rows = bySearch(buildStoreReceiptRows(), ['do_no','store_name','store_code','fg_code','fg_name','from_warehouse'], document.getElementById('search-receipt').value);
+    const store = document.getElementById('filter-receipt-store').value;
+    const dateFrom = document.getElementById('filter-receipt-date-from').value;
+    const dateTo = document.getElementById('filter-receipt-date-to').value;
+    if(store) rows = rows.filter(x => x.store_code === store);
+    if(dateFrom) rows = rows.filter(x => String(x.receipt_date || '') >= dateFrom);
+    if(dateTo) rows = rows.filter(x => String(x.receipt_date || '') <= dateTo);
+    rows = rows.sort((a,b) => String(b.receipt_date || '').localeCompare(String(a.receipt_date || '')) || String(b.do_no || '').localeCompare(String(a.do_no || '')));
+    return downloadCsv('penerimaan-do-toko.csv', [
+      ['Tanggal Terima','No DO','Toko','Gudang Asal','Kode FG','Nama FG','Qty Terima','Status'],
+      ...rows.map(r => [r.receipt_date, r.do_no, r.store_name, r.from_warehouse, r.fg_code, r.fg_name, r.qty, r.status])
+    ]);
+  }
+
+  if(sec === 'movement'){
+    let rows = bySearch(buildStoreMovementRows(), ['store_name','store_code','doc_no','fg_code','fg_name','move_type'], document.getElementById('search-movement').value);
+    const store = document.getElementById('filter-movement-store').value;
+    const dateFrom = document.getElementById('filter-movement-date-from').value;
+    const dateTo = document.getElementById('filter-movement-date-to').value;
+    if(store) rows = rows.filter(x => x.store_code === store);
+    if(dateFrom) rows = rows.filter(x => String(x.move_date || '') >= dateFrom);
+    if(dateTo) rows = rows.filter(x => String(x.move_date || '') <= dateTo);
+    rows = rows.sort((a,b) => String(a.move_date || '').localeCompare(String(b.move_date || '')) || String(a.doc_no || '').localeCompare(String(b.doc_no || '')) || String(a.fg_code || '').localeCompare(String(b.fg_code || '')));
+    const balanceMap = new Map();
+    rows.forEach(row => {
+      const key = `${row.store_code}|${row.fg_code}`;
+      const current = Number(balanceMap.get(key) || 0) + Number(row.qty_in || 0) - Number(row.qty_out || 0);
+      balanceMap.set(key, current);
+      row.balance = current;
+    });
+    rows = rows.sort((a,b) => String(b.move_date || '').localeCompare(String(a.move_date || '')) || String(b.doc_no || '').localeCompare(String(a.doc_no || '')));
+    return downloadCsv('pergerakan-stok-toko.csv', [
+      ['Tanggal','Toko','Dokumen','Tipe','Kode FG','Nama FG','Masuk','Keluar','Saldo'],
+      ...rows.map(r => [r.move_date, r.store_name, r.doc_no, r.move_type, r.fg_code, r.fg_name, r.qty_in, r.qty_out, r.balance])
+    ]);
+  }
+
+  if(sec === 'store'){
+    let rows = bySearch(buildStoreStockRows(), ['store_name','store_code','fg_code','fg_name'], document.getElementById('search-store').value);
+    const store = document.getElementById('filter-store-store').value;
+    if(store) rows = rows.filter(x => x.store_code === store);
+    rows = rows.sort((a,b) => String(a.store_code || '').localeCompare(String(b.store_code || '')) || String(a.fg_code || '').localeCompare(String(b.fg_code || '')));
+    return downloadCsv('stok-toko.csv', [
+      ['Toko','Kode FG','Nama FG','Stok','Status','Dari','Sampai'],
+      ...rows.map(r => [r.store_name, r.fg_code, r.fg_name, r.stock, r.stock <= 0 ? 'Habis' : r.stock < 4 ? 'Tipis' : 'Aktif', document.getElementById('filter-store-date-from')?.value || '', document.getElementById('filter-store-date-to')?.value || ''])
+    ]);
+  }
+
+  toast('Export belum tersedia.');
+}
+
+function openStoreAdjustment(storeCode = ''){
+  const inferredStore = storeCode
+    || document.getElementById('filter-receipt-store')?.value
+    || document.getElementById('filter-store-store')?.value
+    || document.getElementById('filter-movement-store')?.value
+    || document.getElementById('filter-sales-store')?.value
+    || '';
+  const target = inferredStore ? `./erp-mutation.html#adjustment-toko-${inferredStore}` : './erp-mutation.html#adjustment-toko';
+  window.location.href = target;
+}
+
+function toast(msg){ alert(msg); }
+function initDateRangeFilters(){
+  document.querySelectorAll('.date-range-filter').forEach(filter => {
+    const pop = filter.querySelector('.date-range-pop');
+    if(!pop || pop.querySelector('.date-range-actions')) return;
+    const actions = document.createElement('div');
+    actions.className = 'date-range-actions';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary date-range-apply';
+    btn.textContent = 'Terapkan';
+    btn.addEventListener('click', () => {
+      pop.querySelectorAll('input, select').forEach(el => {
+        el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles:true }));
+      });
+      filter.open = false;
+    });
+    actions.appendChild(btn);
+    pop.appendChild(actions);
+  });
+}
+function loadColumnPrefs(){
+  try{
+    const raw = window.localStorage.getItem(COLUMN_PREFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(_err){
+    return {};
+  }
+}
+function persistColumnPrefs(){
+  window.localStorage.setItem(COLUMN_PREFS_KEY, JSON.stringify(columnPrefs));
+}
+function getSectionTable(section){
+  const config = COLUMN_CONFIG[section];
+  const tbody = config ? document.getElementById(config.bodyId) : null;
+  return tbody ? tbody.closest('table') : null;
+}
+function applyColumnVisibility(section){
+  const config = COLUMN_CONFIG[section];
+  const table = getSectionTable(section);
+  if(!config || !table) return;
+  const prefs = columnPrefs[section] || {};
+  table.querySelectorAll('tr').forEach(row => {
+    Array.from(row.children).forEach((cell, index) => {
+      cell.style.display = prefs[index] === false ? 'none' : '';
+    });
+  });
+}
+function openColumnModal(section = activeColumnSection){
+  activeColumnSection = section;
+  const config = COLUMN_CONFIG[section];
+  if(!config) return;
+  const prefs = columnPrefs[section] || {};
+  document.getElementById('column-modal-sub').textContent = `Atur kolom yang tampil untuk ${config.title}.`;
+  document.getElementById('column-modal-grid').innerHTML = config.columns.map((label, index) => `
+    <label class="check-item"><input type="checkbox" data-col-index="${index}" ${prefs[index] !== false ? 'checked' : ''}> <span>${label}</span></label>
+  `).join('');
+  document.getElementById('column-modal').classList.add('open');
+}
+function closeColumnModal(){
+  document.getElementById('column-modal').classList.remove('open');
+}
+function saveColumnPrefs(){
+  const picks = {};
+  document.querySelectorAll('#column-modal-grid input[type="checkbox"]').forEach(input => {
+    picks[input.dataset.colIndex] = input.checked;
+  });
+  columnPrefs[activeColumnSection] = picks;
+  persistColumnPrefs();
+  applyColumnVisibility(activeColumnSection);
+  closeColumnModal();
+}
+function resetColumnPrefs(){
+  delete columnPrefs[activeColumnSection];
+  persistColumnPrefs();
+  openColumnModal(activeColumnSection);
+  applyColumnVisibility(activeColumnSection);
+}
+
+function nextDoc(prefix, rows, field){
+  const nums = rows.map(r => Number(String(r[field] || '').split('-').pop())).filter(n => !Number.isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `${prefix}-202603-${String(next).padStart(3,'0')}`;
+}
+
+function quickAddSale(){
+  toggleSalesForm(true);
+}
+
+function refreshPosModalState(){
+  document.body.classList.toggle('has-inline-modal', !!document.querySelector('.inline-form.active'));
+}
+
+function toggleSalesForm(show){
+  document.getElementById('sales-form-card').classList.toggle('active', !!show);
+  refreshPosModalState();
+}
+
+function submitSalesForm(){
+  const storeCode = document.getElementById('sales-form-store').value;
+  const fgCode = document.getElementById('sales-form-fg').value;
+  const qty = Number(document.getElementById('sales-form-qty').value);
+  const price = Number(document.getElementById('sales-form-price').value);
+  const paymentMethod = document.getElementById('sales-form-payment').value;
+  const store = TOKOS.find(s => s.store_code === storeCode);
+  const fg = FG.find(f => f.fg_code === fgCode);
+  if(!store || !fg || !qty || !price) return toast('Form penjualan belum lengkap.');
+  const salesNo = nextDoc('POS', SALES_ROWS, 'sales_no');
+  const netSales = qty * price;
+  RUNTIME.append('sales', {
+    sales_no: salesNo,
+    sales_date: '2026-03-21',
+    store_code: store.store_code,
+    store_name: store.store_name,
+    fg_code: fg.fg_code,
+    fg_name: fg.fg_name,
+    qty,
+    net_sales: netSales,
+    payment_method: paymentMethod,
+    status: 'Posted'
+  });
+
+  if(String(paymentMethod).toLowerCase() === 'cash'){
+    const financeCash = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+    financeCash.push({
+      cash_no: nextDoc('CB', financeCash, 'cash_no'),
+      cash_date: '2026-03-21',
+      type:'Receipt',
+      source:'POS Sales',
+      reference: salesNo,
+      amount: netSales,
+      status:'Posted'
+    });
+    window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(financeCash));
+  }else if(String(paymentMethod).toLowerCase() === 'piutang'){
+    const financeAr = JSON.parse(window.localStorage.getItem('erp.extra.finance_ar') || '[]');
+    financeAr.push({
+      ar_no: nextDoc('AR', financeAr, 'ar_no'),
+      partner_name: store.store_name,
+      source_doc: salesNo,
+      due_date:'2026-04-21',
+      amount: netSales,
+      balance: netSales,
+      status:'Open'
+    });
+    window.localStorage.setItem('erp.extra.finance_ar', JSON.stringify(financeAr));
+  }else{
+    const financeCash = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+    financeCash.push({
+      cash_no: nextDoc('CB', financeCash, 'cash_no'),
+      cash_date: '2026-03-21',
+      type:'Receipt',
+      source:`POS ${paymentMethod}`,
+      reference: salesNo,
+      amount: netSales,
+      status:'Posted'
+    });
+    window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(financeCash));
+  }
+
+  const financeJournal = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+  financeJournal.push({
+    journal_no: nextDoc('JV', financeJournal, 'journal_no'),
+    journal_date: '2026-03-21',
+    source: salesNo,
+    desc:`Penjualan POS ${store.store_code} / ${paymentMethod}`,
+    debit: netSales,
+    credit: netSales,
+    status:'Posted'
+  });
+  window.localStorage.setItem('erp.extra.finance_journal', JSON.stringify(financeJournal));
+
+  location.reload();
+}
+
+function togglePosReturnForm(show){
+  document.getElementById('pos-return-form-card').classList.toggle('active', !!show);
+  refreshPosModalState();
+}
+
+function submitPosReturnForm(){
+  const salesNo = document.getElementById('pos-return-form-sales').value;
+  const qty = Number(document.getElementById('pos-return-form-qty').value);
+  const status = document.getElementById('pos-return-form-status').value;
+  const reason = document.getElementById('pos-return-form-reason').value.trim();
+  const refundMethod = document.getElementById('pos-return-form-refund-method').value;
+  const refundAmount = Number(document.getElementById('pos-return-form-refund-amount').value || 0);
+  const sale = SALES_ROWS.find(s => s.sales_no === salesNo);
+  if(!sale || !qty || !reason) return toast('Form retur penjualan belum lengkap.');
+  const rows = JSON.parse(window.localStorage.getItem('erp.extra.pos_return') || '[]');
+  rows.push({
+    return_no: nextDoc('RTS', RETURN_ROWS, 'return_no'),
+    sales_no: sale.sales_no,
+    return_date: '2026-03-21',
+    store_name: sale.store_name,
+    store_code: sale.store_code,
+    fg_code: sale.fg_code,
+    fg_name: sale.fg_name,
+    qty,
+    reason,
+    refund_method: refundMethod,
+    refund_amount: refundAmount,
+    status
+  });
+  window.localStorage.setItem('erp.extra.pos_return', JSON.stringify(rows));
+
+  const returnNo = rows[rows.length - 1].return_no;
+  if(String(refundMethod).toLowerCase() !== 'store credit' && String(refundMethod).toLowerCase() !== 'tukar barang'){
+    const financeCash = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+    financeCash.push({
+      cash_no: nextDoc('CB', financeCash, 'cash_no'),
+      cash_date: '2026-03-21',
+      type:'Payment',
+      source:'POS Return',
+      reference: returnNo,
+      amount: refundAmount,
+      status:'Posted'
+    });
+    window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(financeCash));
+  }
+  const financeJournal = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+  financeJournal.push({
+    journal_no: nextDoc('JV', financeJournal, 'journal_no'),
+    journal_date: '2026-03-21',
+    source: returnNo,
+    desc:`Retur penjualan POS / ${refundMethod}`,
+    debit: refundAmount,
+    credit: refundAmount,
+    status:'Posted'
+  });
+  window.localStorage.setItem('erp.extra.finance_journal', JSON.stringify(financeJournal));
+
+  location.reload();
+}
+
+function toggleClosingForm(show){
+  document.getElementById('closing-form-card').classList.toggle('active', !!show);
+  refreshPosModalState();
+}
+
+function submitClosingForm(){
+  const storeCode = document.getElementById('closing-form-store').value;
+  const status = document.getElementById('closing-form-status').value;
+  const expectedCash = Number(document.getElementById('closing-form-expected-cash').value || 0);
+  const actualCash = Number(document.getElementById('closing-form-actual-cash').value || 0);
+  const store = TOKOS.find(s => s.store_code === storeCode);
+  if(!store) return toast('Form closing belum lengkap.');
+  const salesRows = SALES_ROWS.filter(x => x.store_code === store.store_code);
+  const rows = JSON.parse(window.localStorage.getItem('erp.extra.pos_closing') || '[]');
+  rows.push({
+    closing_no: nextDoc('CLS', CLOSING_ROWS, 'closing_no'),
+    closing_date: '2026-03-21',
+    store_name: store.store_name,
+    store_code: store.store_code,
+    trx_count: salesRows.length,
+    qty_sold: salesRows.reduce((a,b)=>a+b.qty,0),
+    net_sales: salesRows.reduce((a,b)=>a+b.net_sales,0),
+    expected_cash: expectedCash,
+    actual_cash: actualCash,
+    cash_diff: actualCash - expectedCash,
+    status
+  });
+  window.localStorage.setItem('erp.extra.pos_closing', JSON.stringify(rows));
+
+  const closingNo = rows[rows.length - 1].closing_no;
+  const financeCash = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+  financeCash.push({
+    cash_no: nextDoc('CB', financeCash, 'cash_no'),
+    cash_date: '2026-03-21',
+    type:'Receipt',
+    source:'POS Closing',
+    reference: closingNo,
+    amount: actualCash,
+    status:'Posted'
+  });
+  window.localStorage.setItem('erp.extra.finance_cash', JSON.stringify(financeCash));
+
+  const financeJournal = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+  financeJournal.push({
+    journal_no: nextDoc('JV', financeJournal, 'journal_no'),
+    journal_date: '2026-03-21',
+    source: closingNo,
+    desc:`Closing kasir ${store.store_code} / penerimaan kas POS`,
+    debit: actualCash,
+    credit: actualCash,
+    status:'Posted'
+  });
+  window.localStorage.setItem('erp.extra.finance_journal', JSON.stringify(financeJournal));
+
+  location.reload();
+}
+
+function resetPosModule(){
+  if(!window.confirm('Hapus simulasi POS lokal?')) return;
+  ['sales','pos_return','pos_closing'].forEach(key => window.localStorage.removeItem(`erp.extra.${key}`));
+  ['erp.extra.finance_cash','erp.extra.finance_journal','erp.extra.finance_ar'].forEach(key => window.localStorage.removeItem(key));
+  location.reload();
+}
+
+function setPosNavGroup(group, open){
+  document.getElementById(`nav-parent-${group}`)?.classList.toggle('active', !!open);
+  document.getElementById(`nav-group-${group}`)?.classList.toggle('collapsed', !open);
+}
+
+function syncPosNavBySection(sec){
+  const trxSections = ['sales','return','closing'];
+  const isTrx = trxSections.includes(sec);
+  setPosNavGroup('pos-trx', isTrx);
+  setPosNavGroup('pos-mon', !isTrx);
+}
+
+document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    showSection(el.dataset.sec);
+  });
+});
+
+['pos-trx','pos-mon'].forEach(group => {
+  document.getElementById(`nav-parent-${group}`)?.addEventListener('click', e => {
+    e.preventDefault();
+    const groupEl = document.getElementById(`nav-group-${group}`);
+    const willOpen = groupEl?.classList.contains('collapsed');
+    if(willOpen){
+      const defaultSec = document.getElementById(`nav-parent-${group}`)?.dataset.defaultSec;
+      if(defaultSec) showSection(defaultSec);
+    }else{
+      setPosNavGroup(group, false);
+    }
+  });
+});
+
+[
+  ['search-sales', renderSales], ['filter-sales-date-from', renderSales], ['filter-sales-date-to', renderSales], ['filter-sales-store', renderSales],
+  ['search-return', renderReturn], ['filter-return-date-from', renderReturn], ['filter-return-date-to', renderReturn],
+  ['search-closing', renderClosing], ['filter-closing-date-from', renderClosing], ['filter-closing-date-to', renderClosing],
+  ['search-receipt', renderReceipt], ['filter-receipt-date-from', renderReceipt], ['filter-receipt-date-to', renderReceipt], ['filter-receipt-store', renderReceipt],
+  ['search-store', renderStore], ['filter-store-store', renderStore], ['filter-store-date-from', renderStore], ['filter-store-date-to', renderStore],
+  ['search-movement', renderMovement], ['filter-movement-date-from', renderMovement], ['filter-movement-date-to', renderMovement], ['filter-movement-store', renderMovement]
+].forEach(([id, fn]) => {
+  const el = document.getElementById(id);
+  el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn);
+});
+
+initDateRangeFilters();
+fillStoreFilters();
+renderKpis();
+renderSales();
+renderReturn();
+renderClosing();
+renderReceipt();
+renderStore();
+renderMovement();
+syncPosNavBySection('sales');
+Object.keys(COLUMN_CONFIG).forEach(applyColumnVisibility);
+</script>
+</body>
+</html>
+
+

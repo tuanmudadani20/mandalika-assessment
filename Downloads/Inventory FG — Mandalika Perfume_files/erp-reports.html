@@ -1,0 +1,455 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Reports Operasional</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626;
+  --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:#A1A1AA;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.nav-subwrap{margin:6px 8px 10px;padding:8px 6px 10px;border-left:2px solid rgba(212,175,55,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:0 14px 14px 0}
+.nav-group{margin:2px 0 0;padding:0;overflow:hidden;max-height:260px;transition:max-height .24s ease,opacity .2s ease,transform .2s ease,margin .18s ease}
+.nav-group.collapsed{max-height:0;opacity:0;transform:translateY(-6px);margin:0}
+.nav-parent{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 2px;padding:6px 8px;border-radius:10px;color:#B8BDC7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-parent:hover{background:rgba(255,255,255,.06);color:#F4F4F5;transform:translateX(1px)}
+.nav-parent.active{background:rgba(212,175,55,.12);color:#F6D365}
+.nav-parent small{font-size:9px;color:#8E95A3;font-weight:700;text-transform:none;letter-spacing:0}
+.nav-subwrap .nav-link,.nav-subwrap .nav-item{width:100%;margin:1px 0 0;padding:6px 8px 6px 16px;border-radius:9px;font-size:10.5px}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:9px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px;max-width:1380px;width:100%;margin:0 auto}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.tabs{display:none}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:20px}
+.card-pad{padding:20px 22px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar-right,.toolbar-left{display:flex;gap:8px;flex-wrap:wrap}
+.search,.select{padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:12px}
+.search{min-width:240px}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-draft{background:#E5E7EB;color:#374151}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.tw{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{padding:11px 13px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC}
+tr:hover td{background:#FCFCFD}
+.mono{font-family:'IBM Plex Mono',monospace}
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+.stack{display:grid;gap:14px}
+.note{padding:16px 18px;border:1px dashed var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(212,175,55,.08),rgba(255,255,255,.96));color:var(--text);font-size:12px;line-height:1.6}
+.mini-list{display:grid;gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)} .split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Reports</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link active" href="./erp-reports.html">Reports</a>
+      <div class="nav-subwrap">
+        <div class="nav-parent active" id="nav-parent-reports-ops" data-group="reports-ops">Operasional <small>Supply chain dan sales</small></div>
+        <div class="nav-group" id="nav-group-reports-ops">
+          <a class="nav-link active" href="#" data-sec="shipment">Pengiriman</a>
+          <a class="nav-link" href="#" data-sec="stock">Stok & Aging</a>
+          <a class="nav-link" href="#" data-sec="purchase">Pembelian</a>
+          <a class="nav-link" href="#" data-sec="production">Produksi</a>
+          <a class="nav-link" href="#" data-sec="sales">Penjualan</a>
+        </div>
+        <div class="nav-parent" id="nav-parent-reports-fin" data-group="reports-fin">Keuangan <small>Kas dan summary</small></div>
+        <div class="nav-group" id="nav-group-reports-fin">
+          <a class="nav-link" href="#" data-sec="cash">Kas POS</a>
+          <a class="nav-link" href="#" data-sec="finance">Finance Summary</a>
+        </div>
+      </div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+        Laporan ini membaca hasil modul lain sebagai ringkasan operasional harian dan bulanan.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><small>Reports Workspace</small><div><b>Laporan</b> / <b id="bc-child">Pengiriman</b></div></div>
+      <div>
+        <button class="btn btn-ghost" onclick="location.href='./erp-finance.html'">Finance</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-shell.html'">Back to Shell</button>
+        <button class="btn btn-ghost" onclick="location.reload()">Refresh</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Fase 7</div>
+          <div class="title">Laporan Operasional</div>
+          <div class="subtitle">
+            Modul ini menyatukan ringkasan <span class="mono">pengiriman, stok, pembelian, produksi, penjualan, kas POS, dan finance summary</span>
+            dari transaksi yang sudah hidup di modul lain.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section active" id="sec-shipment">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-shipment" placeholder="Cari laporan pengiriman">
+            <select class="select" id="filter-shipment-dest"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('shipment')">Export</button>
+          </div>
+        </div>
+        <div class="split">
+          <div class="card"><div class="tw"><table><thead><tr><th>No DO</th><th>Tanggal</th><th>Tujuan</th><th>FG</th><th>Qty</th><th>Asal Gudang</th><th>Status</th></tr></thead><tbody id="tbl-shipment"></tbody></table></div></div>
+          <div class="stack">
+            <div class="card card-pad"><div class="note">Laporan pengiriman akan jadi titik pantau distribusi dari gudang FG ke toko dan reseller.</div></div>
+            <div class="card card-pad"><div class="mini-list" id="shipment-side"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-stock">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-stock" placeholder="Cari stok dan aging">
+            <select class="select" id="filter-stock-wh"></select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('stock')">Export</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>Gudang</th><th>Kode Item</th><th>Nama Item</th><th>Kategori</th><th>Stok</th><th>Aging</th><th>Status</th></tr></thead><tbody id="tbl-stock"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-purchase">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-purchase" placeholder="Cari laporan pembelian"></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="exportSection('purchase')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No PO</th><th>Tanggal</th><th>Vendor</th><th>RM</th><th>Qty</th><th>Total</th><th>Status</th></tr></thead><tbody id="tbl-purchase"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-production">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-production" placeholder="Cari laporan produksi"></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="exportSection('production')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No WO</th><th>Tanggal</th><th>FG</th><th>Plan Qty</th><th>Actual Qty</th><th>Waste</th><th>Status</th></tr></thead><tbody id="tbl-production"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-sales">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-sales" placeholder="Cari laporan penjualan"></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="exportSection('sales')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Sales</th><th>Tanggal</th><th>Toko</th><th>FG</th><th>Qty</th><th>Net Sales</th><th>Status</th></tr></thead><tbody id="tbl-sales"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-cash">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-cash" placeholder="Cari laporan kas POS"></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="exportSection('cash')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Cash</th><th>Tanggal</th><th>Type</th><th>Source</th><th>Reference</th><th>Amount</th><th>Status</th></tr></thead><tbody id="tbl-cash"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-finance">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-finance" placeholder="Cari finance summary"></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="exportSection('finance')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>Kategori</th><th>Dokumen</th><th>Amount</th><th>Balance</th><th>Status</th></tr></thead><tbody id="tbl-finance"></tbody></table></div></div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const TX = window.TRANSACTION_DATA || {};
+const RUNTIME = window.ERP_RUNTIME || {};
+const GUDANGS = DATA.gudangs || [];
+const TOKOS = DATA.tokos || [];
+
+function badge(status){
+  const map = { Posted:'b-ok', Closed:'b-ok', Open:'b-warn', Review:'b-info', Healthy:'b-ok', Aging:'b-warn' };
+  return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
+}
+function money(n){ return new Intl.NumberFormat('id-ID').format(n || 0); }
+
+const LOCAL_RECEIPTS = RUNTIME.read ? RUNTIME.read('receipts') : [];
+const LOCAL_SALES = RUNTIME.read ? RUNTIME.read('sales') : [];
+const LOCAL_POS_RETURN = JSON.parse(window.localStorage.getItem('erp.extra.pos_return') || '[]');
+const LOCAL_FINANCE_CASH = JSON.parse(window.localStorage.getItem('erp.extra.finance_cash') || '[]');
+const LOCAL_FINANCE_JOURNAL = JSON.parse(window.localStorage.getItem('erp.extra.finance_journal') || '[]');
+const LOCAL_FINANCE_AR = JSON.parse(window.localStorage.getItem('erp.extra.finance_ar') || '[]');
+const MFG_WO = JSON.parse(window.localStorage.getItem('erp.mfg.work_orders') || '[]');
+const MFG_PROD = JSON.parse(window.localStorage.getItem('erp.mfg.productions') || '[]');
+const MFG_WASTE = JSON.parse(window.localStorage.getItem('erp.mfg.waste') || '[]');
+
+const SHIPMENT_ROWS = (TX.delivery_orders || []).concat(RUNTIME.read ? RUNTIME.read('delivery_orders') : []).map(r => ({
+  do_no:r.do_no,
+  trx_date:r.do_date,
+  destination:r.dest_name,
+  fg_code:r.fg_code,
+  fg_name:r.fg_name,
+  qty:r.qty,
+  warehouse:(GUDANGS.find(w => w.warehouse_code === r.from_warehouse) || {}).warehouse_name || r.from_warehouse,
+  status:r.status
+}));
+
+const STOCK_ROWS = TX.stock_aging || [];
+
+const PURCHASE_ROWS = (TX.receipts || []).concat(LOCAL_RECEIPTS).map(r => ({
+  po_no:r.receipt_no || r.receive_no || r.po_no || '-',
+  trx_date:r.receipt_date || r.receive_date || r.po_date,
+  vendor_name:r.vendor_name,
+  rm_name:r.item_name,
+  qty:r.qty,
+  total:r.amount || r.total_est || 0,
+  status:r.status || 'Posted'
+}));
+
+const PRODUCTION_ROWS = MFG_WO.map(r => {
+  const prod = MFG_PROD.find(p => p.wo_no === r.wo_no) || {};
+  const wasteQty = MFG_WASTE.filter(w => (w.prod_no && w.prod_no === prod.prod_no) || (w.wo_no && w.wo_no === r.wo_no)).reduce((sum, w) => sum + Number(w.qty || w.waste_qty || 0), 0);
+  return {
+    wo_no:r.wo_no,
+    trx_date:r.wo_date,
+    fg_name:r.fg_name,
+    plan_qty:r.target_qty || r.plan_qty || 0,
+    actual_qty:prod.fg_result || prod.actual_qty || 0,
+    waste_qty:wasteQty,
+    status:r.status
+  };
+});
+
+const SALES_ROWS = (TX.sales || []).concat(LOCAL_SALES).map(r => ({
+  sales_no:r.sales_no,
+  trx_date:r.sales_date,
+  store_name:r.store_name,
+  fg_name:r.fg_name,
+  qty:r.qty,
+  net_sales:r.net_sales,
+  status:r.status
+}));
+
+const CASH_ROWS = (TX.cash_rows || []).concat(LOCAL_FINANCE_CASH).map(r => ({
+  cash_no:r.cash_no,
+  trx_date:r.cash_date,
+  type:r.type,
+  source:r.source,
+  reference:r.reference,
+  amount:r.amount,
+  status:r.status
+}));
+
+const FINANCE_ROWS = [
+  ...(TX.ap_rows || []).map(r => ({ category:'AP', doc_no:r.ap_no, amount:r.amount, balance:r.balance, status:r.status })),
+  ...(TX.ar_rows || []).concat(LOCAL_FINANCE_AR).map(r => ({ category:'AR', doc_no:r.ar_no, amount:r.amount, balance:r.balance, status:r.status })),
+  ...CASH_ROWS.map(r => ({ category:'Cash', doc_no:r.cash_no, amount:r.amount, balance:0, status:r.status })),
+  ...(TX.journal_rows || []).concat(LOCAL_FINANCE_JOURNAL).map(r => ({ category:'Journal', doc_no:r.journal_no, amount:r.debit || r.amount || 0, balance:0, status:r.status }))
+];
+
+const sections = ['shipment','stock','purchase','production','sales','cash','finance'];
+
+function setActive(sec){
+  document.querySelectorAll('.section').forEach(el => el.classList.toggle('active', el.id === `sec-${sec}`));
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(el => el.classList.toggle('active', el.dataset.sec === sec));
+  setReportsNavState(sec);
+  const labels = { shipment:'Pengiriman', stock:'Stok & Aging', purchase:'Pembelian', production:'Produksi', sales:'Penjualan', cash:'Kas POS', finance:'Finance Summary' };
+  document.getElementById('bc-child').textContent = labels[sec] || 'Pengiriman';
+}
+
+function setReportsNavState(activeSec='shipment'){
+  const opsSecs = ['shipment','stock','purchase','production','sales'];
+  const finSecs = ['cash','finance'];
+  document.getElementById('nav-parent-reports-ops')?.classList.toggle('active', opsSecs.includes(activeSec));
+  document.getElementById('nav-parent-reports-fin')?.classList.toggle('active', finSecs.includes(activeSec));
+  document.getElementById('nav-group-reports-ops')?.classList.remove('collapsed');
+  document.getElementById('nav-group-reports-fin')?.classList.remove('collapsed');
+}
+
+function renderKpis(){
+  document.getElementById('kpis').innerHTML = [
+    ['Pengiriman', SHIPMENT_ROWS.length],
+    ['Pembelian RM', PURCHASE_ROWS.length],
+    ['Penjualan POS', SALES_ROWS.length],
+    ['Cash POS', CASH_ROWS.length]
+  ].map(([label,val]) => `<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-val">${val}</div></div>`).join('');
+}
+
+function renderShipment(rows = SHIPMENT_ROWS){
+  document.getElementById('tbl-shipment').innerHTML = rows.map(r => `<tr><td class="mono">${r.do_no}</td><td>${r.trx_date}</td><td>${r.destination}</td><td><div class="mono">${r.fg_code}</div><div>${r.fg_name}</div></td><td>${r.qty}</td><td>${r.warehouse}</td><td>${badge(r.status)}</td></tr>`).join('');
+  const byDest = rows.reduce((acc, row) => { acc[row.destination] = (acc[row.destination] || 0) + row.qty; return acc; }, {});
+  document.getElementById('shipment-side').innerHTML = Object.entries(byDest).slice(0,5).map(([key,val]) => `<div class="mini-item"><div class="mini-k">${key}</div><div class="mini-v">${val} pcs terkirim</div></div>`).join('');
+}
+
+function renderStock(rows = STOCK_ROWS){
+  document.getElementById('tbl-stock').innerHTML = rows.map(r => `<tr><td>${r.warehouse}</td><td class="mono">${r.item_code}</td><td>${r.item_name}</td><td>${r.category}</td><td>${r.qty}</td><td>${r.aging} hari</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+function renderPurchase(rows = PURCHASE_ROWS){
+  document.getElementById('tbl-purchase').innerHTML = rows.map(r => `<tr><td class="mono">${r.po_no}</td><td>${r.trx_date}</td><td>${r.vendor_name}</td><td>${r.rm_name}</td><td>${r.qty}</td><td>${money(r.total)}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+function renderProduction(rows = PRODUCTION_ROWS){
+  document.getElementById('tbl-production').innerHTML = rows.map(r => `<tr><td class="mono">${r.wo_no}</td><td>${r.trx_date}</td><td>${r.fg_name}</td><td>${r.plan_qty}</td><td>${r.actual_qty}</td><td>${r.waste_qty}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+function renderSales(rows = SALES_ROWS){
+  document.getElementById('tbl-sales').innerHTML = rows.map(r => `<tr><td class="mono">${r.sales_no}</td><td>${r.trx_date}</td><td>${r.store_name}</td><td>${r.fg_name}</td><td>${r.qty}</td><td>${money(r.net_sales)}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+function renderCash(rows = CASH_ROWS){
+  document.getElementById('tbl-cash').innerHTML = rows.map(r => `<tr><td class="mono">${r.cash_no}</td><td>${r.trx_date}</td><td>${r.type}</td><td>${r.source}</td><td class="mono">${r.reference}</td><td>${money(r.amount)}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+function renderFinance(rows = FINANCE_ROWS){
+  document.getElementById('tbl-finance').innerHTML = rows.map(r => `<tr><td>${r.category}</td><td class="mono">${r.doc_no}</td><td>${money(r.amount)}</td><td>${money(r.balance || 0)}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+function populateFilters(){
+  document.getElementById('filter-shipment-dest').innerHTML = `<option value="">Semua tujuan</option>` + TOKOS.map(t => `<option value="${t.store_name}">${t.store_name}</option>`).join('');
+  document.getElementById('filter-stock-wh').innerHTML = `<option value="">Semua gudang</option>` + GUDANGS.map(w => `<option value="${w.warehouse_name}">${w.warehouse_name}</option>`).join('');
+}
+
+function bindFilters(){
+  document.getElementById('filter-shipment-dest').addEventListener('change', e => {
+    const value = e.target.value;
+    const rows = !value ? SHIPMENT_ROWS : SHIPMENT_ROWS.filter(r => r.destination === value);
+    renderShipment(rows);
+  });
+  document.getElementById('filter-stock-wh').addEventListener('change', e => {
+    const value = e.target.value;
+    const rows = !value ? STOCK_ROWS : STOCK_ROWS.filter(r => r.warehouse === value);
+    renderStock(rows);
+  });
+  [['shipment', SHIPMENT_ROWS], ['stock', STOCK_ROWS], ['purchase', PURCHASE_ROWS], ['production', PRODUCTION_ROWS], ['sales', SALES_ROWS], ['cash', CASH_ROWS], ['finance', FINANCE_ROWS]].forEach(([sec, rows]) => {
+    document.getElementById(`search-${sec}`).addEventListener('input', e => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = !q ? rows : rows.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(q)));
+      if(sec === 'shipment') renderShipment(filtered);
+      if(sec === 'stock') renderStock(filtered);
+      if(sec === 'purchase') renderPurchase(filtered);
+      if(sec === 'production') renderProduction(filtered);
+      if(sec === 'sales') renderSales(filtered);
+      if(sec === 'cash') renderCash(filtered);
+      if(sec === 'finance') renderFinance(filtered);
+    });
+  });
+}
+
+function exportSection(sec){
+  const map = {
+    shipment: SHIPMENT_ROWS,
+    stock: STOCK_ROWS,
+    purchase: PURCHASE_ROWS,
+    production: PRODUCTION_ROWS,
+    sales: SALES_ROWS,
+    cash: CASH_ROWS,
+    finance: FINANCE_ROWS
+  };
+  const rows = map[sec] || [];
+  const headers = rows.length ? Object.keys(rows[0]) : [];
+  const csv = [headers.join(',')].concat(rows.map(row => headers.map(h => `"${String(row[h] ?? '').replace(/"/g,'""')}"`).join(','))).join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report-${sec}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function toast(msg){ window.alert(msg); }
+
+document.querySelectorAll('[data-sec]').forEach(el => el.addEventListener('click', e => {
+  e.preventDefault();
+  setActive(el.dataset.sec);
+}));
+
+document.getElementById('nav-parent-reports-ops')?.addEventListener('click', e => {
+  e.preventDefault();
+  setActive('shipment');
+});
+
+document.getElementById('nav-parent-reports-fin')?.addEventListener('click', e => {
+  e.preventDefault();
+  setActive('cash');
+});
+
+renderKpis();
+renderShipment();
+renderStock();
+renderPurchase();
+renderProduction();
+renderSales();
+renderCash();
+renderFinance();
+populateFilters();
+bindFilters();
+setReportsNavState('shipment');
+</script>
+</body>
+</html>
+
+

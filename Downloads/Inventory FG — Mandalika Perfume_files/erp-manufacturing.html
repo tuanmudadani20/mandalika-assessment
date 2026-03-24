@@ -1,0 +1,3462 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Manufacturing</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<script src="./transaction-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626;
+  --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:#A1A1AA;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.nav-subwrap{margin:6px 8px 10px;padding:8px 6px 10px;border-left:2px solid rgba(212,175,55,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:0 14px 14px 0}
+.nav-group{margin:0;padding:0;overflow:hidden;max-height:240px;transition:max-height .24s ease,opacity .2s ease,transform .2s ease,margin .18s ease}
+.nav-group.collapsed{max-height:0;opacity:0;transform:translateY(-6px);margin:0}
+.nav-parent{display:flex;align-items:center;justify-content:space-between;width:100%;margin:2px 8px 1px;padding:6px 8px;border-radius:10px;color:#B8BDC7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-parent:hover{background:rgba(255,255,255,.06);color:#F4F4F5;transform:translateX(1px)}
+.nav-parent.active{background:rgba(212,175,55,.12);color:#F6D365}
+.nav-parent small{font-size:9px;color:#8E95A3;font-weight:700;text-transform:none;letter-spacing:0}
+.nav-mini-lbl{margin:8px 0 4px 8px;color:#8E95A3;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.nav-subwrap .nav-link,.nav-subwrap .nav-item{width:100%;margin:1px 0 0;padding:6px 8px 6px 16px;border-radius:9px;font-size:10.5px}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:8px 12px;min-height:34px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.tabs{display:none}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:14px}
+.card-pad{padding:18px 20px}
+.modal{display:none;position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.52);padding:20px;overflow:auto}
+.modal.open{display:block}
+.modal-dialog{max-width:1080px;margin:0 auto}
+.modal-dialog.form-lg{max-width:1080px}
+.modal-dialog.detail-md{max-width:1080px}
+.modal-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:18px;max-height:calc(100vh - 40px);overflow:auto}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
+.form-card{display:none}
+.form-card.active{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.span-2{grid-column:span 2}
+.span-4{grid-column:1 / -1}
+.field{display:grid;gap:6px}
+.field label{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field .read{padding:8px 10px;min-height:34px;border:1px solid var(--line);border-radius:10px;background:#F8FAFC;font-size:11.5px;color:var(--text-d);display:flex;align-items:center}
+.grid-4{display:none}
+.kpi{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar-right,.toolbar-left{display:flex;gap:8px;flex-wrap:wrap}
+.search,.select{padding:8px 10px;min-height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:11.5px}
+.search{min-width:240px}
+.date-range-filter{position:relative}
+.date-range-filter[open]{z-index:12}
+.date-range-trigger{list-style:none;display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.date-range-trigger::-webkit-details-marker{display:none}
+.date-range-pop{position:absolute;top:calc(100% + 6px);left:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(15,23,42,.12);min-width:290px}
+.date-range-pop label{display:grid;gap:4px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.date-range-pop .search{min-width:0;width:100%}
+.date-range-actions{grid-column:1 / -1;display:flex;justify-content:flex-end}
+.date-range-apply{min-width:92px}
+.num-pos{color:#15803D;font-weight:800}
+.num-neg{color:#B91C1C;font-weight:800}
+.schedule-pane{display:none}
+.schedule-pane.active{display:block}
+.pane{display:none}
+.pane.active{display:block}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-draft{background:#E5E7EB;color:#374151}.b-err{background:#FEE2E2;color:#B91C1C}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.tw{overflow:auto;max-height:560px}
+table{width:100%;border-collapse:collapse;min-width:860px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle;white-space:nowrap}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC;position:sticky;top:0;z-index:1}
+tr:hover td{background:#FCFCFD}
+.mono{font-family:'IBM Plex Mono',monospace}
+.split{display:grid;grid-template-columns:1fr;gap:10px}
+.stack{display:grid;gap:10px}
+.note{padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(212,175,55,.06),rgba(255,255,255,.98));color:var(--text);font-size:10.5px;line-height:1.5}
+.mini-list{display:grid;gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+.empty{padding:32px 18px;color:var(--muted);text-align:center}
+.schedule-wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+.agenda-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.agenda-card{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.agenda-card .mini-k{margin-bottom:6px}
+.agenda-card .mini-v{font-size:16px;font-weight:800}
+.schedule-calendar-card{padding:16px 18px}
+.schedule-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.agenda-nav{display:flex;align-items:center;gap:8px}
+.agenda-nav .btn{padding:7px 11px}
+.detail-panel{display:none}
+.detail-panel.active{display:block}
+.day-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.day-trio.agenda-anim-prev{animation:agendaWipePrev .22s ease}
+.day-trio.agenda-anim-next{animation:agendaWipeNext .22s ease}
+.day-card{border:1px solid var(--line);border-radius:16px;background:#fff;min-height:220px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.day-card.empty{background:#FAFAFA}
+.day-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.day-title{font-size:12px;font-weight:800;color:var(--text-d)}
+.day-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.day-items{display:grid;gap:6px}
+.calendar-chip{padding:6px 7px;border-radius:10px;background:#FFF8E1;border:1px solid #FDE68A;font-size:10px;line-height:1.35}
+.calendar-chip .mono{font-size:10px}
+.calendar-chip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
+.calendar-chip-head .btn{padding:4px 7px;min-height:24px;font-size:10px}
+.tw td .btn{min-height:28px}
+.tw td .btn:not(.btn-ghost),
+.calendar-chip-head .btn:not(.btn-ghost),
+.modal-actions .btn-primary{
+  background:#D4AF37;
+  border-color:#D4AF37;
+  color:#fff;
+}
+.tw td .btn:not(.btn-ghost):hover,
+.calendar-chip-head .btn:not(.btn-ghost):hover,
+.modal-actions .btn-primary:hover{
+  filter:brightness(.97);
+}
+.mini-table{width:100%;border-collapse:collapse;min-width:0}
+.mini-table th,.mini-table td{padding:8px 9px;border-bottom:1px solid var(--line);font-size:11px;text-align:left;vertical-align:top}
+.mini-table th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC}
+.qty-alert{color:var(--err);font-weight:800}
+.sel-row td{background:#FFF8E1}
+.b-transfer{background:#FEF3C7;color:#92400E}
+.muted-line{font-size:10px;color:var(--muted);margin-top:4px}
+.bom-detail{max-height:430px;overflow:auto}
+.picker-card{margin-top:14px;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}
+.picker-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);background:#FCFCFD;flex-wrap:wrap}
+.picker-title{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.picker-meta{font-size:12px;color:var(--text-d);font-weight:700;margin-top:4px}
+.picker-table{max-height:260px;overflow:auto}
+.picker-table table{min-width:100%}
+.picker-table tr.is-selected td{background:#FFF8E1}
+.picker-table tr{cursor:pointer}
+.hide-select{display:none}
+@keyframes agendaWipeNext{from{opacity:.45;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes agendaWipePrev{from{opacity:.45;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:1200px){.grid-4,.agenda-strip,.form-grid{grid-template-columns:repeat(2,1fr)} .split,.day-trio{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Manufacturing</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <div class="nav-link active">Manufacturing</div>
+      <div class="nav-subwrap">
+        <div class="nav-parent active" data-group="prod-group" data-default-sec="schedule"><span>Produksi</span><small>Planning & execution</small></div>
+        <div class="nav-group" id="prod-group">
+          <a class="nav-link active" href="#" data-sec="schedule">Jadwal Produksi</a>
+          <a class="nav-link" href="#" data-sec="wo">Perintah Produksi</a>
+          <a class="nav-link" href="#" data-sec="prod">Hasil Produksi</a>
+          <a class="nav-link" href="#" data-sec="qc">QC FG</a>
+          <a class="nav-link" href="#" data-sec="wastefg">Waste FG</a>
+        </div>
+        <div class="nav-parent" data-group="rm-group" data-default-sec="rmstock"><span>Inventory RM</span><small>Material control</small></div>
+        <div class="nav-group collapsed" id="rm-group">
+          <div class="nav-mini-lbl">Transaksi</div>
+          <a class="nav-link" href="#" data-sec="rmreceipt">Penerimaan RM</a>
+          <a class="nav-link" href="#" data-sec="rmtransfer">Transfer RM</a>
+          <a class="nav-link" href="#" data-sec="rmusage">Pemakaian RM</a>
+          <a class="nav-link" href="#" data-sec="wasterm">Waste RM</a>
+          <div class="nav-mini-lbl">Monitoring</div>
+          <a class="nav-link" href="#" data-sec="rmstock">Stok RM</a>
+          <a class="nav-link" href="#" data-sec="rmcard">Pergerakan Stok RM</a>
+        </div>
+      </div>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+        Manufacturing memakai FG, RM, dan gudang produksi dari <span class="mono">master-data.js</span>.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><small>Manufacturing Workspace</small><div><b>Manufacturing</b> / <b id="bc-child">Jadwal Produksi</b></div></div>
+      <div>
+        <button class="btn btn-ghost" onclick="location.href='./erp-master.html'">Master Data</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-inventory.html'">Next: Inventory</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Fase 3</div>
+          <div class="title">Manufacturing Dasar</div>
+          <div class="subtitle">
+            Fondasi produksi ini menyiapkan jalur <span class="mono">Jadwal Produksi -> Perintah Produksi -> Hasil Produksi -> QC -> Waste</span>.
+            Master BOM aktif langsung ditarik dari master data, lalu dipakai untuk cek kebutuhan RM terhadap dua gudang
+            supaya alur RM ke FG lebih realistis untuk simulasi produksi.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section active" id="sec-schedule">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div id="schedule-view-tabs"></div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('schedule')">Export</button>
+            <button class="btn btn-ghost" onclick="location.href='./erp-master.html#sec-bom'">Master BOM</button>
+            <button class="btn btn-primary" onclick="toggleScheduleForm(true)">+ Buat Jadwal</button>
+          </div>
+        </div>
+        <div class="schedule-pane active" id="schedule-pane-agenda">
+          <div class="card schedule-calendar-card">
+            <div class="schedule-calendar-head">
+              <div>
+                <div class="mini-k">Agenda Jadwal Produksi</div>
+                <div class="mini-v" id="schedule-agenda-title">Agenda 3 Hari</div>
+              </div>
+              <div class="agenda-nav">
+                <button class="btn btn-ghost" type="button" onclick="shiftScheduleAgenda(-1)">‹</button>
+                <div class="mini-v" id="schedule-agenda-summary" style="font-size:12px;color:var(--muted);font-weight:700">-</div>
+                <button class="btn btn-ghost" type="button" onclick="shiftScheduleAgenda(1)">›</button>
+              </div>
+            </div>
+            <div class="day-trio" id="schedule-agenda"></div>
+          </div>
+        </div>
+        <div class="schedule-pane" id="schedule-pane-recap">
+          <div class="toolbar" style="margin-top:12px">
+            <div class="toolbar-left">
+              <input class="search" id="search-schedule" placeholder="Cari jadwal, FG, atau BOM">
+              <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-schedule-date-from" type="date"></label><label>Sampai<input class="search" id="filter-schedule-date-to" type="date"></label></div></details>
+              <select class="select" id="filter-schedule-status">
+                <option value="">Semua Status</option>
+                <option value="Draft">Draft</option>
+                <option value="Posted">Posted</option>
+                <option value="Released">Released</option>
+                <option value="Ready">Ready</option>
+                <option value="Need Transfer">Need Transfer</option>
+                <option value="Need Supply">Need Supply</option>
+              </select>
+            </div>
+            <div class="toolbar-right"></div>
+          </div>
+          <div class="card">
+            <div class="tw">
+              <table>
+                <thead>
+                  <tr><th>No Jadwal</th><th>Tanggal</th><th>FG</th><th>BOM</th><th>Target Qty</th><th>Kesiapan RM</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="tbl-schedule"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="modal" id="schedule-form-modal">
+        <div class="modal-dialog form-lg">
+          <div class="modal-card form-card" id="schedule-form-card">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <div>
+                  <div class="mini-k">Jadwal Produksi</div>
+                  <div class="mini-v" id="schedule-form-title">Buat Jadwal Produksi</div>
+                </div>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn btn-ghost" type="button" onclick="toggleScheduleForm(false)">Batal</button>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Tanggal Jadwal</label>
+                <input class="search" type="date" id="schedule-form-date">
+              </div>
+              <div class="field span-2">
+                <label>FG Tujuan</label>
+                <input class="search" id="schedule-form-fg" list="schedule-fg-options" placeholder="Cari SKU atau nama varian FG">
+                <datalist id="schedule-fg-options"></datalist>
+              </div>
+              <div class="field">
+                <label>Kode BOM</label>
+                <div class="read mono" id="schedule-form-bom">-</div>
+              </div>
+              <div class="field">
+                <label>Target Qty</label>
+                <input class="search" type="number" min="1" step="1" id="schedule-form-qty" placeholder="Qty plan">
+              </div>
+              <div class="field">
+                <label>Gudang RM MADE</label>
+                <div class="read mono" id="schedule-form-rm-prod">-</div>
+              </div>
+              <div class="field">
+                <label>Gudang RM KDGN</label>
+                <div class="read mono" id="schedule-form-rm-main">-</div>
+              </div>
+              <div class="field">
+                <label>Placement FG</label>
+                <div class="read mono" id="schedule-form-fg-wh">-</div>
+              </div>
+              <div class="field span-4">
+                <label>Catatan</label>
+                <input class="search" id="schedule-form-note" placeholder="Catatan jadwal produksi">
+              </div>
+              <div class="field span-4">
+                <label>List Material BOM</label>
+                <div class="card" style="margin-bottom:0">
+                  <div class="tw" style="max-height:300px">
+                    <table class="mini-table">
+                      <thead>
+                        <tr><th>Material BOM</th><th>Qty BOM</th><th>UOM</th><th>Need</th><th>Avail MADE</th><th>Avail KDGN</th><th>Keterangan</th></tr>
+                      </thead>
+                      <tbody id="tbl-schedule-rm"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost" type="button" onclick="toggleScheduleForm(false)">Batal</button>
+              <button class="btn btn-ghost" type="button" onclick="submitScheduleForm('Draft')">Simpan Draft</button>
+              <button class="btn btn-primary" type="button" onclick="submitScheduleForm('Posted')">Simpan & Post</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="schedule-detail-modal">
+        <div class="modal-dialog detail-md">
+          <div class="modal-card detail-panel" id="schedule-detail-card">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <div>
+                  <div class="mini-k">Detail Jadwal</div>
+                  <div class="mini-v">Informasi Jadwal Produksi</div>
+                </div>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn btn-ghost" type="button" onclick="toggleScheduleDetail(false)">Batal</button>
+              </div>
+            </div>
+            <div class="agenda-strip" id="schedule-detail-meta"></div>
+            <div class="card" style="margin-bottom:0">
+              <div class="tw" style="max-height:320px">
+                <table class="mini-table">
+                  <thead>
+                    <tr><th>Material BOM</th><th>Qty BOM</th><th>UOM</th><th>Need</th><th>Avail MADE</th><th>Avail KDGN</th><th>Keterangan</th></tr>
+                  </thead>
+                  <tbody id="tbl-schedule-detail-rm"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost" type="button" onclick="toggleScheduleDetail(false)">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="mfg-detail-modal">
+        <div class="modal-dialog detail-md">
+          <div class="modal-card detail-panel active" id="mfg-detail-card">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <div>
+                  <div class="mini-k" id="mfg-detail-kicker">Detail</div>
+                  <div class="mini-v" id="mfg-detail-title">Informasi</div>
+                </div>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn btn-ghost" type="button" onclick="toggleManufacturingDetail(false)">Batal</button>
+              </div>
+            </div>
+            <div class="agenda-strip" id="mfg-detail-meta"></div>
+            <div class="card" id="mfg-detail-table-card" style="margin-bottom:0;display:none">
+              <div class="tw" style="max-height:320px">
+                <table class="mini-table">
+                  <thead id="mfg-detail-thead"></thead>
+                  <tbody id="mfg-detail-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost" type="button" onclick="toggleManufacturingDetail(false)">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="section" id="sec-rmstock">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-rmstock" placeholder="Cari RM code atau nama material">
+            <select class="select" id="filter-rmstock-category">
+              <option value="">Semua Kategori</option>
+            </select>
+            <select class="select" id="filter-rmstock-wh">
+              <option value="">Semua Gudang RM</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('rmstock')">Export</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tw">
+            <table>
+              <thead>
+                <tr id="hd-rmstock"></tr>
+              </thead>
+              <tbody id="tbl-rmstock"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-rmreceipt">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div id="rmreceipt-view-tabs"></div>
+            <input class="search" id="search-rmreceipt" placeholder="Cari receipt, RM, atau vendor">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-rmreceipt-date-from" type="date"></label><label>Sampai<input class="search" id="filter-rmreceipt-date-to" type="date"></label></div></details>
+            <select class="select" id="filter-rmreceipt-wh">
+              <option value="">Semua Gudang RM</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('rmreceipt')">Export</button>
+            <button class="btn btn-primary" onclick="toggleRmReceiptForm(true)">+ Penerimaan RM</button>
+          </div>
+        </div>
+        <div class="modal" id="rmreceipt-form-modal">
+          <div class="modal-dialog form-lg">
+            <div class="modal-card form-card active" id="rmreceipt-form-card">
+              <div class="section-head">
+                <div>
+                  <div class="kicker">PENERIMAAN RM</div>
+                  <h2 class="section-title">Buat Penerimaan RM</h2>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field"><label>Tanggal</label><input class="search" type="date" id="rmreceipt-form-date" value="2026-03-24"></div>
+                <div class="field"><label>Gudang Tujuan</label><select class="select" id="rmreceipt-form-wh"></select></div>
+                <div class="field span-2">
+                  <label>Ringkasan Item</label>
+                  <div class="read" id="rmreceipt-form-rm-label">Belum ada item diterima</div>
+                  <select class="select hide-select" id="rmreceipt-form-rm"></select>
+                </div>
+                <div class="field"><label>Total Item</label><div class="read mono" id="rmreceipt-form-item-count">0</div></div>
+                <div class="field"><label>Total Qty</label><div class="read mono" id="rmreceipt-form-total-qty">0</div></div>
+                <div class="field"><label>Info</label><div class="read" id="rmreceipt-form-vendor">Penerimaan manual gudang RM</div></div>
+              </div>
+              <div class="picker-card">
+                <div class="picker-head">
+                  <div>
+                    <div class="picker-title">Pilih Material Receipt</div>
+                    <div class="picker-meta" id="rmreceipt-picker-meta">Belum ada material dipilih</div>
+                  </div>
+                  <div class="toolbar-right">
+                    <select class="select" id="rmreceipt-form-category"><option value="">Semua Kategori</option></select>
+                    <input class="search" id="rmreceipt-form-search" placeholder="Cari kode atau nama material">
+                  </div>
+                </div>
+                <div class="picker-table">
+                  <table>
+                    <thead>
+                      <tr><th>Kode RM</th><th>Material</th><th>Kategori</th><th>UOM</th><th>Qty Receipt</th></tr>
+                    </thead>
+                    <tbody id="rmreceipt-picker-body"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="btn btn-ghost" type="button" onclick="toggleRmReceiptForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitRmReceipt()">Simpan Receipt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="rmreceipt-pane-recap" class="pane active"><div class="card"><div class="tw"><table><thead><tr><th>No Receipt</th><th>Tanggal</th><th>RM</th><th>UOM</th><th>Gudang</th><th>Sumber</th><th>MOQ</th><th>Harga Beli</th><th>Qty</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-rmreceipt"></tbody></table></div></div></div>
+        <div id="rmreceipt-pane-table" class="pane"><div class="card"><div class="tw"><table><thead><tr id="hd-rmreceipt-table"></tr></thead><tbody id="tbl-rmreceipt-table"></tbody></table></div></div></div>
+      </section>
+
+      <section class="section" id="sec-rmtransfer">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div id="rmtransfer-view-tabs"></div>
+            <input class="search" id="search-rmtransfer" placeholder="Cari transfer RM atau material">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-rmtransfer-date-from" type="date"></label><label>Sampai<input class="search" id="filter-rmtransfer-date-to" type="date"></label></div></details>
+            <select class="select" id="filter-rmtransfer-wh">
+              <option value="">Semua Gudang RM</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('rmtransfer')">Export</button>
+            <button class="btn btn-primary" onclick="toggleRmTransferForm(true)">+ Transfer RM</button>
+          </div>
+        </div>
+        <div class="modal" id="rmtransfer-form-modal">
+          <div class="modal-dialog form-lg">
+            <div class="modal-card form-card active" id="rmtransfer-form-card">
+              <div class="section-head">
+                <div>
+                  <div class="kicker">TRANSFER RM</div>
+                  <h2 class="section-title">Buat Transfer RM</h2>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field"><label>Tanggal</label><input class="search" type="date" id="rmtransfer-form-date" value="2026-03-22"></div>
+                <div class="field"><label>Dari Gudang</label><select class="select" id="rmtransfer-form-from"></select></div>
+                <div class="field"><label>Ke Gudang</label><select class="select" id="rmtransfer-form-to"></select></div>
+                <div class="field span-2">
+                  <label>Ringkasan Item</label>
+                  <div class="read" id="rmtransfer-form-rm-label">Belum ada item transfer</div>
+                  <select class="select hide-select" id="rmtransfer-form-rm"></select>
+                </div>
+                <div class="field"><label>Total Item</label><div class="read mono" id="rmtransfer-form-item-count">0</div></div>
+                <div class="field"><label>Total Qty</label><div class="read mono" id="rmtransfer-form-total-qty">0</div></div>
+                <div class="field span-2"><label>Keterangan</label><input class="search" id="rmtransfer-form-note" placeholder="Catatan transfer"></div>
+              </div>
+              <div class="picker-card">
+                <div class="picker-head">
+                  <div>
+                    <div class="picker-title">Pilih Material Transfer</div>
+                    <div class="picker-meta" id="rmtransfer-picker-meta">Belum ada material dipilih</div>
+                  </div>
+                  <div class="toolbar-right">
+                    <select class="select" id="rmtransfer-form-category"><option value="">Semua Kategori</option></select>
+                    <input class="search" id="rmtransfer-form-search" placeholder="Cari kode atau nama material">
+                  </div>
+                </div>
+                <div class="picker-table">
+                  <table>
+                    <thead>
+                      <tr><th>Kode RM</th><th>Material</th><th>Kategori</th><th>UOM</th><th>Avail Asal</th><th>Avail Tujuan</th><th>Qty Transfer</th></tr>
+                    </thead>
+                    <tbody id="rmtransfer-picker-body"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="btn btn-ghost" type="button" onclick="toggleRmTransferForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitRmTransfer()">Simpan Transfer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="rmtransfer-pane-recap" class="pane active"><div class="card"><div class="tw"><table><thead><tr><th>No Transfer</th><th>Tanggal</th><th>Material</th><th>UOM</th><th>Dari</th><th>Ke</th><th>Qty</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-rmtransfer"></tbody></table></div></div></div>
+        <div id="rmtransfer-pane-table" class="pane"><div class="card"><div class="tw"><table><thead><tr id="hd-rmtransfer-table"></tr></thead><tbody id="tbl-rmtransfer-table"></tbody></table></div></div></div>
+      </section>
+
+      <section class="section" id="sec-rmusage">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div id="rmusage-view-tabs"></div>
+            <input class="search" id="search-rmusage" placeholder="Cari pemakaian RM, hasil produksi, atau material">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-rmusage-date-from" type="date"></label><label>Sampai<input class="search" id="filter-rmusage-date-to" type="date"></label></div></details>
+            <select class="select" id="filter-rmusage-wh">
+              <option value="">Semua Gudang RM</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('rmusage')">Export</button>
+          </div>
+        </div>
+        <div id="rmusage-pane-recap" class="pane active"><div class="card"><div class="tw"><table><thead><tr><th>Tanggal</th><th>No Hasil</th><th>No Perintah</th><th>RM</th><th>UOM</th><th>Gudang</th><th>Qty Pakai</th><th>Aksi</th></tr></thead><tbody id="tbl-rmusage"></tbody></table></div></div></div>
+        <div id="rmusage-pane-table" class="pane"><div class="card"><div class="tw"><table><thead><tr id="hd-rmusage-table"></tr></thead><tbody id="tbl-rmusage-table"></tbody></table></div></div></div>
+      </section>
+
+      <section class="section" id="sec-rmcard">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div id="rmcard-view-tabs"></div>
+            <input class="search" id="search-rmcard" placeholder="Cari dokumen, RM, atau referensi">
+            <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-rmcard-date-from" type="date"></label><label>Sampai<input class="search" id="filter-rmcard-date-to" type="date"></label></div></details>
+            <select class="select" id="filter-rmcard-wh">
+              <option value="">Semua Gudang RM</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('rmcard')">Export</button>
+          </div>
+        </div>
+        <div id="rmcard-pane-recap" class="pane active"><div class="card"><div class="tw"><table><thead><tr><th>Tanggal</th><th>Dokumen</th><th>RM</th><th>UOM</th><th>Gudang</th><th>Masuk</th><th>Keluar</th><th>Ref</th></tr></thead><tbody id="tbl-rmcard"></tbody></table></div></div></div>
+        <div id="rmcard-pane-table" class="pane"><div class="card"><div class="tw"><table><thead><tr id="hd-rmcard-table"></tr></thead><tbody id="tbl-rmcard-table"></tbody></table></div></div></div>
+      </section>
+
+      <section class="section" id="sec-wo">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div id="wo-view-tabs"></div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('wo')">Export</button>
+            <button class="btn btn-primary" onclick="openManufacturingAction('schedule-to-order')">Perintah dari Jadwal</button>
+          </div>
+        </div>
+        <div class="schedule-pane active" id="wo-pane-agenda">
+          <div class="card schedule-calendar-card">
+            <div class="schedule-calendar-head">
+              <div>
+                <div class="mini-k">Agenda Perintah Produksi</div>
+                <div class="mini-v" id="wo-agenda-title">Agenda 3 Hari</div>
+              </div>
+              <div class="agenda-nav">
+                <button class="btn btn-ghost" type="button" onclick="shiftWoAgenda(-1)">‹</button>
+                <div class="mini-v" id="wo-agenda-summary" style="font-size:12px;color:var(--muted);font-weight:700">-</div>
+                <button class="btn btn-ghost" type="button" onclick="shiftWoAgenda(1)">›</button>
+              </div>
+            </div>
+            <div class="day-trio" id="wo-agenda"></div>
+          </div>
+        </div>
+        <div class="schedule-pane" id="wo-pane-recap">
+          <div class="toolbar" style="margin-top:12px">
+            <div class="toolbar-left">
+              <input class="search" id="search-wo" placeholder="Cari nomor perintah atau FG">
+              <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-wo-date-from" type="date"></label><label>Sampai<input class="search" id="filter-wo-date-to" type="date"></label></div></details>
+              <select class="select" id="filter-wo-status">
+                <option value="">Semua Status</option>
+                <option value="Released">Released</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <div class="toolbar-right"></div>
+          </div>
+          <div class="card"><div class="tw"><table><thead><tr><th>No Perintah</th><th>Tanggal</th><th>FG</th><th>Source Jadwal</th><th>Gudang</th><th>Target Qty</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-wo"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-prod">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div id="prod-view-tabs"></div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('prod')">Export</button>
+            <button class="btn btn-primary" onclick="openManufacturingAction('input-production')">+ Input Hasil Produksi</button>
+          </div>
+        </div>
+        <div class="schedule-pane active" id="prod-pane-agenda">
+          <div class="card schedule-calendar-card">
+            <div class="schedule-calendar-head">
+              <div>
+                <div class="mini-k">Agenda Hasil Produksi</div>
+                <div class="mini-v" id="prod-agenda-title">Agenda 3 Hari</div>
+              </div>
+              <div class="agenda-nav">
+                <button class="btn btn-ghost" type="button" onclick="shiftProdAgenda(-1)">‹</button>
+                <div class="mini-v" id="prod-agenda-summary" style="font-size:12px;color:var(--muted);font-weight:700">-</div>
+                <button class="btn btn-ghost" type="button" onclick="shiftProdAgenda(1)">›</button>
+              </div>
+            </div>
+            <div class="day-trio" id="prod-agenda"></div>
+          </div>
+        </div>
+        <div class="schedule-pane" id="prod-pane-recap">
+          <div class="toolbar" style="margin-top:12px">
+            <div class="toolbar-left">
+              <input class="search" id="search-prod" placeholder="Cari hasil produksi atau nomor perintah">
+              <details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-prod-date-from" type="date"></label><label>Sampai<input class="search" id="filter-prod-date-to" type="date"></label></div></details>
+              <select class="select" id="filter-prod-status">
+                <option value="">Semua Status</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+              </select>
+            </div>
+            <div class="toolbar-right"></div>
+          </div>
+          <div class="card"><div class="tw"><table><thead><tr><th>No Hasil</th><th>No Perintah</th><th>FG</th><th>RM Dipakai</th><th>Hasil FG</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-prod"></tbody></table></div></div>
+          <div class="card card-pad">
+            <div class="mini-k" style="margin-bottom:8px">Pemakaian RM</div>
+            <div class="tw">
+              <table class="mini-table">
+                <thead><tr><th>RM</th><th>Need</th><th>KDGN</th><th>MADE</th><th>Status</th></tr></thead>
+                <tbody id="tbl-prod-rm"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-qc">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-qc" placeholder="Cari QC FG atau FG"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-qc-date-from" type="date"></label><label>Sampai<input class="search" id="filter-qc-date-to" type="date"></label></div></details><select class="select" id="filter-qc-status"><option value="">Semua Status</option><option value="Review">Review</option><option value="Done">Done</option></select></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('qc')">Export</button>
+            <button class="btn btn-primary" onclick="openManufacturingAction('input-qc')">+ Input QC FG</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No QC</th><th>Tanggal</th><th>FG</th><th>Qty Cek</th><th>Accepted</th><th>Reject</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-qc"></tbody></table></div></div>
+      </section>
+
+      <div class="modal" id="qc-final-modal">
+        <div class="modal-dialog detail-md">
+          <div class="modal-card active">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <div>
+                  <div class="mini-k">Final QC FG</div>
+                  <div class="mini-v" id="qc-final-title">Review QC</div>
+                </div>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn btn-ghost" type="button" onclick="toggleQcFinalModal(false)">Batal</button>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>No QC</label><div class="read" id="qc-final-no">-</div></div>
+              <div class="field"><label>No Hasil</label><div class="read" id="qc-final-prod">-</div></div>
+              <div class="field span-2"><label>FG</label><div class="read" id="qc-final-fg">-</div></div>
+              <div class="field"><label>Qty Diperiksa</label><div class="read" id="qc-final-checked">0</div></div>
+              <div class="field"><label>Accepted</label><input class="search" id="qc-final-accepted" type="number" min="0"></div>
+              <div class="field"><label>Reject</label><input class="search" id="qc-final-reject" type="number" min="0"></div>
+              <div class="field span-4"><label>Catatan QC</label><input class="search" id="qc-final-note" placeholder="Catatan QC FG"></div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost" type="button" onclick="toggleQcFinalModal(false)">Batal</button>
+              <button class="btn btn-primary" type="button" onclick="submitQcFinal()">Final QC</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="section" id="sec-wastefg">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-wastefg" placeholder="Cari waste FG atau reject QC"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-wastefg-date-from" type="date"></label><label>Sampai<input class="search" id="filter-wastefg-date-to" type="date"></label></div></details></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('wastefg')">Export</button>
+            <button class="btn btn-primary" onclick="openManufacturingAction('waste-fg')">Waste dari QC FG</button>
+          </div>
+        </div>
+        <div class="agenda-strip" id="wastefg-agenda"></div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Waste FG</th><th>Tanggal</th><th>FG</th><th>Qty Reject</th><th>Sumber</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-wastefg"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-wasterm">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-wasterm" placeholder="Cari waste RM atau susut material"><details class="date-range-filter"><summary class="date-range-trigger">Rentang Tanggal</summary><div class="date-range-pop"><label>Dari<input class="search" id="filter-wasterm-date-from" type="date"></label><label>Sampai<input class="search" id="filter-wasterm-date-to" type="date"></label></div></details><select class="select" id="filter-wasterm-wh"><option value="">Semua Gudang RM</option></select></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="exportSection('wasterm')">Export</button>
+            <button class="btn btn-primary" onclick="openManufacturingAction('input-waste-rm')">+ Catat Waste RM</button>
+          </div>
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>No Waste RM</th><th>Tanggal</th><th>RM</th><th>UOM</th><th>Qty Waste</th><th>Alasan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-wasterm"></tbody></table></div></div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const MASTER_PREVIEW_STORAGE_KEY = 'erp.master.preview.overrides.v1';
+const TX = window.TRANSACTION_DATA || {};
+const RUNTIME = window.ERP_RUNTIME || null;
+const APP_TODAY = '2026-03-24';
+function hydrateDataFromMasterPreview(){
+  try{
+    const raw = window.localStorage.getItem(MASTER_PREVIEW_STORAGE_KEY);
+    if(!raw) return;
+    const parsed = JSON.parse(raw);
+    ['gudangs','tokos','vendors','fg_items','rm_items','uoms','categories','resellers','bom_headers','bom_details','meta'].forEach(key => {
+      if(parsed && parsed[key]) DATA[key] = parsed[key];
+    });
+  }catch(_err){}
+}
+hydrateDataFromMasterPreview();
+const FG = DATA.fg_items || [];
+const RM = DATA.rm_items || [];
+const GUDANG = DATA.gudangs || [];
+const RM_WH = GUDANG.find(x => x.warehouse_code === 'GRM-KDGN') || GUDANG[0] || { warehouse_code:'GRM-KDGN' };
+const PROD_WH = GUDANG.find(x => x.warehouse_code === 'GRM-MADE') || GUDANG[1] || { warehouse_code:'GRM-MADE' };
+const FG_WH = GUDANG.find(x => x.warehouse_code === 'GFG-SBY') || GUDANG[2] || { warehouse_code:'GFG-SBY' };
+const RECEIPTS = TX.receipts || [];
+const VENDOR_RETURNS = [];
+let RM_TRANSFER_ROWS = [];
+let rmTransferQtyDraft = {};
+let rmReceiptQtyDraft = {};
+const MASTER_BOM_HEADERS = (DATA.bom_headers || []).filter(x => x.bom_code && x.fg_code);
+const MASTER_BOM_DETAILS = DATA.bom_details || [];
+let selectedScheduleNo = '';
+let selectedBomCode = '';
+let selectedWoNo = '';
+let selectedProdNo = '';
+let selectedQcNo = '';
+let selectedWasteFgNo = '';
+let selectedWasteRmNo = '';
+let editingQcNo = '';
+let scheduleAgendaIndex = 0;
+let scheduleViewMode = 'AGENDA';
+let woViewMode = 'AGENDA';
+let prodViewMode = 'AGENDA';
+let rmreceiptViewMode = 'RECAP';
+let rmtransferViewMode = 'RECAP';
+let rmusageViewMode = 'RECAP';
+let rmcardViewMode = 'RECAP';
+let scheduleAgendaAnchored = false;
+let woAgendaIndex = 0;
+let prodAgendaIndex = 0;
+let editingScheduleNo = '';
+
+function badge(status){
+  const map = { Aktif:'b-ok', Draft:'b-draft', Released:'b-info', Closed:'b-ok', 'In Progress':'b-warn', Done:'b-ok', Review:'b-info', Manual:'b-draft', 'Need Transfer':'b-transfer', 'Short RM':'b-err', Ready:'b-ok', Partial:'b-warn', Kosong:'b-draft' };
+  return `<span class="badge ${map[status] || 'b-info'}">${status || '-'}</span>`;
+}
+
+function sampleFg(i){ return FG[(i * 9) % Math.max(FG.length, 1)] || {}; }
+function sampleRm(i){ return RM[(i * 11) % Math.max(RM.length, 1)] || {}; }
+
+function getRmMasterMeta(rmCode){
+  const rm = RM.find(x => x.rm_code === rmCode) || {};
+  const vendorCode = rm.default_vendor_code || '';
+  const vendor = (DATA.vendors || []).find(v => v.vendor_code === vendorCode || v.vendor_name === rm.primary_supplier) || {};
+  return {
+    rm_code: rm.rm_code || rmCode || '',
+    rm_name: rm.rm_name || '',
+    uom_code: rm.uom_code || inferManufacturingBomUom(rmCode),
+    vendor_code: vendorCode || vendor.vendor_code || '',
+    vendor_name: vendor.vendor_name || rm.primary_supplier || '',
+    purchase_price: Number(rm.purchase_price || 0),
+    minimum_buy: Number(rm.minimum_buy || 0)
+  };
+}
+
+function getManualRmReceiptRows(){
+  try{
+    const raw = window.localStorage.getItem('erp.mfg.rm_receipts');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(_err){
+    return [];
+  }
+}
+
+function getRmReceiptRows(){
+  const mergedRows = getManualRmReceiptRows().map(row => ({
+    ...row,
+    receipt_no: row.receipt_no || row.receive_no || '-',
+    receipt_date: row.receipt_date || row.receive_date || '',
+    warehouse_code: row.warehouse_code || row.receive_wh || row.wh_code || '',
+    item_code: row.item_code || row.rm_code || '',
+    item_name: row.item_name || row.rm_name || '',
+    qty: Number(row.qty || 0),
+    amount: Number(row.amount || 0),
+    status: row.status || 'Posted'
+  })).filter(row => [RM_WH.warehouse_code, PROD_WH.warehouse_code].includes(row.warehouse_code));
+  return mergedRows.map(row => {
+    const meta = getRmMasterMeta(row.item_code);
+    const vendorMismatch = !!(meta.vendor_name && row.vendor_name && meta.vendor_name !== row.vendor_name);
+    return {
+      ...row,
+      receipt_no: row.receipt_no || row.receive_no || '-',
+      receipt_date: row.receipt_date || row.receive_date || '',
+      item_name: row.item_name || meta.rm_name || row.item_code || '-',
+      vendor_code: meta.vendor_code || row.vendor_code || '',
+      vendor_name: meta.vendor_name || row.vendor_name || '-',
+      uom_code: meta.uom_code,
+      purchase_price: meta.purchase_price,
+      minimum_buy: meta.minimum_buy,
+      vendor_mismatch: vendorMismatch
+    };
+  });
+}
+
+function getRmInboundRows(){
+  const receiptRows = getRmReceiptRows().map(row => ({
+    ...row,
+    source_type: 'Manual Receipt',
+    source_ref: row.created_by || CURRENT_USER_NAME || '-'
+  }));
+  const transferRows = RM_TRANSFER_ROWS
+    .filter(row => [RM_WH.warehouse_code, PROD_WH.warehouse_code].includes(row.to_warehouse))
+    .map(row => {
+      const meta = getRmMasterMeta(row.rm_code);
+      return {
+        receipt_no: row.transfer_no || '-',
+        receipt_date: row.transfer_date || '',
+        warehouse_code: row.to_warehouse || '',
+        item_code: row.rm_code || '',
+        item_name: row.rm_name || meta.rm_name || row.rm_code || '-',
+        qty: Number(row.qty || 0),
+        amount: 0,
+        status: row.status || 'Posted',
+        vendor_code: '',
+        vendor_name: 'Transfer Internal',
+        uom_code: meta.uom_code || inferManufacturingBomUom(row.rm_code),
+        purchase_price: 0,
+        minimum_buy: '',
+        vendor_mismatch: false,
+        source_type: 'Transfer Internal',
+        source_ref: `Dari ${row.from_warehouse || '-'}`
+      };
+    });
+  return receiptRows.concat(transferRows);
+}
+
+function buildRmMatrixRows(rows, keyField, nameField, uomResolver){
+  const getDate = row => String(row.date || row.move_date || row.receipt_date || row.transfer_date || row.prod_date || '').slice(0,10);
+  const getQty = row => {
+    if(row.signed_qty !== undefined) return Number(row.signed_qty || 0);
+    if(row.qty !== undefined) return Number(row.qty || 0);
+    if(row.in_qty !== undefined) return Number(row.in_qty || 0);
+    return 0;
+  };
+  const dates = [...new Set(rows.map(getDate).filter(Boolean))].sort().reverse();
+  const grouped = rows.reduce((map, row) => {
+    const key = row[keyField];
+    if(!map[key]){
+      map[key] = {
+        code: row[keyField],
+        name: row[nameField],
+        uom_code: uomResolver(row),
+        total: 0,
+        total_in: 0,
+        total_net: 0,
+        by_date: {}
+      };
+    }
+    const qty = getQty(row);
+    const dateKey = getDate(row);
+    map[key].total += Math.abs(qty);
+    map[key].total_net += qty;
+    if(qty > 0) map[key].total_in += qty;
+    map[key].by_date[dateKey] = (map[key].by_date[dateKey] || 0) + qty;
+    return map;
+  }, {});
+  return { dates, rows: Object.values(grouped).sort((a,b) => String(a.code).localeCompare(String(b.code))) };
+}
+function inferManufacturingBomUom(materialCode){ return String(materialCode || '').toUpperCase().startsWith('FO-') ? 'ML' : 'PCS'; }
+function getManufacturingFg(code){ return FG.find(row => row.fg_code === code); }
+function getManufacturingFgName(code, fallback = ''){ return getManufacturingFg(code)?.fg_name || fallback || code || '-'; }
+function syncManufacturingFgNames(){
+  WOS = WOS.map(row => ({ ...row, fg_name: getManufacturingFgName(row.fg_code, row.fg_name) }));
+  PRODUCTIONS = PRODUCTIONS.map(row => ({ ...row, fg_name: getManufacturingFgName(row.fg_code, row.fg_name) }));
+  QC_ROWS = QC_ROWS.map(row => ({ ...row, fg_name: getManufacturingFgName(row.fg_code, row.fg_name) }));
+  WASTE_ROWS = WASTE_ROWS.map(row => row.item_kind === 'FG' ? ({ ...row, item_name: getManufacturingFgName(row.item_code, row.item_name) }) : row);
+  SCHEDULE_ROWS = SCHEDULE_ROWS.map(row => ({ ...row, fg_name: getManufacturingFgName(row.fg_code, row.fg_name) }));
+}
+
+const BOMS = MASTER_BOM_HEADERS.length ? MASTER_BOM_HEADERS.map(row => ({
+  bom_code: row.bom_code,
+  fg_code: row.fg_code,
+  fg_name: getManufacturingFgName(row.fg_code, row.fg_name),
+  version: row.version || 'V1',
+  rm_count: MASTER_BOM_DETAILS.filter(d => d.bom_code === row.bom_code).length,
+  status: row.status || 'Aktif',
+  pack_size: Number(String(row.pack_size || '').replace(',','.')) || 0,
+  variant_type: row.variant_type || '-',
+  output_uom: row.output_uom || 'PCS'
+})) : Array.from({length:10}, (_,i) => {
+  const fg = sampleFg(i);
+  return {
+    bom_code: `BOM-${fg.fg_code}-V1`,
+    fg_code: fg.fg_code,
+    fg_name: getManufacturingFgName(fg.fg_code, fg.fg_name),
+    version: 'V1',
+    rm_count: 3 + (i % 4),
+    status: i < 2 ? 'Manual' : 'Aktif',
+    pack_size: 100,
+    variant_type: '-',
+    output_uom: 'PCS'
+  };
+});
+
+const BOM_COMPONENTS = MASTER_BOM_DETAILS.length ? Object.fromEntries(BOMS.map(bom => {
+  const header = BOMS.find(x => x.bom_code === bom.bom_code) || bom;
+  const packSize = Number(header.pack_size || 0);
+  return [bom.bom_code, MASTER_BOM_DETAILS
+    .filter(row => row.bom_code === bom.bom_code)
+    .map(row => {
+      const qty = Number(row.qty || 0);
+      const qtyPercent = Number(row.qty_percent || (qty * 100) || 0);
+      const percentRatio = qtyPercent / 100;
+      return {
+        rm_code: row.material_code,
+        rm_name: row.material_name,
+        base_qty: row.qty_is_percent ? (packSize * percentRatio) : qty,
+        qty_bom: row.qty_is_percent ? qtyPercent.toLocaleString('id-ID') : qty.toLocaleString('id-ID'),
+        qty_is_percent: !!row.qty_is_percent,
+        qty_percent: qtyPercent,
+        percent_ratio: percentRatio,
+        uom_code: inferManufacturingBomUom(row.material_code)
+      };
+    })];
+})) : Object.fromEntries(BOMS.map((bom, i) => {
+  const count = Math.max(3, Math.min(5, Number(bom.rm_count || 3)));
+  return [bom.bom_code, Array.from({length:count}, (_, idx) => {
+    const rm = sampleRm((i * 3) + idx);
+    return {
+      rm_code: rm.rm_code,
+      rm_name: rm.rm_name,
+      base_qty: 4 + idx + (i % 3),
+      qty_bom: `${4 + idx + (i % 3)}`,
+      qty_is_percent: false,
+      qty_percent: null,
+      uom_code: inferManufacturingBomUom(rm.rm_code)
+    };
+  })];
+}));
+
+let WOS = [];
+let PRODUCTIONS = [];
+let QC_ROWS = [];
+let WASTE_ROWS = [];
+function readMfgRows(key){
+  try{
+    const raw = window.localStorage.getItem(`erp.mfg.${key}`);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(_err){
+    return [];
+  }
+}
+
+function writeMfgRows(key, rows){
+  window.localStorage.setItem(`erp.mfg.${key}`, JSON.stringify(rows || []));
+}
+
+function bootstrapMfgRows(key, defaults = []){
+  const localRows = readMfgRows(key);
+  if(localRows.length){
+    writeMfgRows(key, localRows);
+    return localRows.map(row => ({ ...row }));
+  }
+  writeMfgRows(key, defaults);
+  return defaults.map(row => ({ ...row }));
+}
+
+let SCHEDULE_ROWS = bootstrapMfgRows('schedules', []);
+RM_TRANSFER_ROWS = bootstrapMfgRows('rm_transfer', []);
+WOS = bootstrapMfgRows('work_orders', []);
+PRODUCTIONS = bootstrapMfgRows('productions', []);
+QC_ROWS = bootstrapMfgRows('qc', []);
+WASTE_ROWS = bootstrapMfgRows('waste', []);
+
+function bySearch(arr, keys, q){
+  const term = (q || '').trim().toLowerCase();
+  if(!term) return arr;
+  return arr.filter(row => keys.some(k => String(row[k] || '').toLowerCase().includes(term)));
+}
+
+function qtyBadgeStatus(available, needed){
+  if(available >= needed) return 'Ready';
+  if(available > 0) return 'Partial';
+  return 'Kosong';
+}
+
+function getProductionUsageRows(){
+  return PRODUCTIONS.filter(p => ['In Progress','Done'].includes(p.status)).flatMap(prod => {
+    const wo = WOS.find(x => x.wo_no === prod.wo_no);
+    const schedule = wo ? SCHEDULE_ROWS.find(x => x.schedule_no === wo.source_schedule_no) : null;
+    const comps = schedule ? (BOM_COMPONENTS[schedule.bom_code] || []).map(c => {
+      const planQty = Number(schedule.plan_qty || 0);
+      const needQty = Math.ceil(Number(c.base_qty || 0) * planQty);
+      return {
+        rm_code: c.rm_code,
+        rm_name: c.rm_name,
+        need_qty: needQty
+      };
+    }) : [];
+    return comps.map(c => ({
+      prod_no: prod.prod_no,
+      prod_date: prod.prod_date,
+      rm_code: c.rm_code,
+      rm_name: c.rm_name,
+      warehouse_code: PROD_WH.warehouse_code,
+      qty: Number(c.need_qty || 0),
+      ref: prod.wo_no
+    }));
+  });
+}
+
+function getRmWasteRows(){
+  return WASTE_ROWS.filter(row => row.item_kind === 'RM').map(row => ({
+    waste_no: row.waste_no,
+    waste_date: row.waste_date,
+    rm_code: row.item_code,
+    rm_name: row.item_name,
+    uom_code: inferManufacturingBomUom(row.item_code),
+    qty: Number(row.qty || 0),
+    reason: row.reason || '-',
+    status: row.status || 'Done'
+  }));
+}
+
+function saveRmTransfers(){
+  writeMfgRows('rm_transfer', RM_TRANSFER_ROWS);
+}
+
+function saveWos(){
+  writeMfgRows('work_orders', WOS);
+}
+
+function saveProductions(){
+  writeMfgRows('productions', PRODUCTIONS);
+}
+
+function saveQcRows(){
+  writeMfgRows('qc', QC_ROWS);
+}
+
+function saveWasteRows(){
+  writeMfgRows('waste', WASTE_ROWS);
+}
+
+function fillRmWarehouseOptions(){
+  ['filter-rmstock-wh','filter-rmreceipt-wh','filter-rmtransfer-wh','filter-rmusage-wh','filter-rmcard-wh','filter-wasterm-wh','rmtransfer-form-from','rmtransfer-form-to','rmreceipt-form-wh'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const current = el.value;
+    const allowBlank = id.startsWith('filter-');
+    el.innerHTML = `${allowBlank ? '<option value="">Semua Gudang RM</option>' : ''}${[RM_WH, PROD_WH].map(w => `<option value="${w.warehouse_code}">${w.warehouse_code} - ${w.warehouse_name || w.warehouse_code}</option>`).join('')}`;
+    if([RM_WH.warehouse_code, PROD_WH.warehouse_code].includes(current)) el.value = current;
+    else if(!allowBlank) el.value = id.endsWith('-to') ? PROD_WH.warehouse_code : RM_WH.warehouse_code;
+  });
+}
+
+function fillRmTransferMaterialOptions(){
+  const select = document.getElementById('rmtransfer-form-rm');
+  if(!select) return;
+  const current = select.value;
+  select.innerHTML = RM.slice(0, 400).map(r => `<option value="${r.rm_code}">${r.rm_code} - ${r.rm_name}</option>`).join('');
+  if(RM.some(r => r.rm_code === current)) select.value = current;
+  else if(RM[0]) select.value = RM[0].rm_code;
+  fillRmFormCategoryOptions('rmtransfer-form-category');
+  renderRmTransferPicker();
+  syncRmTransferForm();
+}
+
+function fillRmReceiptMaterialOptions(){
+  const select = document.getElementById('rmreceipt-form-rm');
+  if(!select) return;
+  const current = select.value;
+  select.innerHTML = RM.slice(0, 400).map(r => `<option value="${r.rm_code}">${r.rm_code} - ${r.rm_name}</option>`).join('');
+  if(RM.some(r => r.rm_code === current)) select.value = current;
+  else if(RM[0]) select.value = RM[0].rm_code;
+  fillRmFormCategoryOptions('rmreceipt-form-category');
+  renderRmReceiptPicker();
+  syncRmReceiptForm();
+}
+
+function fillRmFormCategoryOptions(selectId){
+  const select = document.getElementById(selectId);
+  if(!select) return;
+  const current = select.value || '';
+  const categories = [...new Set(RM.map(r => r.rm_category || r.category || '').filter(Boolean))].sort();
+  select.innerHTML = `<option value="">Semua Kategori</option>` + categories.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">${v}</option>`).join('');
+  select.value = categories.includes(current) ? current : '';
+}
+
+function setSelectedRmReceipt(rmCode){
+  const select = document.getElementById('rmreceipt-form-rm');
+  if(!select) return;
+  select.value = rmCode;
+  syncRmReceiptForm();
+  renderRmReceiptPicker();
+}
+
+function updateRmReceiptQtyDraft(rmCode, value){
+  const qty = Number(value || 0);
+  if(qty > 0) rmReceiptQtyDraft[rmCode] = qty;
+  else delete rmReceiptQtyDraft[rmCode];
+  const selectedCodes = Object.keys(rmReceiptQtyDraft).filter(code => Number(rmReceiptQtyDraft[code] || 0) > 0);
+  const select = document.getElementById('rmreceipt-form-rm');
+  if(select) select.value = selectedCodes[0] || '';
+  syncRmReceiptForm();
+  renderRmReceiptPicker();
+}
+
+function setSelectedRmTransfer(rmCode){
+  const select = document.getElementById('rmtransfer-form-rm');
+  if(!select) return;
+  select.value = rmCode;
+  syncRmTransferForm();
+  renderRmTransferPicker();
+}
+
+function updateRmTransferQtyDraft(rmCode, value){
+  const qty = Number(value || 0);
+  if(qty > 0) rmTransferQtyDraft[rmCode] = qty;
+  else delete rmTransferQtyDraft[rmCode];
+  const selectedCodes = Object.keys(rmTransferQtyDraft).filter(code => Number(rmTransferQtyDraft[code] || 0) > 0);
+  const select = document.getElementById('rmtransfer-form-rm');
+  if(select) select.value = selectedCodes[0] || '';
+  syncRmTransferForm();
+  renderRmTransferPicker();
+}
+
+function renderRmReceiptPicker(){
+  const tbody = document.getElementById('rmreceipt-picker-body');
+  if(!tbody) return;
+  const q = (document.getElementById('rmreceipt-form-search')?.value || '').trim().toLowerCase();
+  const category = document.getElementById('rmreceipt-form-category')?.value || '';
+  const rows = RM
+    .filter(r => !category || (r.rm_category || r.category || '') === category)
+    .filter(r => !q || [r.rm_code, r.rm_name, r.rm_category, r.category].some(v => String(v || '').toLowerCase().includes(q)))
+    .slice(0, 250);
+  tbody.innerHTML = rows.length ? rows.map(r => {
+    const meta = getRmMasterMeta(r.rm_code);
+    const draftQty = Number(rmReceiptQtyDraft[r.rm_code] || 0);
+    const rowClass = draftQty > 0 ? 'is-selected' : '';
+    return `
+      <tr class="${rowClass}" onclick="setSelectedRmReceipt('${r.rm_code}')">
+        <td class="mono">${r.rm_code}</td>
+        <td>${r.rm_name}</td>
+        <td>${r.rm_category || r.category || '-'}</td>
+        <td class="mono">${meta.uom_code || inferManufacturingBomUom(r.rm_code)}</td>
+        <td><input class="search" type="number" min="0" placeholder="Qty" value="${draftQty || ''}" onclick="event.stopPropagation()" oninput="updateRmReceiptQtyDraft('${r.rm_code}', this.value)"></td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="5" class="empty">Material tidak ditemukan.</td></tr>`;
+}
+
+function renderRmTransferPicker(){
+  const tbody = document.getElementById('rmtransfer-picker-body');
+  if(!tbody) return;
+  const q = (document.getElementById('rmtransfer-form-search')?.value || '').trim().toLowerCase();
+  const category = document.getElementById('rmtransfer-form-category')?.value || '';
+  const from = document.getElementById('rmtransfer-form-from')?.value || RM_WH.warehouse_code;
+  const to = document.getElementById('rmtransfer-form-to')?.value || PROD_WH.warehouse_code;
+  const rows = RM
+    .filter(r => !category || (r.rm_category || r.category || '') === category)
+    .filter(r => !q || [r.rm_code, r.rm_name, r.rm_category, r.category].some(v => String(v || '').toLowerCase().includes(q)))
+    .slice(0, 250);
+  tbody.innerHTML = rows.length ? rows.map(r => {
+    const meta = getRmMasterMeta(r.rm_code);
+    const draftQty = Number(rmTransferQtyDraft[r.rm_code] || 0);
+    const rowClass = draftQty > 0 ? 'is-selected' : '';
+    const fromAvail = getAvailableRmQty(r.rm_code, from);
+    const toAvail = getAvailableRmQty(r.rm_code, to);
+    return `
+      <tr class="${rowClass}" onclick="setSelectedRmTransfer('${r.rm_code}')">
+        <td class="mono">${r.rm_code}</td>
+        <td>${r.rm_name}</td>
+        <td>${r.rm_category || r.category || '-'}</td>
+        <td class="mono">${meta.uom_code || inferManufacturingBomUom(r.rm_code)}</td>
+        <td class="mono">${fromAvail}</td>
+        <td class="mono">${toAvail}</td>
+        <td><input class="search" type="number" min="0" placeholder="Qty" value="${draftQty || ''}" onclick="event.stopPropagation()" oninput="updateRmTransferQtyDraft('${r.rm_code}', this.value)"></td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="7" class="empty">Material tidak ditemukan.</td></tr>`;
+}
+
+function syncRmReceiptForm(){
+  const rmCode = document.getElementById('rmreceipt-form-rm')?.value || '';
+  const meta = getRmMasterMeta(rmCode);
+  const vendorEl = document.getElementById('rmreceipt-form-vendor');
+  const labelEl = document.getElementById('rmreceipt-form-rm-label');
+  const pickerMeta = document.getElementById('rmreceipt-picker-meta');
+  const itemCountEl = document.getElementById('rmreceipt-form-item-count');
+  const totalQtyEl = document.getElementById('rmreceipt-form-total-qty');
+  const selectedCodes = Object.keys(rmReceiptQtyDraft).filter(code => Number(rmReceiptQtyDraft[code] || 0) > 0);
+  const totalQty = selectedCodes.reduce((sum, code) => sum + Number(rmReceiptQtyDraft[code] || 0), 0);
+  if(itemCountEl) itemCountEl.textContent = String(selectedCodes.length);
+  if(totalQtyEl) totalQtyEl.textContent = String(totalQty);
+  if(vendorEl) vendorEl.textContent = 'Penerimaan manual gudang RM';
+  if(labelEl) labelEl.textContent = selectedCodes.length
+    ? `${selectedCodes.length} item dipilih`
+    : 'Belum ada item diterima';
+  if(pickerMeta) pickerMeta.textContent = selectedCodes.length
+    ? `${selectedCodes.length} item • Total Qty ${totalQty}`
+    : (rmCode ? `${rmCode} | ${meta.rm_name || '-'}` : 'Belum ada material dipilih');
+}
+
+function syncRmTransferForm(){
+  const rmCode = document.getElementById('rmtransfer-form-rm')?.value || '';
+  const meta = getRmMasterMeta(rmCode);
+  const labelEl = document.getElementById('rmtransfer-form-rm-label');
+  const pickerMeta = document.getElementById('rmtransfer-picker-meta');
+  const itemCountEl = document.getElementById('rmtransfer-form-item-count');
+  const totalQtyEl = document.getElementById('rmtransfer-form-total-qty');
+  const selectedCodes = Object.keys(rmTransferQtyDraft).filter(code => Number(rmTransferQtyDraft[code] || 0) > 0);
+  const totalQty = selectedCodes.reduce((sum, code) => sum + Number(rmTransferQtyDraft[code] || 0), 0);
+  if(itemCountEl) itemCountEl.textContent = String(selectedCodes.length);
+  if(totalQtyEl) totalQtyEl.textContent = String(totalQty);
+  if(labelEl) labelEl.textContent = selectedCodes.length
+    ? `${selectedCodes.length} item dipilih`
+    : 'Belum ada item transfer';
+  if(pickerMeta) pickerMeta.textContent = selectedCodes.length
+    ? `${selectedCodes.length} item • Total Qty ${totalQty}`
+    : (rmCode ? `${rmCode} | ${meta.rm_name || '-'}` : 'Belum ada material dipilih');
+}
+
+function rmStockByWarehouse(rmCode, warehouseCode){
+  const received = getRmReceiptRows().filter(r => r.item_code === rmCode && r.warehouse_code === warehouseCode && r.status !== 'Draft')
+    .reduce((sum, r) => sum + Number(r.qty || 0), 0);
+  const returned = VENDOR_RETURNS.filter(r => r.item_code === rmCode && r.warehouse_code === warehouseCode && r.status !== 'Draft')
+    .reduce((sum, r) => sum + Number(r.qty || 0), 0);
+  const transferIn = RM_TRANSFER_ROWS.filter(r => r.rm_code === rmCode && r.to_warehouse === warehouseCode && r.status !== 'Draft')
+    .reduce((sum, r) => sum + Number(r.qty || 0), 0);
+  const transferOut = RM_TRANSFER_ROWS.filter(r => r.rm_code === rmCode && r.from_warehouse === warehouseCode && r.status !== 'Draft')
+    .reduce((sum, r) => sum + Number(r.qty || 0), 0);
+  const usage = getProductionUsageRows().filter(r => r.rm_code === rmCode && r.warehouse_code === warehouseCode)
+    .reduce((sum, r) => sum + Number(r.qty || 0), 0);
+  const waste = getRmWasteRows().filter(r => r.rm_code === rmCode && warehouseCode === PROD_WH.warehouse_code)
+    .reduce((sum, r) => sum + Number(r.qty || 0), 0);
+  return Math.max(0, received - returned + transferIn - transferOut - usage - waste);
+}
+
+function buildRmBookingAllocation(rmCode, excludeScheduleNo = ''){
+  const schedules = SCHEDULE_ROWS
+    .filter(row => ['Posted','Released'].includes(row.status) && row.schedule_no !== excludeScheduleNo)
+    .map(row => {
+      const comp = (BOM_COMPONENTS[row.bom_code] || []).find(c => c.rm_code === rmCode);
+      if(!comp) return null;
+      const planQty = Number(row.plan_qty || 0);
+      const needQty = Math.ceil(Number(comp.base_qty || 0) * planQty);
+      return { ...row, need_qty: needQty };
+    })
+    .filter(Boolean)
+    .sort((a,b) => String(a.schedule_date || '').localeCompare(String(b.schedule_date || '')) || String(a.schedule_no || '').localeCompare(String(b.schedule_no || '')));
+
+  let remainingMade = rmStockByWarehouse(rmCode, PROD_WH.warehouse_code);
+  let remainingKdgn = rmStockByWarehouse(rmCode, RM_WH.warehouse_code);
+  const allocation = new Map();
+
+  schedules.forEach(row => {
+    const needQty = Number(row.need_qty || 0);
+    const bookedMade = Math.min(remainingMade, needQty);
+    remainingMade = Math.max(0, remainingMade - bookedMade);
+    const remainingNeed = Math.max(0, needQty - bookedMade);
+    const bookedKdgn = Math.min(remainingKdgn, remainingNeed);
+    remainingKdgn = Math.max(0, remainingKdgn - bookedKdgn);
+    allocation.set(row.schedule_no, {
+      made: bookedMade,
+      kdgn: bookedKdgn,
+      total: bookedMade + bookedKdgn,
+      need: needQty
+    });
+  });
+
+  return allocation;
+}
+
+function getBookedRmQty(rmCode, warehouseCode, excludeScheduleNo = ''){
+  const allocation = buildRmBookingAllocation(rmCode, excludeScheduleNo);
+  let total = 0;
+  allocation.forEach(book => {
+    total += warehouseCode === PROD_WH.warehouse_code ? Number(book.made || 0) : Number(book.kdgn || 0);
+  });
+  return total;
+}
+
+function getAvailableRmQty(rmCode, warehouseCode, excludeScheduleNo = ''){
+  const onHand = rmStockByWarehouse(rmCode, warehouseCode);
+  const booked = getBookedRmQty(rmCode, warehouseCode, excludeScheduleNo);
+  return Math.max(0, onHand - booked);
+}
+
+function getScheduleComponents(schedule){
+  const components = BOM_COMPONENTS[schedule.bom_code] || [];
+  return components.map(c => {
+    const planQty = Number(schedule.plan_qty || 0);
+    const needQty = Math.ceil(Number(c.base_qty || 0) * planQty);
+    const kdgnQty = getAvailableRmQty(c.rm_code, RM_WH.warehouse_code, schedule.schedule_no);
+    const madeQty = getAvailableRmQty(c.rm_code, PROD_WH.warehouse_code, schedule.schedule_no);
+    const totalQty = kdgnQty + madeQty;
+    return {
+      ...c,
+      need_qty: needQty,
+      kdgn_qty: kdgnQty,
+      made_qty: madeQty,
+      total_qty: totalQty,
+      transfer_need: Math.max(0, needQty - madeQty),
+      ready_status: qtyBadgeStatus(totalQty, needQty)
+    };
+  });
+}
+
+function scheduleRmStatus(schedule){
+  const components = getScheduleComponents(schedule);
+  const supplyCount = components.filter(c => c.made_qty < c.need_qty && c.total_qty < c.need_qty).length;
+  const transferCount = components.filter(c => c.made_qty < c.need_qty && c.total_qty >= c.need_qty).length;
+  const readyCount = components.filter(c => c.made_qty >= c.need_qty && c.kdgn_qty < c.need_qty).length;
+  const safeCount = components.filter(c => c.made_qty >= c.need_qty && c.kdgn_qty >= c.need_qty).length;
+  if(!components.length) return { label:'Belum ada BOM', cls:'Manual' };
+  if(supplyCount) return { label:`Need Supply (${supplyCount})`, cls:'Need Supply' };
+  if(transferCount) return { label:`Need TF (${transferCount})`, cls:'Need Transfer' };
+  if(readyCount) return { label:`Ready (${readyCount})`, cls:'Ready' };
+  if(safeCount) return { label:'Safe', cls:'Safe' };
+  return { label:'Draft', cls:'Draft' };
+}
+
+function renderKpis(){
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Finished Good</div><div class="kpi-val">${FG.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Raw Material</div><div class="kpi-val">${RM.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Jadwal Ready</div><div class="kpi-val">${SCHEDULE_ROWS.filter(x => scheduleRmStatus(x).label === 'Ready').length}</div></div>
+    <div class="kpi"><div class="kpi-label">Perintah Released</div><div class="kpi-val">${WOS.filter(x => x.status === 'Released').length}</div></div>
+  `;
+}
+
+function fillRmStockFilters(){
+  const select = document.getElementById('filter-rmstock-category');
+  if(!select) return;
+  const categories = [...new Set(RM.map(r => r.rm_category || r.category || '').filter(Boolean))].sort();
+  select.innerHTML = `<option value="">Semua Kategori</option>` + categories.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">${v}</option>`).join('');
+}
+
+function saveScheduleRows(){
+  writeMfgRows('schedules', SCHEDULE_ROWS);
+}
+
+function nextScheduleNo(dateStr){
+  const clean = String(dateStr || '2026-03-22').replaceAll('-','');
+  const sameDay = SCHEDULE_ROWS.filter(r => String(r.schedule_date || '').slice(0,10) === String(dateStr || '2026-03-22').slice(0,10)).length + 1;
+  return `SCH-${clean}-${String(sameDay).padStart(3,'0')}`;
+}
+
+function fillScheduleFgOptions(){
+  const list = document.getElementById('schedule-fg-options');
+  if(!list) return;
+  const q = (document.getElementById('schedule-form-fg')?.value || '').trim().toLowerCase();
+  const options = BOMS.filter(b => !q || [b.fg_code,b.fg_name,b.bom_code,`${b.fg_code} - ${b.fg_name}`].some(v => String(v || '').toLowerCase().includes(q)));
+  list.innerHTML = options.map(b => `<option value="${b.fg_code} - ${String(b.fg_name || '').replace(/"/g,'&quot;')}"></option>`).join('');
+}
+
+function getScheduleSelectedBom(){
+  const raw = (document.getElementById('schedule-form-fg')?.value || '').trim();
+  const lower = raw.toLowerCase();
+  const exact = BOMS.find(b => {
+    const fgCode = String(b.fg_code || '').toLowerCase();
+    const fgName = String(b.fg_name || '').toLowerCase();
+    const combo = `${fgCode} - ${fgName}`;
+    return lower === fgCode || lower === fgName || lower === combo;
+  }) || BOMS.find(b => String(b.fg_code || '').toLowerCase() === lower.split(' - ')[0]);
+  if(exact) return exact;
+  const matches = BOMS.filter(b => [b.fg_code,b.fg_name,b.bom_code,`${b.fg_code} - ${b.fg_name}`].some(v => String(v || '').toLowerCase().includes(lower)));
+  return matches.length === 1 ? matches[0] : (matches[0] || null);
+}
+
+function buildScheduleDraft(){
+  const bom = getScheduleSelectedBom();
+  const bomCode = bom?.bom_code || '';
+  const schedule = {
+    schedule_no: editingScheduleNo || nextScheduleNo(document.getElementById('schedule-form-date').value || '2026-03-22'),
+    schedule_date: document.getElementById('schedule-form-date').value || '2026-03-22',
+    bom_code: bomCode,
+    fg_code: bom?.fg_code || '',
+    fg_name: bom?.fg_name || '',
+    plan_qty: Number(document.getElementById('schedule-form-qty').value || 0),
+    line_name: 'Line A',
+    status: 'Draft',
+    note: document.getElementById('schedule-form-note').value.trim(),
+    fg_wh: FG_WH.warehouse_code
+  };
+  return schedule;
+}
+
+function syncScheduleForm(){
+  const draft = buildScheduleDraft();
+  document.getElementById('schedule-form-bom').textContent = draft.bom_code || '-';
+  document.getElementById('schedule-form-rm-main').textContent = RM_WH.warehouse_code;
+  document.getElementById('schedule-form-rm-prod').textContent = PROD_WH.warehouse_code;
+  document.getElementById('schedule-form-fg-wh').textContent = draft.fg_wh;
+}
+
+function toggleScheduleForm(show, scheduleNo = ''){
+  const modal = document.getElementById('schedule-form-modal');
+  const card = document.getElementById('schedule-form-card');
+  const title = document.getElementById('schedule-form-title');
+  editingScheduleNo = scheduleNo || '';
+  if(show){
+    fillScheduleFgOptions();
+    if(scheduleNo){
+      const row = SCHEDULE_ROWS.find(x => x.schedule_no === scheduleNo);
+      if(row){
+        document.getElementById('schedule-form-date').value = row.schedule_date || '2026-03-22';
+        document.getElementById('schedule-form-fg').value = row.fg_code ? `${row.fg_code} - ${getManufacturingFgName(row.fg_code, row.fg_name)}` : '';
+        document.getElementById('schedule-form-qty').value = row.plan_qty || '';
+        document.getElementById('schedule-form-note').value = row.note || '';
+        if(title) title.textContent = `Edit ${row.schedule_no}`;
+      }
+    } else {
+      document.getElementById('schedule-form-fg').value = '';
+      fillScheduleFgOptions();
+      document.getElementById('schedule-form-date').value = '2026-03-22';
+      document.getElementById('schedule-form-qty').value = '';
+      document.getElementById('schedule-form-note').value = '';
+      if(title) title.textContent = 'Buat Jadwal Produksi';
+    }
+    modal.classList.add('open');
+    card.classList.add('active');
+    syncScheduleForm();
+    renderSchedule();
+  } else {
+    modal.classList.remove('open');
+    card.classList.remove('active');
+    editingScheduleNo = '';
+    renderSchedule();
+  }
+}
+
+function toggleScheduleDetail(show, scheduleNo = ''){
+  const modal = document.getElementById('schedule-detail-modal');
+  const card = document.getElementById('schedule-detail-card');
+  if(scheduleNo) selectedScheduleNo = scheduleNo;
+  if(show){
+    modal.classList.add('open');
+    card.classList.add('active');
+    renderSchedule();
+  }else{
+    modal.classList.remove('open');
+    card.classList.remove('active');
+  }
+}
+
+function submitScheduleForm(targetStatus){
+  const draft = buildScheduleDraft();
+  if(!draft.bom_code || !draft.schedule_date || !draft.plan_qty) return toast('Form jadwal produksi belum lengkap.');
+  draft.status = targetStatus || 'Draft';
+  SCHEDULE_ROWS = [draft].concat(SCHEDULE_ROWS.filter(x => x.schedule_no !== draft.schedule_no));
+  saveScheduleRows();
+  toggleScheduleForm(false);
+  selectedScheduleNo = draft.schedule_no;
+  renderKpis();
+  renderSchedule();
+  toast(`Jadwal ${draft.schedule_no} disimpan sebagai ${draft.status}.`);
+}
+
+function renderBom(){
+  if(!selectedBomCode && BOMS[0]) selectedBomCode = BOMS[0].bom_code;
+  const rows = bySearch(BOMS, ['bom_code','fg_code','fg_name'], document.getElementById('search-bom').value);
+  if(selectedBomCode && !rows.some(r => r.bom_code === selectedBomCode)) selectedBomCode = rows[0]?.bom_code || '';
+  document.getElementById('tbl-bom').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.bom_code === selectedBomCode ? 'sel-row' : ''}" onclick="selectBom('${r.bom_code}')">
+      <td class="mono">${r.bom_code}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${r.fg_name}</td>
+      <td>${r.version}</td>
+      <td>${r.rm_count} item</td>
+      <td>${badge(r.status)}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="5" class="empty">Belum ada data BOM.</td></tr>`;
+
+  const active = rows.find(r => r.bom_code === selectedBomCode) || rows[0];
+  const components = active ? (BOM_COMPONENTS[active.bom_code] || []) : [];
+  const bomSide = document.getElementById('bom-side');
+  if(bomSide){bomSide.innerHTML = `
+    <div class="mini-item"><div class="mini-k">Source BOM</div><div class="mini-v">${MASTER_BOM_HEADERS.length ? 'Master BOM aktif' : 'Simulasi fallback'}</div></div>
+    <div class="mini-item"><div class="mini-k">FG Aktif</div><div class="mini-v">${active ? `${active.fg_code}<div class="muted-line">${active.fg_name}</div>` : '-'}</div></div>
+    <div class="mini-item"><div class="mini-k">Pack Size</div><div class="mini-v">${active?.pack_size || '-'} ${active?.output_uom || ''}</div></div>
+    <div class="mini-item"><div class="mini-k">Gudang RM / Produksi</div><div class="mini-v">${RM_WH.warehouse_code} / ${PROD_WH.warehouse_code}</div></div>
+  `;}
+  document.getElementById('tbl-bom-detail').innerHTML = components.length ? components.map(c => {
+    const kdgnQty = rmStockByWarehouse(c.rm_code, RM_WH.warehouse_code);
+    const madeQty = rmStockByWarehouse(c.rm_code, PROD_WH.warehouse_code);
+    const totalQty = kdgnQty + madeQty;
+    const needPreview = Math.ceil(Number(c.base_qty || 0));
+    const status = qtyBadgeStatus(totalQty, needPreview);
+    return `
+      <tr>
+        <td><span class="mono">${c.rm_code}</span><br>${c.rm_name}</td>
+        <td class="mono">${c.qty_bom}</td>
+        <td class="mono">${c.uom_code}</td>
+        <td class="mono">${kdgnQty}</td>
+        <td class="mono">${madeQty}</td>
+        <td class="mono">${totalQty}</td>
+        <td>${badge(status)}</td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="7" class="empty">Pilih BOM untuk lihat komponen.</td></tr>`;
+}
+
+function renderRmStock(){
+  const wh = document.getElementById('filter-rmstock-wh')?.value || '';
+  const dynamicCodes = new Set([
+    ...RM.map(r => r.rm_code),
+    ...getRmReceiptRows().map(r => r.item_code),
+    ...RM_TRANSFER_ROWS.map(r => r.rm_code),
+    ...getProductionUsageRows().map(r => r.rm_code),
+    ...getRmWasteRows().map(r => r.rm_code),
+    ...Object.values(BOM_COMPONENTS).flat().map(r => r.rm_code)
+  ].filter(Boolean));
+  let rows = Array.from(dynamicCodes).map(rmCode => {
+    const meta = getRmMasterMeta(rmCode);
+    const kdgnOnHand = rmStockByWarehouse(rmCode, RM_WH.warehouse_code);
+    const madeOnHand = rmStockByWarehouse(rmCode, PROD_WH.warehouse_code);
+    const kdgnAvail = getAvailableRmQty(rmCode, RM_WH.warehouse_code);
+    const madeAvail = getAvailableRmQty(rmCode, PROD_WH.warehouse_code);
+    return {
+      rm_code: rmCode,
+      rm_name: meta.rm_name || getRmReceiptRows().find(x => x.item_code === rmCode)?.item_name || rmCode,
+      rm_category: (RM.find(x => x.rm_code === rmCode) || {}).rm_category || (RM.find(x => x.rm_code === rmCode) || {}).category || '-',
+      uom_code: meta.uom_code || inferManufacturingBomUom(rmCode),
+      kdgn_on_hand: kdgnOnHand,
+      kdgn_avail: kdgnAvail,
+      made_on_hand: madeOnHand,
+      made_avail: madeAvail,
+      total_on_hand: kdgnOnHand + madeOnHand,
+      total_avail: kdgnAvail + madeAvail
+    };
+  });
+  rows = bySearch(rows, ['rm_code','rm_name','rm_category'], document.getElementById('search-rmstock').value);
+  const category = document.getElementById('filter-rmstock-category').value;
+  if(category) rows = rows.filter(r => r.rm_category === category);
+  const head = document.getElementById('hd-rmstock');
+  if(head){
+    head.innerHTML = wh ? `
+      <th>RM Code</th><th>Material</th><th>Kategori</th><th>UOM</th><th>On Hand</th><th>Avail</th><th>Total On Hand</th><th>Total Avail</th><th>Status</th>
+    ` : `
+      <th>RM Code</th><th>Material</th><th>Kategori</th><th>UOM</th><th>On Hand KDGN</th><th>Avail KDGN</th><th>On Hand MADE</th><th>Avail MADE</th><th>Total On Hand</th><th>Total Avail</th><th>Status</th>
+    `;
+  }
+  document.getElementById('tbl-rmstock').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.rm_code}</td>
+      <td>${r.rm_name}</td>
+      <td>${r.rm_category}</td>
+      <td class="mono">${r.uom_code}</td>
+      ${wh === RM_WH.warehouse_code ? `<td class="mono">${r.kdgn_on_hand}</td><td class="mono">${r.kdgn_avail}</td>` : wh === PROD_WH.warehouse_code ? `<td class="mono">${r.made_on_hand}</td><td class="mono">${r.made_avail}</td>` : `<td class="mono">${r.kdgn_on_hand}</td><td class="mono">${r.kdgn_avail}</td><td class="mono">${r.made_on_hand}</td><td class="mono">${r.made_avail}</td>`}
+      <td class="mono">${r.total_on_hand}</td>
+      <td class="mono">${r.total_avail}</td>
+      <td>${badge(r.made_avail > 0 && r.kdgn_avail > 0 ? 'Safe' : r.made_avail > 0 ? 'Ready' : r.total_avail > 0 ? 'Need Transfer' : 'Need Supply')}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="${wh ? 9 : 11}" class="empty">Tidak ada data RM.</td></tr>`;
+}
+
+function renderRmReceipt(){
+  let rows = bySearch(getRmInboundRows(), ['receipt_no','item_code','item_name','vendor_name','warehouse_code','source_type','source_ref'], document.getElementById('search-rmreceipt').value);
+  const wh = document.getElementById('filter-rmreceipt-wh').value;
+  const dateFrom = document.getElementById('filter-rmreceipt-date-from').value;
+  const dateTo = document.getElementById('filter-rmreceipt-date-to').value;
+  if(wh) rows = rows.filter(r => r.warehouse_code === wh);
+  if(dateFrom) rows = rows.filter(r => String(r.receipt_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(r => String(r.receipt_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.receipt_date || '').localeCompare(String(a.receipt_date || '')) || String(b.receipt_no || '').localeCompare(String(a.receipt_no || '')));
+  document.getElementById('rmreceipt-view-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip" title="${rmreceiptViewMode === 'RECAP' ? 'Rekap Penerimaan RM' : 'Tabel Per Tanggal'}" aria-label="${rmreceiptViewMode === 'RECAP' ? 'Rekap Penerimaan RM' : 'Tabel Per Tanggal'}" onclick="toggleRmReceiptViewMode()">${rmreceiptViewMode === 'RECAP' ? '≣' : '▦'}</button>
+    </div>
+  `;
+  document.getElementById('rmreceipt-pane-recap').classList.toggle('active', rmreceiptViewMode === 'RECAP');
+  document.getElementById('rmreceipt-pane-table').classList.toggle('active', rmreceiptViewMode === 'TABLE');
+  document.getElementById('tbl-rmreceipt').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.receipt_no || '-'}</td>
+      <td>${r.receipt_date || '-'}</td>
+      <td><span class="mono">${r.item_code}</span><br>${r.item_name}</td>
+      <td class="mono">${r.uom_code || inferManufacturingBomUom(r.item_code)}</td>
+      <td>${r.warehouse_code}</td>
+      <td>${r.source_type || 'Manual Receipt'}${r.source_ref ? `<div class="muted-line">${r.source_ref}</div>` : ''}</td>
+      <td>${r.qty}</td>
+      <td>${badge(r.status || 'Posted')}</td>
+      <td><button class="btn btn-ghost" onclick="openManufacturingDetail('rmreceipt','${r.receipt_no || ''}')">Detail</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="9" class="empty">Tidak ada penerimaan RM.</td></tr>`;
+  const matrix = buildRmMatrixRows(rows, 'item_code', 'item_name', row => row.uom_code || inferManufacturingBomUom(row.item_code));
+  document.getElementById('hd-rmreceipt-table').innerHTML = `
+    <th>RM Code</th><th>Material</th><th>UOM</th><th>Total</th>${matrix.dates.map(d => `<th>${d}</th>`).join('')}
+  `;
+  document.getElementById('tbl-rmreceipt-table').innerHTML = matrix.rows.length ? matrix.rows.map(r => `
+    <tr>
+      <td class="mono">${r.code}</td>
+      <td>${r.name}</td>
+      <td class="mono">${r.uom_code || inferManufacturingBomUom(r.code)}</td>
+      <td class="qty-cell">${r.total_in}</td>
+      ${matrix.dates.map(d => `<td class="qty-cell">${r.by_date[d] || ''}</td>`).join('')}
+    </tr>
+  `).join('') : `<tr><td colspan="${4 + matrix.dates.length}" class="empty">Tidak ada penerimaan RM.</td></tr>`;
+}
+
+function toggleRmTransferForm(show){
+  const modal = document.getElementById('rmtransfer-form-modal');
+  if(!modal) return;
+  modal.classList.toggle('open', !!show);
+  if(show){
+    rmTransferQtyDraft = {};
+    fillRmWarehouseOptions();
+    const categoryEl = document.getElementById('rmtransfer-form-category');
+    const searchEl = document.getElementById('rmtransfer-form-search');
+    if(categoryEl) categoryEl.value = '';
+    if(searchEl) searchEl.value = '';
+    fillRmTransferMaterialOptions();
+    syncRmTransferForm();
+    const dateEl = document.getElementById('rmtransfer-form-date');
+    if(dateEl && !dateEl.value) dateEl.value = APP_TODAY;
+    renderRmTransferPicker();
+    document.getElementById('rmtransfer-form-search')?.focus();
+  } else {
+    rmTransferQtyDraft = {};
+  }
+}
+
+function toggleRmReceiptForm(show){
+  const modal = document.getElementById('rmreceipt-form-modal');
+  if(!modal) return;
+  modal.classList.toggle('open', !!show);
+  if(show){
+    rmReceiptQtyDraft = {};
+    fillRmWarehouseOptions();
+    const categoryEl = document.getElementById('rmreceipt-form-category');
+    const searchEl = document.getElementById('rmreceipt-form-search');
+    if(categoryEl) categoryEl.value = '';
+    if(searchEl) searchEl.value = '';
+    fillRmReceiptMaterialOptions();
+    const wh = document.getElementById('rmreceipt-form-wh');
+    if(wh) wh.value = RM_WH.warehouse_code;
+    const dateEl = document.getElementById('rmreceipt-form-date');
+    if(dateEl && !dateEl.value) dateEl.value = APP_TODAY;
+    syncRmReceiptForm();
+    renderRmReceiptPicker();
+    document.getElementById('rmreceipt-form-search')?.focus();
+  } else {
+    rmReceiptQtyDraft = {};
+  }
+}
+
+function submitRmReceipt(){
+  const date = document.getElementById('rmreceipt-form-date').value || APP_TODAY;
+  const warehouseCode = document.getElementById('rmreceipt-form-wh').value || RM_WH.warehouse_code;
+  const picked = Object.entries(rmReceiptQtyDraft)
+    .map(([rmCode, qty]) => ({ rm: RM.find(r => r.rm_code === rmCode), qty:Number(qty || 0) }))
+    .filter(x => x.rm && x.qty > 0);
+  if(!warehouseCode || !picked.length) return toast('Form penerimaan RM belum lengkap.');
+  const receiptRows = getManualRmReceiptRows();
+  const receiptNos = new Set(receiptRows.map(r => r.receipt_no).filter(Boolean));
+  const seq = String(receiptNos.size + 1).padStart(3, '0');
+  const receiptNo = `RCV-202603-${seq}`;
+  picked.forEach(row => {
+    receiptRows.push({
+      receipt_no: receiptNo,
+      receipt_date: date,
+      warehouse_code: warehouseCode,
+      item_code: row.rm.rm_code,
+      item_name: row.rm.rm_name,
+      qty: row.qty,
+      amount: 0,
+      status: 'Posted',
+      created_by: CURRENT_USER_NAME
+    });
+  });
+  window.localStorage.setItem('erp.mfg.rm_receipts', JSON.stringify(receiptRows));
+  rmReceiptQtyDraft = {};
+  toggleRmReceiptForm(false);
+  renderRmReceipt();
+  renderRmStock();
+  renderRmCard();
+}
+
+function submitRmTransfer(){
+  const date = document.getElementById('rmtransfer-form-date').value || '2026-03-22';
+  const from = document.getElementById('rmtransfer-form-from').value;
+  const to = document.getElementById('rmtransfer-form-to').value;
+  const note = document.getElementById('rmtransfer-form-note').value.trim();
+  const picked = Object.entries(rmTransferQtyDraft)
+    .map(([rmCode, qty]) => ({ rm: RM.find(r => r.rm_code === rmCode), qty:Number(qty || 0) }))
+    .filter(x => x.rm && x.qty > 0);
+  if(!from || !to || !picked.length) return toast('Form transfer RM belum lengkap.');
+  if(from === to) return toast('Gudang asal dan tujuan tidak boleh sama.');
+  for(const row of picked){
+    const available = getAvailableRmQty(row.rm.rm_code, from);
+    if(row.qty > available) return toast(`Qty ${row.rm.rm_code} melebihi stok available gudang asal (${available}).`);
+  }
+  const seq = String(new Set(RM_TRANSFER_ROWS.map(r => r.transfer_no)).size + 1).padStart(3,'0');
+  const transferNo = `TRRM-202603-${seq}`;
+  RM_TRANSFER_ROWS = picked.map(row => ({
+    transfer_no: transferNo,
+    transfer_date: date,
+    rm_code: row.rm.rm_code,
+    rm_name: row.rm.rm_name,
+    from_warehouse: from,
+    to_warehouse: to,
+    qty: row.qty,
+    note,
+    status: 'Posted'
+  })).concat(RM_TRANSFER_ROWS);
+  saveRmTransfers();
+  rmTransferQtyDraft = {};
+  toggleRmTransferForm(false);
+  renderRmStock();
+  renderRmTransfer();
+  renderRmCard();
+  renderSchedule();
+  toast('Transfer RM berhasil disimpan.');
+}
+
+function renderRmTransfer(){
+  let rows = bySearch(RM_TRANSFER_ROWS, ['transfer_no','rm_code','rm_name','from_warehouse','to_warehouse','note'], document.getElementById('search-rmtransfer').value);
+  const dateFrom = document.getElementById('filter-rmtransfer-date-from').value;
+  const dateTo = document.getElementById('filter-rmtransfer-date-to').value;
+  const wh = document.getElementById('filter-rmtransfer-wh')?.value || '';
+  if(dateFrom) rows = rows.filter(r => String(r.transfer_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(r => String(r.transfer_date || '') <= dateTo);
+  if(wh) rows = rows.filter(r => r.from_warehouse === wh || r.to_warehouse === wh);
+  rows = rows.sort((a,b) => String(b.transfer_date || '').localeCompare(String(a.transfer_date || '')));
+  document.getElementById('rmtransfer-view-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip" title="${rmtransferViewMode === 'RECAP' ? 'Rekap Transfer RM' : 'Tabel Per Tanggal'}" aria-label="${rmtransferViewMode === 'RECAP' ? 'Rekap Transfer RM' : 'Tabel Per Tanggal'}" onclick="toggleRmTransferViewMode()">${rmtransferViewMode === 'RECAP' ? '≣' : '▦'}</button>
+    </div>
+  `;
+  document.getElementById('rmtransfer-pane-recap').classList.toggle('active', rmtransferViewMode === 'RECAP');
+  document.getElementById('rmtransfer-pane-table').classList.toggle('active', rmtransferViewMode === 'TABLE');
+  document.getElementById('tbl-rmtransfer').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.transfer_no}</td>
+      <td>${r.transfer_date}</td>
+      <td><span class="mono">${r.rm_code}</span><br>${r.rm_name}</td>
+      <td class="mono">${(RM.find(x => x.rm_code === r.rm_code) || {}).uom_code || inferManufacturingBomUom(r.rm_code)}</td>
+      <td>${r.from_warehouse}</td>
+      <td>${r.to_warehouse}</td>
+      <td>${r.qty}</td>
+      <td>${badge(r.status || 'Posted')}</td>
+      <td><button class="btn btn-ghost" onclick="openManufacturingDetail('rmtransfer','${r.transfer_no}')">Detail</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="9" class="empty">Tidak ada transfer RM.</td></tr>`;
+  const matrixRows = rows.flatMap(r => {
+    const uom = (RM.find(x => x.rm_code === r.rm_code) || {}).uom_code || inferManufacturingBomUom(r.rm_code);
+    return [
+      { move_date:r.transfer_date, rm_code:r.rm_code, rm_name:r.rm_name, uom_code:uom, signed_qty:-Math.abs(Number(r.qty || 0)) },
+      { move_date:r.transfer_date, rm_code:r.rm_code, rm_name:r.rm_name, uom_code:uom, signed_qty:Math.abs(Number(r.qty || 0)) }
+    ];
+  });
+  const matrix = buildRmMatrixRows(matrixRows, 'rm_code', 'rm_name', row => row.uom_code || inferManufacturingBomUom(row.rm_code));
+  document.getElementById('hd-rmtransfer-table').innerHTML = `
+    <th>RM Code</th><th>Material</th><th>UOM</th><th>Total TF</th>${matrix.dates.map(d => `<th>${d}</th>`).join('')}
+  `;
+  document.getElementById('tbl-rmtransfer-table').innerHTML = matrix.rows.length ? matrix.rows.map(r => `
+    <tr>
+      <td class="mono">${r.code}</td>
+      <td>${r.name}</td>
+      <td class="mono">${r.uom_code || inferManufacturingBomUom(r.code)}</td>
+      <td class="qty-cell">${r.total_net || ''}</td>
+      ${matrix.dates.map(d => {
+        const val = Number(r.by_date[d] || 0);
+        return `<td class="qty-cell ${val > 0 ? 'num-pos' : val < 0 ? 'num-neg' : ''}">${val || ''}</td>`;
+      }).join('')}
+    </tr>
+  `).join('') : `<tr><td colspan="${4 + matrix.dates.length}" class="empty">Tidak ada transfer RM.</td></tr>`;
+}
+
+function renderRmUsage(){
+  let rows = bySearch(getProductionUsageRows(), ['prod_no','ref','rm_code','rm_name'], document.getElementById('search-rmusage').value);
+  const dateFrom = document.getElementById('filter-rmusage-date-from').value;
+  const dateTo = document.getElementById('filter-rmusage-date-to').value;
+  const wh = document.getElementById('filter-rmusage-wh')?.value || '';
+  if(dateFrom) rows = rows.filter(r => String(r.prod_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(r => String(r.prod_date || '') <= dateTo);
+  if(wh) rows = rows.filter(r => r.warehouse_code === wh);
+  rows = rows.sort((a,b) => String(b.prod_date || '').localeCompare(String(a.prod_date || '')));
+  document.getElementById('rmusage-view-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip" title="${rmusageViewMode === 'RECAP' ? 'Rekap Pemakaian RM' : 'Tabel Per Tanggal'}" aria-label="${rmusageViewMode === 'RECAP' ? 'Rekap Pemakaian RM' : 'Tabel Per Tanggal'}" onclick="toggleRmUsageViewMode()">${rmusageViewMode === 'RECAP' ? '≣' : '▦'}</button>
+    </div>
+  `;
+  document.getElementById('rmusage-pane-recap').classList.toggle('active', rmusageViewMode === 'RECAP');
+  document.getElementById('rmusage-pane-table').classList.toggle('active', rmusageViewMode === 'TABLE');
+  document.getElementById('tbl-rmusage').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td>${r.prod_date}</td>
+      <td class="mono">${r.prod_no}</td>
+      <td class="mono">${r.ref}</td>
+      <td><span class="mono">${r.rm_code}</span><br>${r.rm_name}</td>
+      <td class="mono">${inferManufacturingBomUom(r.rm_code)}</td>
+      <td class="mono">${r.warehouse_code}</td>
+      <td>${r.qty}</td>
+      <td><button class="btn btn-ghost" onclick="openManufacturingDetail('rmusage','${r.prod_no}|${r.rm_code}')">Detail</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Belum ada pemakaian RM.</td></tr>`;
+  const matrixRows = rows.map(r => ({
+    move_date: r.prod_date,
+    rm_code: r.rm_code,
+    rm_name: r.rm_name,
+    uom_code: inferManufacturingBomUom(r.rm_code),
+    signed_qty: -Math.abs(Number(r.qty || 0))
+  }));
+  const matrix = buildRmMatrixRows(matrixRows, 'rm_code', 'rm_name', row => row.uom_code || inferManufacturingBomUom(row.rm_code));
+  document.getElementById('hd-rmusage-table').innerHTML = `
+    <th>RM Code</th><th>Material</th><th>UOM</th><th>Total Pakai</th>${matrix.dates.map(d => `<th>${d}</th>`).join('')}
+  `;
+  document.getElementById('tbl-rmusage-table').innerHTML = matrix.rows.length ? matrix.rows.map(r => `
+    <tr>
+      <td class="mono">${r.code}</td>
+      <td>${r.name}</td>
+      <td class="mono">${r.uom_code || inferManufacturingBomUom(r.code)}</td>
+      <td class="qty-cell">${Math.abs(Number(r.total_net || 0))}</td>
+      ${matrix.dates.map(d => {
+        const val = Number(r.by_date[d] || 0);
+        return `<td class="qty-cell ${val < 0 ? 'num-neg' : ''}">${val ? Math.abs(val) : ''}</td>`;
+      }).join('')}
+    </tr>
+  `).join('') : `<tr><td colspan="${4 + matrix.dates.length}" class="empty">Belum ada pemakaian RM.</td></tr>`;
+}
+
+function toggleRmReceiptViewMode(){
+  rmreceiptViewMode = rmreceiptViewMode === 'RECAP' ? 'TABLE' : 'RECAP';
+  renderRmReceipt();
+}
+
+function toggleRmTransferViewMode(){
+  rmtransferViewMode = rmtransferViewMode === 'RECAP' ? 'TABLE' : 'RECAP';
+  renderRmTransfer();
+}
+
+function toggleRmUsageViewMode(){
+  rmusageViewMode = rmusageViewMode === 'RECAP' ? 'TABLE' : 'RECAP';
+  renderRmUsage();
+}
+
+function renderRmCard(){
+  document.getElementById('rmcard-view-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip" title="${rmcardViewMode === 'RECAP' ? 'Rekap Pergerakan RM' : 'Tabel Per Tanggal'}" aria-label="${rmcardViewMode === 'RECAP' ? 'Rekap Pergerakan RM' : 'Tabel Per Tanggal'}" onclick="toggleRmCardViewMode()">${rmcardViewMode === 'RECAP' ? '≣' : '▦'}</button>
+    </div>
+  `;
+  document.getElementById('rmcard-pane-recap').classList.toggle('active', rmcardViewMode === 'RECAP');
+  document.getElementById('rmcard-pane-table').classList.toggle('active', rmcardViewMode === 'TABLE');
+  const wh = document.getElementById('filter-rmcard-wh').value;
+  const dateFrom = document.getElementById('filter-rmcard-date-from').value;
+  const dateTo = document.getElementById('filter-rmcard-date-to').value;
+  let rows = [];
+  rows = rows.concat(getRmReceiptRows().map(r => ({
+    date: r.receipt_date || '',
+    doc: r.receipt_no || '-',
+    rm_code: r.item_code,
+    rm_name: r.item_name,
+    warehouse_code: r.warehouse_code,
+    in_qty: Number(r.qty || 0),
+    out_qty: 0,
+    ref: r.vendor_name || ''
+  })));
+  rows = rows.concat(VENDOR_RETURNS.filter(r => [RM_WH.warehouse_code, PROD_WH.warehouse_code].includes(r.warehouse_code)).map(r => ({
+    date: r.return_date || '',
+    doc: r.return_no || '-',
+    rm_code: r.item_code,
+    rm_name: r.item_name,
+    warehouse_code: r.warehouse_code,
+    in_qty: 0,
+    out_qty: Number(r.qty || 0),
+    ref: 'Retur Vendor'
+  })));
+  rows = rows.concat(RM_TRANSFER_ROWS.flatMap(r => ([
+    { date:r.transfer_date, doc:r.transfer_no, rm_code:r.rm_code, rm_name:r.rm_name, warehouse_code:r.from_warehouse, in_qty:0, out_qty:Number(r.qty || 0), ref:`Transfer ke ${r.to_warehouse}` },
+    { date:r.transfer_date, doc:r.transfer_no, rm_code:r.rm_code, rm_name:r.rm_name, warehouse_code:r.to_warehouse, in_qty:Number(r.qty || 0), out_qty:0, ref:`Transfer dari ${r.from_warehouse}` }
+  ])));
+  rows = rows.concat(getProductionUsageRows().map(r => ({
+    date: r.prod_date,
+    doc: r.prod_no,
+    rm_code: r.rm_code,
+    rm_name: r.rm_name,
+    warehouse_code: r.warehouse_code,
+    in_qty: 0,
+    out_qty: Number(r.qty || 0),
+    ref: `Pemakaian ${r.ref}`
+  })));
+  rows = rows.concat(getRmWasteRows().map(r => ({
+    date: r.waste_date,
+    doc: r.waste_no,
+    rm_code: r.rm_code,
+    rm_name: r.rm_name,
+    warehouse_code: PROD_WH.warehouse_code,
+    in_qty: 0,
+    out_qty: Number(r.qty || 0),
+    ref: `Waste RM - ${r.reason}`
+  })));
+  rows = bySearch(rows, ['doc','rm_code','rm_name','ref','warehouse_code'], document.getElementById('search-rmcard').value)
+    .sort((a,b) => String(b.date).localeCompare(String(a.date)));
+  if(wh) rows = rows.filter(r => r.warehouse_code === wh);
+  if(dateFrom) rows = rows.filter(r => String(r.date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(r => String(r.date || '') <= dateTo);
+  document.getElementById('tbl-rmcard').innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td>${r.date}</td>
+      <td class="mono">${r.doc}</td>
+      <td><span class="mono">${r.rm_code}</span><br>${r.rm_name}</td>
+      <td class="mono">${(RM.find(x => x.rm_code === r.rm_code) || {}).uom_code || inferManufacturingBomUom(r.rm_code)}</td>
+      <td>${r.warehouse_code}</td>
+      <td class="${Number(r.in_qty || 0) > 0 ? 'num-pos' : ''}">${r.in_qty || ''}</td>
+      <td class="${Number(r.out_qty || 0) > 0 ? 'num-neg' : ''}">${r.out_qty || ''}</td>
+      <td>${r.ref || '-'}</td>
+      <td><button class="btn btn-ghost" onclick="openManufacturingDetail('rmcard','${encodeURIComponent(JSON.stringify(r))}')">Detail</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="9" class="empty">Tidak ada pergerakan stok RM.</td></tr>`;
+  const dates = [...new Set(rows.map(r => String(r.date || '').slice(0,10)).filter(Boolean))].sort().reverse();
+  document.getElementById('hd-rmcard-table').innerHTML = `
+    <tr><th rowspan="2">RM Code</th><th rowspan="2">Material</th><th rowspan="2">UOM</th><th rowspan="2">Total Masuk</th><th rowspan="2">Total Keluar</th>${dates.map(d => `<th colspan="2">${d}</th>`).join('')}</tr>
+    <tr>${dates.map(() => `<th>In</th><th>Out</th>`).join('')}</tr>
+  `;
+  const grouped = rows.reduce((map, row) => {
+    const key = row.rm_code;
+    if(!map[key]){
+      map[key] = {
+        rm_code: row.rm_code,
+        rm_name: row.rm_name,
+        uom_code: (RM.find(x => x.rm_code === row.rm_code) || {}).uom_code || inferManufacturingBomUom(row.rm_code),
+        total_in: 0,
+        total_out: 0,
+        by_date_in: {},
+        by_date_out: {}
+      };
+    }
+    map[key].total_in += Number(row.in_qty || 0);
+    map[key].total_out += Number(row.out_qty || 0);
+    map[key].by_date_in[row.date] = (map[key].by_date_in[row.date] || 0) + Number(row.in_qty || 0);
+    map[key].by_date_out[row.date] = (map[key].by_date_out[row.date] || 0) + Number(row.out_qty || 0);
+    return map;
+  }, {});
+  const tableRows = Object.values(grouped).sort((a,b) => String(a.rm_code).localeCompare(String(b.rm_code)));
+  document.getElementById('tbl-rmcard-table').innerHTML = tableRows.length ? tableRows.map(r => `
+    <tr>
+      <td class="mono">${r.rm_code}</td>
+      <td>${r.rm_name}</td>
+      <td class="mono">${r.uom_code}</td>
+      <td class="mono num-pos">${r.total_in || ''}</td>
+      <td class="mono num-neg">${r.total_out || ''}</td>
+      ${dates.map(d => {
+        const inVal = Number(r.by_date_in[d] || 0);
+        const outVal = Number(r.by_date_out[d] || 0);
+        return `<td class="mono ${inVal > 0 ? 'num-pos' : ''}">${inVal > 0 ? `+${inVal}` : ''}</td><td class="mono ${outVal > 0 ? 'num-neg' : ''}">${outVal > 0 ? `-${outVal}` : ''}</td>`;
+      }).join('')}
+    </tr>
+  `).join('') : `<tr><td colspan="${5 + Math.max(dates.length * 2, 1)}" class="empty">Tidak ada pergerakan stok RM.</td></tr>`;
+}
+
+function toggleRmCardViewMode(){
+  rmcardViewMode = rmcardViewMode === 'RECAP' ? 'TABLE' : 'RECAP';
+  renderRmCard();
+}
+
+function renderSchedule(){
+  syncManufacturingFgNames();
+  document.getElementById('schedule-view-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip" title="${scheduleViewMode === 'AGENDA' ? 'Agenda Jadwal' : 'Rekap Jadwal'}" aria-label="${scheduleViewMode === 'AGENDA' ? 'Agenda Jadwal' : 'Rekap Jadwal'}" onclick="toggleScheduleViewMode()">${scheduleViewMode === 'AGENDA' ? '☷' : '≣'}</button>
+    </div>
+  `;
+  document.getElementById('schedule-pane-agenda').classList.toggle('active', scheduleViewMode === 'AGENDA');
+  document.getElementById('schedule-pane-recap').classList.toggle('active', scheduleViewMode === 'RECAP');
+  const agendaRows = [...SCHEDULE_ROWS].sort((a,b) => String(b.schedule_date || '').localeCompare(String(a.schedule_date || '')) || String(b.schedule_no || '').localeCompare(String(a.schedule_no || '')));
+  let rows = bySearch(SCHEDULE_ROWS, ['schedule_no','fg_code','fg_name','bom_code','line_name'], document.getElementById('search-schedule').value);
+  const status = document.getElementById('filter-schedule-status').value;
+  const dateFrom = document.getElementById('filter-schedule-date-from').value;
+  const dateTo = document.getElementById('filter-schedule-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.schedule_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.schedule_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.schedule_date || '').localeCompare(String(a.schedule_date || '')) || String(b.schedule_no || '').localeCompare(String(a.schedule_no || '')));
+  if(status) rows = rows.filter(x => {
+    const rm = scheduleRmStatus(x).label;
+    return status === 'Draft' ? x.status === 'Draft'
+      : status === 'Posted' ? x.status === 'Posted'
+      : status === 'Ready' ? rm === 'Ready'
+      : status === 'Need Supply' ? rm.includes('Need Supply')
+      : status === 'Need Transfer' ? rm.includes('Need Transfer')
+      : status === 'Released' ? x.status === 'Released'
+      : rm === status;
+  });
+  const agenda = {
+    draft: agendaRows.filter(x => x.status === 'Draft').length,
+    posted: agendaRows.filter(x => x.status === 'Posted').length,
+    ready: agendaRows.filter(x => scheduleRmStatus(x).label === 'Ready' && x.status !== 'Released').length,
+    transfer: agendaRows.filter(x => scheduleRmStatus(x).label.includes('Need Transfer') && x.status !== 'Released').length,
+    short: agendaRows.filter(x => scheduleRmStatus(x).label.includes('Need Supply') && x.status !== 'Released').length,
+    released: agendaRows.filter(x => x.status === 'Released').length
+  };
+  const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const byDate = agendaRows.reduce((acc, row) => {
+    const key = String(row.schedule_date || '').slice(0,10);
+    acc[key] = acc[key] || [];
+    acc[key].push(row);
+    return acc;
+  }, {});
+  const visibleDates = [addDays(APP_TODAY, scheduleAgendaIndex), addDays(APP_TODAY, scheduleAgendaIndex + 1), addDays(APP_TODAY, scheduleAgendaIndex + 2)];
+  document.getElementById('schedule-agenda-title').textContent = 'Agenda 3 Hari';
+  document.getElementById('schedule-agenda-summary').textContent = `${visibleDates[0]} s/d ${visibleDates[2]}`;
+  document.getElementById('schedule-agenda').innerHTML = visibleDates.map(ds => {
+    const dt = new Date(`${ds}T00:00:00`);
+    const items = byDate[ds] || [];
+            return `
+      <div class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="day-title">${dayNames[dt.getDay()]}</div>
+            <div class="day-sub">${ds}</div>
+          </div>
+          <div class="badge b-draft">${items.length} jadwal</div>
+        </div>
+        <div class="day-items">
+          ${items.map(item => {
+            const rm = scheduleRmStatus(item).label;
+            const action = item.status === 'Posted'
+              ? `<button class="btn btn-ghost" type="button" onclick="event.stopPropagation();unpostSchedule('${item.schedule_no}')">Unpost</button>`
+              : item.status === 'Released'
+                ? `<button class="btn btn-ghost" type="button" onclick="event.stopPropagation();showSection('wo')">Laksanakan Perintah</button>`
+                : '';
+            return `<div class="calendar-chip">
+              <div class="calendar-chip-head">
+                <div class="mono">${item.schedule_no}</div>
+                ${action || ''}
+              </div>
+              <div><strong>${item.fg_code}</strong></div>
+              <div>${getManufacturingFgName(item.fg_code, item.fg_name)}</div>
+              <div class="muted-line">Target ${item.plan_qty} pcs</div>
+              <div class="muted-line">BOM ${item.bom_code}</div>
+              <div class="muted-line">${item.status} / ${rm}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  if(!selectedScheduleNo && rows[0]) selectedScheduleNo = rows[0].schedule_no;
+  if(selectedScheduleNo && !rows.some(r => r.schedule_no === selectedScheduleNo)) selectedScheduleNo = rows[0]?.schedule_no || '';
+  document.getElementById('tbl-schedule').innerHTML = rows.length ? rows.map(r => {
+    const rmStatus = scheduleRmStatus(r);
+    return `
+      <tr class="${r.schedule_no === selectedScheduleNo ? 'sel-row' : ''}" onclick="selectSchedule('${r.schedule_no}')">
+        <td class="mono">${r.schedule_no}</td>
+        <td>${r.schedule_date}</td>
+        <td><span class="mono">${r.fg_code}</span><br>${getManufacturingFgName(r.fg_code, r.fg_name)}</td>
+        <td class="mono">${r.bom_code}</td>
+        <td>${r.plan_qty}</td>
+        <td>${badge(rmStatus.label)}</td>
+        <td>${badge(r.status)}</td>
+        <td>
+          <button class="btn btn-ghost" onclick="event.stopPropagation();toggleScheduleDetail(true,'${r.schedule_no}')">Detail</button>
+          ${r.status === 'Draft' ? `<button class="btn btn-ghost" onclick="event.stopPropagation();toggleScheduleForm(true,'${r.schedule_no}')">Edit</button><button class="btn btn-ghost" onclick="event.stopPropagation();postSchedule('${r.schedule_no}')">Post</button>` : ''}
+          ${r.status === 'Posted' ? `<button class="btn btn-ghost" onclick="event.stopPropagation();unpostSchedule('${r.schedule_no}')">Unpost</button><button class="btn btn-ghost" onclick="event.stopPropagation();releaseScheduleToWo('${r.schedule_no}')">Buat Perintah</button>` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="8" class="empty">Belum ada jadwal produksi.</td></tr>`;
+
+  const previewSchedule = document.getElementById('schedule-form-modal').classList.contains('open') ? buildScheduleDraft() : (rows.find(r => r.schedule_no === selectedScheduleNo) || rows[0]);
+  const components = previewSchedule ? getScheduleComponents(previewSchedule) : [];
+  document.getElementById('tbl-schedule-rm').innerHTML = components.length ? components.map(c => `
+    <tr>
+      <td><span class="mono">${c.rm_code}</span><br>${c.rm_name}</td>
+      <td class="mono">${c.qty_bom}</td>
+      <td class="mono">${c.uom_code}</td>
+      <td class="mono">${c.need_qty}</td>
+      <td class="mono ${c.made_qty < c.need_qty ? 'qty-alert' : ''}">${c.made_qty}</td>
+      <td class="mono">${c.kdgn_qty}</td>
+      <td>${c.made_qty < c.need_qty && c.total_qty < c.need_qty
+        ? `<span class="mono">Need Supply</span><div class="muted-line">Total kurang ${Math.max(0, c.need_qty - c.total_qty)}</div>`
+        : c.made_qty < c.need_qty
+          ? `<span class="mono">Need TF ${c.transfer_need}</span><div class="muted-line">Avail ${RM_WH.warehouse_code} -> ${PROD_WH.warehouse_code}</div>`
+          : c.kdgn_qty < c.need_qty
+            ? `<span class="mono">Ready</span><div class="muted-line">Avail MADE cukup, KDGN tipis</div>`
+            : `<span class="mono">Safe</span><div class="muted-line">Avail aman, buffer cukup</div>`}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Pilih FG tujuan dan isi target plan untuk lihat kebutuhan material.</td></tr>`;
+
+  const detailCard = document.getElementById('schedule-detail-card');
+  const detailModal = document.getElementById('schedule-detail-modal');
+  const detailMeta = document.getElementById('schedule-detail-meta');
+  const detailTable = document.getElementById('tbl-schedule-detail-rm');
+  const active = rows.find(r => r.schedule_no === selectedScheduleNo) || rows[0];
+  if(active && detailModal.classList.contains('open')){
+    detailCard.classList.add('active');
+    const activeComponents = getScheduleComponents(active);
+    detailMeta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">No Jadwal</div><div class="mini-v">${active.schedule_no}</div></div>
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${active.schedule_date}</div></div>
+      <div class="agenda-card"><div class="mini-k">FG</div><div class="mini-v">${active.fg_code}<div class="muted-line">${getManufacturingFgName(active.fg_code, active.fg_name)}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">BOM</div><div class="mini-v">${active.bom_code}</div></div>
+      <div class="agenda-card"><div class="mini-k">Target Qty</div><div class="mini-v">${active.plan_qty}</div></div>
+      <div class="agenda-card"><div class="mini-k">Status</div><div class="mini-v">${badge(active.status)} ${badge(scheduleRmStatus(active).label)}</div></div>
+    `;
+    detailTable.innerHTML = activeComponents.length ? activeComponents.map(c => `
+      <tr>
+        <td><span class="mono">${c.rm_code}</span><br>${c.rm_name}</td>
+        <td class="mono">${c.qty_bom}</td>
+        <td class="mono">${c.uom_code}</td>
+        <td class="mono">${c.need_qty}</td>
+        <td class="mono ${c.made_qty < c.need_qty ? 'qty-alert' : ''}">${c.made_qty}</td>
+        <td class="mono">${c.kdgn_qty}</td>
+        <td>${c.made_qty < c.need_qty && c.total_qty < c.need_qty
+          ? `<span class="mono">Need Supply</span><div class="muted-line">Total kurang ${Math.max(0, c.need_qty - c.total_qty)}</div>`
+          : c.made_qty < c.need_qty
+            ? `<span class="mono">Need TF ${c.transfer_need}</span><div class="muted-line">Avail ${RM_WH.warehouse_code} -> ${PROD_WH.warehouse_code}</div>`
+            : c.kdgn_qty < c.need_qty
+              ? `<span class="mono">Ready</span><div class="muted-line">Avail MADE cukup, KDGN tipis</div>`
+              : `<span class="mono">Safe</span><div class="muted-line">Avail aman, buffer cukup</div>`}</td>
+      </tr>
+    `).join('') : `<tr><td colspan="7" class="empty">Belum ada komponen BOM untuk jadwal ini.</td></tr>`;
+  }else{
+    detailCard.classList.remove('active');
+    detailMeta.innerHTML = '';
+    detailTable.innerHTML = '';
+  }
+}
+
+function toggleScheduleViewMode(){
+  scheduleViewMode = scheduleViewMode === 'AGENDA' ? 'RECAP' : 'AGENDA';
+  renderSchedule();
+}
+
+function toggleManufacturingDetail(show){
+  const modal = document.getElementById('mfg-detail-modal');
+  if(!modal) return;
+  modal.classList.toggle('open', !!show);
+}
+
+function openManufacturingDetail(kind, refNo){
+  const kicker = document.getElementById('mfg-detail-kicker');
+  const title = document.getElementById('mfg-detail-title');
+  const meta = document.getElementById('mfg-detail-meta');
+  const tableCard = document.getElementById('mfg-detail-table-card');
+  const thead = document.getElementById('mfg-detail-thead');
+  const tbody = document.getElementById('mfg-detail-tbody');
+  if(!kicker || !title || !meta || !tableCard || !thead || !tbody) return;
+
+  let headHtml = '';
+  let bodyHtml = '';
+  let showTable = false;
+
+  if(kind === 'wo'){
+    const row = WOS.find(x => x.wo_no === refNo);
+    if(!row) return;
+    selectedWoNo = refNo;
+    kicker.textContent = 'Detail Perintah';
+    title.textContent = row.wo_no;
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.wo_date}</div></div>
+      <div class="agenda-card"><div class="mini-k">FG</div><div class="mini-v">${row.fg_code}<div class="muted-line">${getManufacturingFgName(row.fg_code, row.fg_name)}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">Target</div><div class="mini-v">${row.target_qty} pcs</div></div>
+      <div class="agenda-card"><div class="mini-k">Status</div><div class="mini-v">${badge(row.status)}</div></div>
+      <div class="agenda-card"><div class="mini-k">Ref Jadwal</div><div class="mini-v">${row.source_schedule_no || '-'}</div></div>
+    `;
+  } else if(kind === 'prod'){
+    const row = PRODUCTIONS.find(x => x.prod_no === refNo);
+    if(!row) return;
+    selectedProdNo = refNo;
+    const wo = WOS.find(x => x.wo_no === row.wo_no);
+    const schedule = wo ? SCHEDULE_ROWS.find(x => x.schedule_no === wo.source_schedule_no) : null;
+    const components = schedule ? getScheduleComponents(schedule) : [];
+    kicker.textContent = 'Detail Hasil';
+    title.textContent = row.prod_no;
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.prod_date}</div></div>
+      <div class="agenda-card"><div class="mini-k">FG</div><div class="mini-v">${row.fg_code}<div class="muted-line">${getManufacturingFgName(row.fg_code, row.fg_name)}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">Hasil FG</div><div class="mini-v">${row.fg_result} pcs</div></div>
+      <div class="agenda-card"><div class="mini-k">Status</div><div class="mini-v">${badge(row.status)}</div></div>
+      <div class="agenda-card"><div class="mini-k">Ref Perintah</div><div class="mini-v">${row.wo_no}</div></div>
+    `;
+    showTable = true;
+    headHtml = `<tr><th>RM</th><th>Need</th><th>KDGN</th><th>MADE</th><th>Status</th></tr>`;
+    bodyHtml = components.length ? components.map(c => `
+      <tr>
+        <td><span class="mono">${c.rm_code}</span><br>${c.rm_name}</td>
+        <td class="mono">${c.need_qty}</td>
+        <td class="mono">${c.kdgn_qty}</td>
+        <td class="mono">${c.made_qty}</td>
+        <td>${badge(c.total_qty < c.need_qty ? 'Short RM' : c.made_qty < c.need_qty ? 'Need Transfer' : 'Ready')}</td>
+      </tr>
+    `).join('') : `<tr><td colspan="5" class="empty">Belum ada detail pemakaian RM.</td></tr>`;
+  } else if(kind === 'qc'){
+    const row = QC_ROWS.find(x => x.qc_no === refNo);
+    if(!row) return;
+    selectedQcNo = refNo;
+    kicker.textContent = 'Detail QC FG';
+    title.textContent = row.qc_no;
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">No Hasil</div><div class="mini-v">${row.prod_no}</div></div>
+      <div class="agenda-card"><div class="mini-k">FG</div><div class="mini-v">${row.fg_code}<div class="muted-line">${getManufacturingFgName(row.fg_code, row.fg_name)}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">Accepted</div><div class="mini-v">${row.accepted}</div></div>
+      <div class="agenda-card"><div class="mini-k">Reject</div><div class="mini-v">${row.reject}</div></div>
+      <div class="agenda-card"><div class="mini-k">Status</div><div class="mini-v">${badge(row.status)}</div></div>
+      <div class="agenda-card"><div class="mini-k">Catatan</div><div class="mini-v">${row.note || '-'}</div></div>
+    `;
+  } else if(kind === 'wastefg'){
+    const row = WASTE_ROWS.find(x => x.waste_no === refNo && x.item_kind === 'FG');
+    if(!row) return;
+    selectedWasteFgNo = refNo;
+    kicker.textContent = 'Detail Waste FG';
+    title.textContent = row.waste_no;
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.waste_date}</div></div>
+      <div class="agenda-card"><div class="mini-k">FG</div><div class="mini-v">${row.item_code}<div class="muted-line">${row.item_name}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">Qty Reject</div><div class="mini-v">${row.qty}</div></div>
+      <div class="agenda-card"><div class="mini-k">Status</div><div class="mini-v">${badge(row.status)}</div></div>
+      <div class="agenda-card"><div class="mini-k">Alasan</div><div class="mini-v">${row.reason || '-'}</div></div>
+    `;
+  } else if(kind === 'wasterm'){
+    const row = getRmWasteRows().find(x => x.waste_no === refNo);
+    if(!row) return;
+    selectedWasteRmNo = refNo;
+    kicker.textContent = 'Detail Waste RM';
+    title.textContent = row.waste_no;
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.waste_date}</div></div>
+      <div class="agenda-card"><div class="mini-k">RM</div><div class="mini-v">${row.rm_code}<div class="muted-line">${row.rm_name}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">UOM</div><div class="mini-v">${row.uom_code || inferManufacturingBomUom(row.rm_code)}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">Qty Waste</div><div class="mini-v">${row.qty}</div></div>
+      <div class="agenda-card"><div class="mini-k">Status</div><div class="mini-v">${badge(row.status)}</div></div>
+      <div class="agenda-card"><div class="mini-k">Alasan</div><div class="mini-v">${row.reason || '-'}</div></div>
+    `;
+  } else if(kind === 'rmreceipt'){
+    const rows = getRmInboundRows().filter(x => x.receipt_no === refNo);
+    const row = rows[0];
+    if(!row) return;
+    kicker.textContent = 'Detail Penerimaan RM';
+    title.textContent = row.receipt_no || '-';
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.receipt_date || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">Gudang</div><div class="mini-v">${row.warehouse_code || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">Sumber</div><div class="mini-v">${row.source_type || 'Manual Receipt'}${row.source_ref ? `<div class="muted-line">${row.source_ref}</div>` : ''}</div></div>
+      <div class="agenda-card"><div class="mini-k">Total Item</div><div class="mini-v">${rows.length}</div></div>
+      <div class="agenda-card"><div class="mini-k">Total Qty</div><div class="mini-v">${rows.reduce((sum, x) => sum + Number(x.qty || 0), 0)}</div></div>
+      <div class="agenda-card"><div class="mini-k">Status</div><div class="mini-v">${badge(row.status || 'Posted')}</div></div>
+      <div class="span-4">
+        <table class="mini-table">
+          <thead><tr><th>RM</th><th>UOM</th><th>Qty</th></tr></thead>
+          <tbody>
+            ${rows.map(x => `<tr><td><span class="mono">${x.item_code}</span><br>${x.item_name || '-'}</td><td class="mono">${x.uom_code || inferManufacturingBomUom(x.item_code)}</td><td class="mono">${x.qty || 0}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } else if(kind === 'rmtransfer'){
+    const rows = RM_TRANSFER_ROWS.filter(x => x.transfer_no === refNo);
+    const row = rows[0];
+    if(!row) return;
+    kicker.textContent = 'Detail Transfer RM';
+    title.textContent = row.transfer_no;
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.transfer_date || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">Dari</div><div class="mini-v">${row.from_warehouse || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">Ke</div><div class="mini-v">${row.to_warehouse || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">Total Item</div><div class="mini-v">${rows.length}</div></div>
+      <div class="agenda-card"><div class="mini-k">Total Qty</div><div class="mini-v">${rows.reduce((sum, x) => sum + Number(x.qty || 0), 0)}</div></div>
+      <div class="agenda-card"><div class="mini-k">Keterangan</div><div class="mini-v">${row.note || '-'}</div></div>
+      <div class="span-4">
+        <table class="mini-table">
+          <thead><tr><th>RM</th><th>UOM</th><th>Qty</th></tr></thead>
+          <tbody>
+            ${rows.map(x => `<tr><td><span class="mono">${x.rm_code}</span><br>${x.rm_name || '-'}</td><td class="mono">${(RM.find(r => r.rm_code === x.rm_code) || {}).uom_code || inferManufacturingBomUom(x.rm_code)}</td><td class="mono">${x.qty || 0}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } else if(kind === 'rmusage'){
+    const [prodNo, rmCode] = String(refNo || '').split('|');
+    const row = getProductionUsageRows().find(x => x.prod_no === prodNo && x.rm_code === rmCode);
+    if(!row) return;
+    kicker.textContent = 'Detail Pemakaian RM';
+    title.textContent = `${row.prod_no} / ${row.rm_code}`;
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.prod_date || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">No Hasil</div><div class="mini-v">${row.prod_no || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">No Perintah</div><div class="mini-v">${row.ref || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">RM</div><div class="mini-v">${row.rm_code}<div class="muted-line">${row.rm_name || '-'}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">Gudang</div><div class="mini-v">${row.warehouse_code || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">Qty Pakai</div><div class="mini-v">${row.qty || 0} ${inferManufacturingBomUom(row.rm_code)}</div></div>
+    `;
+  } else if(kind === 'rmcard'){
+    let row;
+    try{
+      row = JSON.parse(decodeURIComponent(String(refNo || '')));
+    }catch(_err){
+      row = null;
+    }
+    if(!row) return;
+    kicker.textContent = 'Detail Pergerakan Stok RM';
+    title.textContent = row.doc || '-';
+    meta.innerHTML = `
+      <div class="agenda-card"><div class="mini-k">Tanggal</div><div class="mini-v">${row.date || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">RM</div><div class="mini-v">${row.rm_code || '-'}<div class="muted-line">${row.rm_name || '-'}</div></div></div>
+      <div class="agenda-card"><div class="mini-k">Gudang</div><div class="mini-v">${row.warehouse_code || '-'}</div></div>
+      <div class="agenda-card"><div class="mini-k">Masuk</div><div class="mini-v ${Number(row.in_qty || 0) > 0 ? 'num-pos' : ''}">${row.in_qty || 0}</div></div>
+      <div class="agenda-card"><div class="mini-k">Keluar</div><div class="mini-v ${Number(row.out_qty || 0) > 0 ? 'num-neg' : ''}">${row.out_qty || 0}</div></div>
+      <div class="agenda-card"><div class="mini-k">Referensi</div><div class="mini-v">${row.ref || '-'}</div></div>
+    `;
+  } else {
+    return;
+  }
+
+  thead.innerHTML = headHtml;
+  tbody.innerHTML = bodyHtml;
+  tableCard.style.display = showTable ? 'block' : 'none';
+  toggleManufacturingDetail(true);
+}
+
+function shiftScheduleAgenda(step){
+  scheduleAgendaIndex += step;
+  animateAgenda('schedule-agenda', step);
+  renderSchedule();
+}
+
+function shiftWoAgenda(step){
+  woAgendaIndex += step;
+  animateAgenda('wo-agenda', step);
+  renderWo();
+}
+
+function shiftProdAgenda(step){
+  prodAgendaIndex += step;
+  animateAgenda('prod-agenda', step);
+  renderProd();
+}
+
+function getAgendaStartIndex(rows, dateKey){
+  const dates = [...new Set(rows.map(x => String(x[dateKey] || '').slice(0,10)).filter(Boolean))].sort().reverse();
+  if(!dates.length) return 0;
+  let idx = dates.findIndex(d => d === APP_TODAY);
+  if(idx < 0){
+    idx = dates.findIndex(d => d < APP_TODAY);
+    if(idx < 0) idx = 0;
+    return Math.max(0, Math.min(Math.max(0, dates.length - 3), idx));
+  }
+  return Math.max(0, Math.min(Math.max(0, dates.length - 3), idx - 1));
+}
+
+function animateAgenda(elId, direction){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.classList.remove('agenda-anim-prev', 'agenda-anim-next');
+  void el.offsetWidth;
+  el.classList.add(direction < 0 ? 'agenda-anim-prev' : 'agenda-anim-next');
+}
+
+function addDays(dateStr, offset){
+  const dt = new Date(`${dateStr}T00:00:00`);
+  dt.setDate(dt.getDate() + offset);
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const d = String(dt.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function buildAgendaWindow(offset){
+  return [addDays(APP_TODAY, offset - 1), addDays(APP_TODAY, offset), addDays(APP_TODAY, offset + 1)];
+}
+
+function selectSchedule(scheduleNo){
+  selectedScheduleNo = scheduleNo;
+  renderSchedule();
+}
+
+function postSchedule(scheduleNo){
+  const row = SCHEDULE_ROWS.find(x => x.schedule_no === scheduleNo);
+  if(!row) return;
+  row.status = 'Posted';
+  saveScheduleRows();
+  renderSchedule();
+  renderRmStock();
+  toast(`${scheduleNo} dipost.`);
+}
+
+function unpostSchedule(scheduleNo){
+  const row = SCHEDULE_ROWS.find(x => x.schedule_no === scheduleNo);
+  if(!row) return;
+  if(row.status !== 'Posted'){
+    return toast('Hanya jadwal Posted yang bisa di-unpost.');
+  }
+  row.status = 'Draft';
+  saveScheduleRows();
+  renderSchedule();
+  renderRmStock();
+  toast(`${scheduleNo} kembali ke Draft.`);
+}
+
+function releaseScheduleToWo(scheduleNo){
+  const schedule = SCHEDULE_ROWS.find(x => x.schedule_no === scheduleNo);
+  if(!schedule) return;
+  if(schedule.status === 'Released'){
+    toast('Jadwal ini sudah dibuatkan WO.');
+    return;
+  }
+  if(schedule.status !== 'Posted'){
+    toast('Jadwal harus berstatus Posted sebelum dibuatkan WO.');
+    return;
+  }
+  const seq = String(WOS.length + 1).padStart(3, '0');
+  const newWoNo = `WO-202603-${seq}`;
+  WOS = [{
+    wo_no: newWoNo,
+    wo_date: schedule.schedule_date,
+    fg_code: schedule.fg_code,
+    fg_name: getManufacturingFgName(schedule.fg_code, schedule.fg_name),
+    rm_wh: PROD_WH.warehouse_code,
+    fg_wh: FG_WH.warehouse_code,
+    target_qty: schedule.plan_qty,
+    status: 'Released',
+    source_schedule_no: schedule.schedule_no
+  }].concat(WOS);
+  schedule.status = 'Released';
+  selectedWoNo = newWoNo;
+  woViewMode = 'AGENDA';
+  saveScheduleRows();
+  saveWos();
+  renderKpis();
+  renderSchedule();
+  renderWo();
+  toast(`Perintah produksi untuk ${schedule.schedule_no} berhasil dibuat.`);
+}
+
+function selectWo(woNo){
+  selectedWoNo = woNo;
+  renderWo();
+}
+
+function startProductionFromWo(woNo){
+  const wo = WOS.find(x => x.wo_no === woNo);
+  if(!wo || wo.status !== 'Released') return;
+  const schedule = SCHEDULE_ROWS.find(x => x.schedule_no === wo.source_schedule_no);
+  const componentCount = schedule ? getScheduleComponents(schedule).length : 0;
+  const seq = String(PRODUCTIONS.length + 1).padStart(3,'0');
+  const newProdNo = `PROD-202603-${seq}`;
+  PRODUCTIONS = [{
+    prod_no: newProdNo,
+    wo_no: wo.wo_no,
+    fg_code: wo.fg_code,
+    fg_name: getManufacturingFgName(wo.fg_code, wo.fg_name),
+    rm_used: componentCount,
+    fg_result: wo.target_qty,
+    prod_date: wo.wo_date,
+    status: 'In Progress'
+  }].concat(PRODUCTIONS);
+  wo.status = 'In Progress';
+  selectedProdNo = newProdNo;
+  prodViewMode = 'AGENDA';
+  saveWos();
+  saveProductions();
+  renderKpis();
+  renderWo();
+  renderProd();
+  toast(`Produksi dari ${wo.wo_no} dimulai.`);
+}
+
+function selectProd(prodNo){
+  selectedProdNo = prodNo;
+  renderProd();
+}
+
+function completeProduction(prodNo){
+  const prod = PRODUCTIONS.find(x => x.prod_no === prodNo);
+  if(!prod) return;
+  prod.status = 'Done';
+  const seq = String(QC_ROWS.length + 1).padStart(3,'0');
+  QC_ROWS = [{
+    qc_no: `QC-202603-${seq}`,
+    prod_no: prod.prod_no,
+    fg_code: prod.fg_code,
+    accepted: Math.max(0, Number(prod.fg_result || 0) - 1),
+    reject: Number(prod.fg_result || 0) > 0 ? 1 : 0,
+    note: 'Auto draft dari hasil produksi',
+    status: 'Review'
+  }].concat(QC_ROWS);
+  saveProductions();
+  saveQcRows();
+  renderProd();
+  renderQc();
+  toast(`${prod.prod_no} diselesaikan.`);
+}
+
+function selectQc(qcNo){
+  selectedQcNo = qcNo;
+  renderQc();
+}
+
+function toggleQcFinalModal(show, qcNo = ''){
+  const modal = document.getElementById('qc-final-modal');
+  if(!modal) return;
+  if(qcNo) editingQcNo = qcNo;
+  if(show){
+    const qc = QC_ROWS.find(x => x.qc_no === editingQcNo);
+    if(!qc) return;
+    const prod = PRODUCTIONS.find(x => x.prod_no === qc.prod_no);
+    const checkedQty = Number(prod?.fg_result || (Number(qc.accepted || 0) + Number(qc.reject || 0)));
+    document.getElementById('qc-final-title').textContent = qc.qc_no;
+    document.getElementById('qc-final-no').textContent = qc.qc_no;
+    document.getElementById('qc-final-prod').textContent = qc.prod_no || '-';
+    document.getElementById('qc-final-fg').textContent = `${qc.fg_code} - ${getManufacturingFgName(qc.fg_code, qc.fg_name)}`;
+    document.getElementById('qc-final-checked').textContent = checkedQty;
+    document.getElementById('qc-final-accepted').value = qc.accepted ?? Math.max(0, checkedQty - Number(qc.reject || 0));
+    document.getElementById('qc-final-reject').value = qc.reject ?? 0;
+    document.getElementById('qc-final-note').value = qc.note || '';
+    modal.classList.add('open');
+  } else {
+    modal.classList.remove('open');
+    editingQcNo = '';
+  }
+}
+
+function syncQcFinalFromAccepted(){
+  const checked = Number(document.getElementById('qc-final-checked')?.textContent || 0);
+  const accepted = Math.max(0, Number(document.getElementById('qc-final-accepted')?.value || 0));
+  const reject = Math.max(0, checked - accepted);
+  const rejectInput = document.getElementById('qc-final-reject');
+  if(rejectInput) rejectInput.value = reject;
+}
+
+function syncQcFinalFromReject(){
+  const checked = Number(document.getElementById('qc-final-checked')?.textContent || 0);
+  const reject = Math.max(0, Number(document.getElementById('qc-final-reject')?.value || 0));
+  const accepted = Math.max(0, checked - reject);
+  const acceptedInput = document.getElementById('qc-final-accepted');
+  if(acceptedInput) acceptedInput.value = accepted;
+}
+
+function submitQcFinal(){
+  if(!editingQcNo) return;
+  const qc = QC_ROWS.find(x => x.qc_no === editingQcNo);
+  if(!qc) return;
+  const checkedQty = Number(document.getElementById('qc-final-checked')?.textContent || 0);
+  const accepted = Math.max(0, Number(document.getElementById('qc-final-accepted')?.value || 0));
+  const reject = Math.max(0, Number(document.getElementById('qc-final-reject')?.value || 0));
+  if(accepted + reject !== checkedQty){
+    return toast('Accepted dan reject harus sama dengan qty diperiksa.');
+  }
+  qc.accepted = accepted;
+  qc.reject = reject;
+  qc.note = String(document.getElementById('qc-final-note')?.value || '').trim();
+  saveQcRows();
+  finalizeQc(qc.qc_no);
+}
+
+function finalizeQc(qcNo){
+  const qc = QC_ROWS.find(x => x.qc_no === qcNo);
+  if(!qc) return;
+  qc.status = 'Done';
+  saveQcRows();
+  const fgRef = FG.find(x => x.fg_code === qc.fg_code) || { fg_code: qc.fg_code, fg_name: qc.fg_code };
+  if(RUNTIME && Number(qc.accepted || 0) > 0){
+    RUNTIME.append('gr_fg', {
+      gr_no: `MFG-${qc.qc_no}`,
+      gr_date: '2026-03-22',
+      fg_code: fgRef.fg_code,
+      fg_name: fgRef.fg_name || qc.fg_code,
+      warehouse_code: FG_WH.warehouse_code,
+      qty: Number(qc.accepted || 0),
+      source: `Manufacturing / QC FG ${qc.qc_no}`,
+      status: 'Posted'
+    });
+  }
+  if(Number(qc.reject || 0) > 0){
+    const seq = String(WASTE_ROWS.length + 1).padStart(3,'0');
+    WASTE_ROWS = [{
+      waste_no: `WST-202603-${seq}`,
+      waste_date: '2026-03-22',
+      item_code: qc.fg_code,
+      item_name: (FG.find(x => x.fg_code === qc.fg_code) || {}).fg_name || qc.fg_code,
+      item_kind: 'FG',
+      qty: qc.reject,
+      reason: `Reject dari ${qc.qc_no}`,
+      status: 'Done'
+    }].concat(WASTE_ROWS);
+    saveWasteRows();
+  }
+  renderQc();
+  renderWasteFg();
+  renderWasteRm();
+  toggleQcFinalModal(false);
+  toast(`${qc.qc_no} difinalisasi.`);
+}
+
+function closeWo(woNo){
+  const wo = WOS.find(x => x.wo_no === woNo);
+  if(!wo) return;
+  wo.status = 'Closed';
+  saveWos();
+  renderKpis();
+  renderWo();
+  toast(`${wo.wo_no} ditutup.`);
+}
+
+function selectBom(bomCode){
+  selectedBomCode = bomCode;
+  renderBom();
+}
+
+function renderWo(){
+  syncManufacturingFgNames();
+  WOS = WOS.map(row => row.status === 'Draft' ? { ...row, status: 'Released' } : row);
+  document.getElementById('wo-view-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip" title="${woViewMode === 'AGENDA' ? 'Agenda Perintah' : 'Rekap Perintah'}" aria-label="${woViewMode === 'AGENDA' ? 'Agenda Perintah' : 'Rekap Perintah'}" onclick="toggleWoViewMode()">${woViewMode === 'AGENDA' ? '☷' : '≣'}</button>
+    </div>
+  `;
+  document.getElementById('wo-pane-agenda').classList.toggle('active', woViewMode === 'AGENDA');
+  document.getElementById('wo-pane-recap').classList.toggle('active', woViewMode === 'RECAP');
+  const agendaRows = [...WOS].sort((a,b) => String(b.wo_date || '').localeCompare(String(a.wo_date || '')) || String(b.wo_no || '').localeCompare(String(a.wo_no || '')));
+  let rows = bySearch(WOS, ['wo_no','fg_code','fg_name'], document.getElementById('search-wo').value);
+  const status = document.getElementById('filter-wo-status').value;
+  const dateFrom = document.getElementById('filter-wo-date-from').value;
+  const dateTo = document.getElementById('filter-wo-date-to').value;
+  if(status) rows = rows.filter(x => x.status === status);
+  if(dateFrom) rows = rows.filter(x => String(x.wo_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.wo_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.wo_date || '').localeCompare(String(a.wo_date || '')) || String(b.wo_no || '').localeCompare(String(a.wo_no || '')));
+  if(!selectedWoNo && rows[0]) selectedWoNo = rows[0].wo_no;
+  if(selectedWoNo && !rows.some(r => r.wo_no === selectedWoNo)) selectedWoNo = rows[0]?.wo_no || '';
+  const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const byDate = agendaRows.reduce((acc, row) => {
+    const key = String(row.wo_date || '').slice(0,10);
+    acc[key] = acc[key] || [];
+    acc[key].push(row);
+    return acc;
+  }, {});
+  const visibleDates = buildAgendaWindow(woAgendaIndex);
+  document.getElementById('wo-agenda-title').textContent = 'Agenda 3 Hari';
+  document.getElementById('wo-agenda-summary').textContent = `${visibleDates[0]} s/d ${visibleDates[2]}`;
+  document.getElementById('wo-agenda').innerHTML = visibleDates.map(ds => {
+    const dt = new Date(`${ds}T00:00:00`);
+    const items = byDate[ds] || [];
+    return `
+      <div class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="day-title">${dayNames[dt.getDay()]}</div>
+            <div class="day-sub">${ds}</div>
+          </div>
+          <div class="badge b-info">${items.length} perintah</div>
+        </div>
+        <div class="day-items">
+          ${items.map(item => `<div class="calendar-chip">
+            <div class="calendar-chip-head">
+              <div class="mono">${item.wo_no}</div>
+              ${item.status === 'Released' ? `<button class="btn btn-ghost" type="button" onclick="event.stopPropagation();startProductionFromWo('${item.wo_no}')">Mulai</button>` : item.status === 'In Progress' ? `<button class="btn btn-ghost" type="button" onclick="event.stopPropagation();closeWo('${item.wo_no}')">Tutup</button>` : ''}
+            </div>
+            <div><strong>${item.fg_code}</strong></div>
+            <div>${getManufacturingFgName(item.fg_code, item.fg_name)}</div>
+            <div class="muted-line">Target ${item.target_qty} pcs</div>
+            <div class="muted-line">Jadwal ${item.source_schedule_no || '-'}</div>
+            <div class="muted-line">${item.status}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('tbl-wo').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.wo_no === selectedWoNo ? 'sel-row' : ''}">
+      <td class="mono">${r.wo_no}</td>
+      <td>${r.wo_date}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${getManufacturingFgName(r.fg_code, r.fg_name)}</td>
+      <td class="mono">${r.source_schedule_no || '-'}</td>
+      <td><span class="mono">${r.rm_wh}</span><div class="muted-line">${r.fg_wh}</div></td>
+      <td>${r.target_qty}</td>
+      <td>${badge(r.status)}</td>
+      <td>
+        <button class="btn btn-ghost" onclick="openManufacturingDetail('wo','${r.wo_no}')">Detail</button>
+        ${r.status === 'Released' ? `<button class="btn btn-ghost" onclick="startProductionFromWo('${r.wo_no}')">Mulai Produksi</button>` : ''}
+        ${r.status === 'In Progress' ? `<button class="btn btn-ghost" onclick="closeWo('${r.wo_no}')">Tutup Perintah</button>` : ''}
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Tidak ada data perintah produksi.</td></tr>`;
+}
+
+function toggleWoViewMode(){
+  woViewMode = woViewMode === 'AGENDA' ? 'RECAP' : 'AGENDA';
+  renderWo();
+}
+
+function renderProd(){
+  syncManufacturingFgNames();
+  const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  document.getElementById('prod-view-tabs').innerHTML = `
+    <div class="stage-chip-group">
+      <button class="stage-chip" title="${prodViewMode === 'AGENDA' ? 'Agenda Hasil' : 'Rekap Hasil'}" aria-label="${prodViewMode === 'AGENDA' ? 'Agenda Hasil' : 'Rekap Hasil'}" onclick="toggleProdViewMode()">${prodViewMode === 'AGENDA' ? '☷' : '≣'}</button>
+    </div>
+  `;
+  document.getElementById('prod-pane-agenda').classList.toggle('active', prodViewMode === 'AGENDA');
+  document.getElementById('prod-pane-recap').classList.toggle('active', prodViewMode === 'RECAP');
+  const agendaRows = [...PRODUCTIONS].sort((a,b) => String(b.prod_date || '').localeCompare(String(a.prod_date || '')) || String(b.prod_no || '').localeCompare(String(a.prod_no || '')));
+  let rows = bySearch(PRODUCTIONS, ['prod_no','wo_no','fg_code','fg_name'], document.getElementById('search-prod').value);
+  const status = document.getElementById('filter-prod-status').value;
+  const dateFrom = document.getElementById('filter-prod-date-from').value;
+  const dateTo = document.getElementById('filter-prod-date-to').value;
+  if(status) rows = rows.filter(x => x.status === status);
+  if(dateFrom) rows = rows.filter(x => String(x.prod_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.prod_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.prod_date || '').localeCompare(String(a.prod_date || '')) || String(b.prod_no || '').localeCompare(String(a.prod_no || '')));
+  if(!selectedProdNo && rows[0]) selectedProdNo = rows[0].prod_no;
+  if(selectedProdNo && !rows.some(r => r.prod_no === selectedProdNo)) selectedProdNo = rows[0]?.prod_no || '';
+  const prodByDate = agendaRows.reduce((acc, row) => {
+    const key = String(row.prod_date || '').slice(0,10);
+    acc[key] = acc[key] || [];
+    acc[key].push(row);
+    return acc;
+  }, {});
+  const visibleProdDates = buildAgendaWindow(prodAgendaIndex);
+  document.getElementById('prod-agenda-title').textContent = 'Agenda 3 Hari';
+  document.getElementById('prod-agenda-summary').textContent = `${visibleProdDates[0]} s/d ${visibleProdDates[2]}`;
+  document.getElementById('prod-agenda').innerHTML = visibleProdDates.map(ds => {
+    const dt = new Date(`${ds}T00:00:00`);
+    const items = prodByDate[ds] || [];
+    return `
+      <div class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="day-title">${dayNames[dt.getDay()]}</div>
+            <div class="day-sub">${ds}</div>
+          </div>
+          <div class="badge b-info">${items.length} hasil</div>
+        </div>
+        <div class="day-items">
+          ${items.map(item => `<div class="calendar-chip">
+            <div class="calendar-chip-head">
+              <div class="mono">${item.prod_no}</div>
+              ${item.status === 'In Progress' ? `<button class="btn btn-ghost" type="button" onclick="event.stopPropagation();completeProduction('${item.prod_no}')">Selesai</button>` : ''}
+            </div>
+            <div><strong>${item.fg_code}</strong></div>
+            <div>${getManufacturingFgName(item.fg_code, item.fg_name)}</div>
+            <div class="muted-line">Hasil ${item.fg_result} pcs</div>
+            <div class="muted-line">Perintah ${item.wo_no}</div>
+            <div class="muted-line">${item.status}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('tbl-prod').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.prod_no === selectedProdNo ? 'sel-row' : ''}">
+      <td class="mono">${r.prod_no}</td>
+      <td class="mono">${r.wo_no}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${getManufacturingFgName(r.fg_code, r.fg_name)}</td>
+      <td>${r.rm_used} item</td>
+      <td>${r.fg_result}</td>
+      <td>${r.prod_date}</td>
+      <td>${badge(r.status)}</td>
+      <td>
+        <button class="btn btn-ghost" onclick="openManufacturingDetail('prod','${r.prod_no}')">Detail</button>
+        ${r.status === 'In Progress' ? `<button class="btn btn-ghost" onclick="completeProduction('${r.prod_no}')">Selesai</button>` : ''}
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Tidak ada data hasil produksi.</td></tr>`;
+  const active = rows.find(r => r.prod_no === selectedProdNo) || rows[0];
+  const wo = active ? WOS.find(x => x.wo_no === active.wo_no) : null;
+  const schedule = wo ? SCHEDULE_ROWS.find(x => x.schedule_no === wo.source_schedule_no) : null;
+  const components = schedule ? getScheduleComponents(schedule) : [];
+  document.getElementById('tbl-prod-rm').innerHTML = components.length ? components.map(c => `
+    <tr>
+      <td><span class="mono">${c.rm_code}</span><br>${c.rm_name}</td>
+      <td class="mono">${c.need_qty}</td>
+      <td class="mono">${c.kdgn_qty}</td>
+      <td class="mono">${c.made_qty}</td>
+      <td>${badge(c.total_qty < c.need_qty ? 'Short RM' : c.made_qty < c.need_qty ? 'Need Transfer' : 'Ready')}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="5" class="empty">Belum ada pemakaian RM.</td></tr>`;
+}
+
+function toggleProdViewMode(){
+  prodViewMode = prodViewMode === 'AGENDA' ? 'RECAP' : 'AGENDA';
+  renderProd();
+}
+
+function renderQc(){
+  syncManufacturingFgNames();
+  let rows = bySearch(QC_ROWS, ['qc_no','prod_no','fg_code','note'], document.getElementById('search-qc').value);
+  const dateFrom = document.getElementById('filter-qc-date-from').value;
+  const dateTo = document.getElementById('filter-qc-date-to').value;
+  const status = document.getElementById('filter-qc-status')?.value || '';
+  rows = rows.map(r => {
+    const prod = PRODUCTIONS.find(p => p.prod_no === r.prod_no);
+    return { ...r, qc_date: prod?.prod_date || '' };
+  });
+  if(dateFrom) rows = rows.filter(x => String(x.qc_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.qc_date || '') <= dateTo);
+  if(status) rows = rows.filter(x => x.status === status);
+  rows = rows.sort((a,b) => String(b.qc_date || '').localeCompare(String(a.qc_date || '')) || String(b.qc_no || '').localeCompare(String(a.qc_no || '')));
+  if(!selectedQcNo && rows[0]) selectedQcNo = rows[0].qc_no;
+  if(selectedQcNo && !rows.some(r => r.qc_no === selectedQcNo)) selectedQcNo = rows[0]?.qc_no || '';
+  document.getElementById('tbl-qc').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.qc_no === selectedQcNo ? 'sel-row' : ''}">
+      <td class="mono">${r.qc_no}</td>
+      <td>${r.qc_date || '-'}</td>
+      <td><span class="mono">${r.fg_code}</span><br>${getManufacturingFgName(r.fg_code, r.fg_name)}</td>
+      <td>${Number(r.accepted || 0) + Number(r.reject || 0)}</td>
+      <td>${r.accepted}</td>
+      <td>${r.reject}</td>
+      <td>${badge(r.status)}</td>
+      <td>
+        <button class="btn btn-ghost" onclick="openManufacturingDetail('qc','${r.qc_no}')">Detail</button>
+        ${r.status === 'Review' ? `<button class="btn btn-primary" onclick="toggleQcFinalModal(true,'${r.qc_no}')">Final QC</button>` : ''}
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Tidak ada data QC.</td></tr>`;
+}
+
+function renderWasteFg(){
+  syncManufacturingFgNames();
+  let rows = bySearch(WASTE_ROWS.filter(r => r.item_kind === 'FG'), ['waste_no','item_code','item_name','reason'], document.getElementById('search-wastefg').value);
+  const dateFrom = document.getElementById('filter-wastefg-date-from').value;
+  const dateTo = document.getElementById('filter-wastefg-date-to').value;
+  if(dateFrom) rows = rows.filter(x => String(x.waste_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.waste_date || '') <= dateTo);
+  rows = rows.sort((a,b) => String(b.waste_date || '').localeCompare(String(a.waste_date || '')) || String(b.waste_no || '').localeCompare(String(a.waste_no || '')));
+  if(!selectedWasteFgNo && rows[0]) selectedWasteFgNo = rows[0].waste_no;
+  if(selectedWasteFgNo && !rows.some(r => r.waste_no === selectedWasteFgNo)) selectedWasteFgNo = rows[0]?.waste_no || '';
+  document.getElementById('wastefg-agenda').innerHTML = `
+    <div class="agenda-card"><div class="mini-k">Total Waste FG</div><div class="mini-v">${rows.length}</div></div>
+    <div class="agenda-card"><div class="mini-k">Qty Reject</div><div class="mini-v">${rows.reduce((sum, x) => sum + Number(x.qty || 0), 0)}</div></div>
+    <div class="agenda-card"><div class="mini-k">Done</div><div class="mini-v">${rows.filter(x => x.status === 'Done').length}</div></div>
+    <div class="agenda-card"><div class="mini-k">FG Aktif</div><div class="mini-v">${new Set(rows.map(x => x.item_code)).size}</div></div>
+    <div class="agenda-card"><div class="mini-k">Ref QC</div><div class="mini-v">${rows.filter(x => String(x.reason || '').includes('QC')).length}</div></div>
+  `;
+  document.getElementById('tbl-wastefg').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.waste_no === selectedWasteFgNo ? 'sel-row' : ''}">
+      <td class="mono">${r.waste_no}</td>
+      <td>${r.waste_date}</td>
+      <td><span class="mono">${r.item_code}</span><br>${r.item_name}</td>
+      <td>${r.qty}</td>
+      <td>${r.reason}</td>
+      <td>${badge(r.status)}</td>
+      <td><button class="btn btn-ghost" onclick="openManufacturingDetail('wastefg','${r.waste_no}')">Detail</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" class="empty">Tidak ada waste FG.</td></tr>`;
+}
+
+function renderWasteRm(){
+  let rows = bySearch(getRmWasteRows(), ['waste_no','rm_code','rm_name','reason'], document.getElementById('search-wasterm').value);
+  const dateFrom = document.getElementById('filter-wasterm-date-from').value;
+  const dateTo = document.getElementById('filter-wasterm-date-to').value;
+  const wh = document.getElementById('filter-wasterm-wh')?.value || '';
+  if(dateFrom) rows = rows.filter(x => String(x.waste_date || '') >= dateFrom);
+  if(dateTo) rows = rows.filter(x => String(x.waste_date || '') <= dateTo);
+  if(wh) rows = rows.filter(() => wh === PROD_WH.warehouse_code);
+  rows = rows.sort((a,b) => String(b.waste_date || '').localeCompare(String(a.waste_date || '')) || String(b.waste_no || '').localeCompare(String(a.waste_no || '')));
+  if(!selectedWasteRmNo && rows[0]) selectedWasteRmNo = rows[0].waste_no;
+  if(selectedWasteRmNo && !rows.some(r => r.waste_no === selectedWasteRmNo)) selectedWasteRmNo = rows[0]?.waste_no || '';
+  document.getElementById('tbl-wasterm').innerHTML = rows.length ? rows.map(r => `
+    <tr class="${r.waste_no === selectedWasteRmNo ? 'sel-row' : ''}">
+      <td class="mono">${r.waste_no}</td>
+      <td>${r.waste_date}</td>
+      <td><span class="mono">${r.rm_code}</span><br>${r.rm_name}</td>
+      <td class="mono">${r.uom_code}</td>
+      <td>${r.qty}</td>
+      <td>${r.reason}</td>
+      <td>${badge(r.status)}</td>
+      <td><button class="btn btn-ghost" onclick="openManufacturingDetail('wasterm','${r.waste_no}')">Detail</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Tidak ada waste RM.</td></tr>`;
+}
+
+function manufacturingGroupForSection(sec){
+  return ['schedule','wo','prod','qc','wastefg'].includes(sec) ? 'prod-group' : 'rm-group';
+}
+
+function setManufacturingNavGroup(groupId, forceOpen = false){
+  document.querySelectorAll('.nav-parent[data-group]').forEach(parent => {
+    const active = parent.dataset.group === groupId;
+    parent.classList.toggle('active', active);
+    const panel = document.getElementById(parent.dataset.group);
+    if(panel){
+      const shouldCollapse = forceOpen ? !active : !active;
+      panel.classList.toggle('collapsed', shouldCollapse);
+    }
+  });
+}
+
+function showSection(sec){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  setManufacturingNavGroup(manufacturingGroupForSection(sec));
+  document.getElementById('sec-' + sec).classList.add('active');
+  if(sec === 'schedule'){
+    scheduleAgendaIndex = 0;
+    scheduleViewMode = 'AGENDA';
+    renderSchedule();
+  }
+  if(sec === 'wo'){
+    woAgendaIndex = 0;
+    woViewMode = 'AGENDA';
+    renderWo();
+  }
+  if(sec === 'prod'){
+    prodAgendaIndex = 0;
+    prodViewMode = 'AGENDA';
+    renderProd();
+  }
+  document.getElementById('bc-child').textContent = ({
+    schedule: 'Jadwal Produksi',
+    rmstock: 'Stok RM',
+    rmreceipt: 'Penerimaan RM',
+    rmtransfer: 'Transfer RM',
+    rmusage: 'Pemakaian RM',
+    wasterm: 'Waste RM',
+    rmcard: 'Pergerakan Stok RM',
+    wo: 'Perintah Produksi',
+    prod: 'Hasil Produksi',
+    qc: 'QC FG',
+    wastefg: 'Waste FG'
+  })[sec];
+}
+
+function printScheduleDailySummary(dateFilter = ''){
+  let rows = bySearch(SCHEDULE_ROWS, ['schedule_no','fg_code','fg_name','bom_code','line_name'], document.getElementById('search-schedule')?.value || '');
+  const status = document.getElementById('filter-schedule-status')?.value || '';
+  if(status) rows = rows.filter(x => {
+    const rm = scheduleRmStatus(x).label;
+    return status === 'Draft' ? x.status === 'Draft'
+      : status === 'Posted' ? x.status === 'Posted'
+      : status === 'Ready' ? rm === 'Ready'
+      : status === 'Need Supply' ? rm.includes('Need Supply')
+      : status === 'Need Transfer' ? rm.includes('Need Transfer')
+      : status === 'Released' ? x.status === 'Released'
+      : rm === status;
+  });
+  if(dateFilter){
+    rows = rows.filter(r => String(r.schedule_date || '').slice(0,10) === dateFilter);
+  }
+  const grouped = rows.reduce((acc, row) => {
+    const key = String(row.schedule_date || '').slice(0,10) || '-';
+    acc[key] = acc[key] || [];
+    acc[key].push(row);
+    return acc;
+  }, {});
+  const dates = Object.keys(grouped).sort();
+  const html = `
+    <!doctype html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Rekap Jadwal Produksi Harian</title>
+      <style>
+        body{font-family:Segoe UI,Arial,sans-serif;padding:24px;color:#0F172A;background:#fff}
+        .head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:18px}
+        h1{font-size:24px;margin:0 0 6px}
+        .brand{font-size:11px;letter-spacing:.12em;color:#64748B;text-transform:uppercase;font-weight:700}
+        .sub{color:#64748B;font-size:12px;margin-bottom:4px}
+        .summary{min-width:260px;border:1px solid #E2E8F0;border-radius:14px;padding:12px 14px;background:#F8FAFC}
+        .summary div{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:4px 0}
+        .day{margin:0 0 20px}
+        .day h2{font-size:15px;margin:0 0 8px;padding:10px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px}
+        table{width:100%;border-collapse:collapse;font-size:12px}
+        th,td{border:1px solid #E2E8F0;padding:8px 9px;vertical-align:top;text-align:left}
+        th{background:#F8FAFC;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+        .mono{font-family:Consolas,monospace}
+        .muted{color:#64748B}
+        .empty{padding:16px;border:1px solid #E2E8F0;border-radius:10px;color:#64748B}
+        @media print{body{padding:0}}
+      </style>
+    </head>
+    <body>
+      <div class="head">
+        <div>
+          <div class="brand">Manufacturing Schedule</div>
+          <h1>Rekap Jadwal Produksi Harian</h1>
+          <div class="sub">Tanggal cetak: 2026-03-24</div>
+          <div class="sub">Filter tanggal: ${dateFilter || 'Semua tanggal'}</div>
+        </div>
+        <div class="summary">
+          <div><span>Total Jadwal</span><b>${rows.length}</b></div>
+          <div><span>Total Hari</span><b>${dates.length}</b></div>
+          <div><span>Draft</span><b>${rows.filter(r => r.status === 'Draft').length}</b></div>
+          <div><span>Posted/Released</span><b>${rows.filter(r => ['Posted','Released'].includes(r.status)).length}</b></div>
+        </div>
+      </div>
+      ${dates.length ? dates.map(ds => {
+        const items = grouped[ds];
+        const totalQty = items.reduce((sum, row) => sum + Number(row.plan_qty || 0), 0);
+        return `
+          <div class="day">
+            <h2>${ds} <span class="muted">| ${items.length} jadwal | Total plan ${totalQty}</span></h2>
+            <table>
+              <thead><tr><th>No Jadwal</th><th>FG</th><th>BOM</th><th>Target Qty</th><th>Kesiapan RM</th><th>Status</th><th>Catatan</th></tr></thead>
+              <tbody>
+                ${items.map(r => `
+                  <tr>
+                    <td class="mono">${r.schedule_no}</td>
+                    <td><div class="mono">${r.fg_code}</div><div>${r.fg_name}</div></td>
+                    <td class="mono">${r.bom_code}</td>
+                    <td class="mono">${r.plan_qty}</td>
+                    <td>${scheduleRmStatus(r).label}</td>
+                    <td>${r.status}</td>
+                    <td>${r.note || '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }).join('') : `<div class="empty">Tidak ada jadwal produksi untuk dicetak.</div>`}
+      <script>window.print();<\/script>
+    </body>
+    </html>
+  `;
+  const win = window.open('', '_blank', 'width=1100,height=800');
+  if(!win) return toast('Popup print diblok browser.');
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+}
+
+function downloadCsv(filename, headers, rows){
+  const csvRows = [headers].concat(rows).map(row => row.map(cell => {
+    const value = String(cell ?? '');
+    return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  }).join(','));
+  const blob = new Blob([csvRows.join('\r\n')], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportTableByBody(bodyId, filename){
+  const tbody = document.getElementById(bodyId);
+  const table = tbody ? tbody.closest('table') : null;
+  if(!tbody || !table) return toast('Tabel tidak ditemukan.');
+  const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.replace(/\s+/g,' ').trim());
+  const rows = Array.from(tbody.querySelectorAll('tr'))
+    .map(tr => Array.from(tr.children).map(td => td.innerText.replace(/\s+/g,' ').trim()))
+    .filter(row => row.length && !row.join(' ').includes('Tidak ada') && !row.join(' ').includes('Belum ada'));
+  return downloadCsv(filename, headers, rows);
+}
+
+function exportSection(sec){
+  if(sec === 'schedule'){
+    const defaultDate = (SCHEDULE_ROWS.find(r => r.schedule_no === selectedScheduleNo) || SCHEDULE_ROWS[0] || {}).schedule_date || '2026-03-24';
+    const chosen = window.prompt('Cetak jadwal produksi tanggal berapa? Gunakan format YYYY-MM-DD', String(defaultDate).slice(0,10));
+    if(chosen === null) return;
+    return printScheduleDailySummary(String(chosen).trim());
+  }
+  if(sec === 'rmcard'){
+    const wh = document.getElementById('filter-rmcard-wh')?.value || '';
+    const dateFrom = document.getElementById('filter-rmcard-date-from')?.value || '';
+    const dateTo = document.getElementById('filter-rmcard-date-to')?.value || '';
+    const search = document.getElementById('search-rmcard')?.value || '';
+    let rows = [];
+    rows = rows.concat(getRmReceiptRows().map(r => ({
+      date: r.receipt_date || '',
+      doc: r.receipt_no || '-',
+      rm_code: r.item_code,
+      rm_name: r.item_name,
+      warehouse_code: r.warehouse_code,
+      in_qty: Number(r.qty || 0),
+      out_qty: 0,
+      ref: r.vendor_name || ''
+    })));
+    rows = rows.concat(VENDOR_RETURNS.filter(r => [RM_WH.warehouse_code, PROD_WH.warehouse_code].includes(r.warehouse_code)).map(r => ({
+      date: r.return_date || '',
+      doc: r.return_no || '-',
+      rm_code: r.item_code,
+      rm_name: r.item_name,
+      warehouse_code: r.warehouse_code,
+      in_qty: 0,
+      out_qty: Number(r.qty || 0),
+      ref: 'Retur Vendor'
+    })));
+    rows = rows.concat(RM_TRANSFER_ROWS.flatMap(r => ([
+      { date:r.transfer_date, doc:r.transfer_no, rm_code:r.rm_code, rm_name:r.rm_name, warehouse_code:r.from_warehouse, in_qty:0, out_qty:Number(r.qty || 0), ref:`Transfer ke ${r.to_warehouse}` },
+      { date:r.transfer_date, doc:r.transfer_no, rm_code:r.rm_code, rm_name:r.rm_name, warehouse_code:r.to_warehouse, in_qty:Number(r.qty || 0), out_qty:0, ref:`Transfer dari ${r.from_warehouse}` }
+    ])));
+    rows = rows.concat(getProductionUsageRows().map(r => ({
+      date: r.prod_date,
+      doc: r.prod_no,
+      rm_code: r.rm_code,
+      rm_name: r.rm_name,
+      warehouse_code: r.warehouse_code,
+      in_qty: 0,
+      out_qty: Number(r.qty || 0),
+      ref: `Pemakaian ${r.ref}`
+    })));
+    rows = rows.concat(getRmWasteRows().map(r => ({
+      date: r.waste_date,
+      doc: r.waste_no,
+      rm_code: r.rm_code,
+      rm_name: r.rm_name,
+      warehouse_code: PROD_WH.warehouse_code,
+      in_qty: 0,
+      out_qty: Number(r.qty || 0),
+      ref: `Waste RM - ${r.reason}`
+    })));
+    rows = bySearch(rows, ['doc','rm_code','rm_name','ref','warehouse_code'], search).sort((a,b) => String(b.date).localeCompare(String(a.date)));
+    if(wh) rows = rows.filter(r => r.warehouse_code === wh);
+    if(dateFrom) rows = rows.filter(r => String(r.date || '') >= dateFrom);
+    if(dateTo) rows = rows.filter(r => String(r.date || '') <= dateTo);
+    const dates = [...new Set(rows.map(r => String(r.date || '').slice(0,10)).filter(Boolean))].sort().reverse();
+    const grouped = rows.reduce((map, row) => {
+      const key = row.rm_code;
+      if(!map[key]){
+        map[key] = {
+          rm_code: row.rm_code,
+          rm_name: row.rm_name,
+          uom_code: (RM.find(x => x.rm_code === row.rm_code) || {}).uom_code || inferManufacturingBomUom(row.rm_code),
+          total_in: 0,
+          total_out: 0,
+          by_date: {}
+        };
+      }
+      map[key].total_in += Number(row.in_qty || 0);
+      map[key].total_out += Number(row.out_qty || 0);
+      map[key].by_date[row.date] = (map[key].by_date[row.date] || 0) + Number(row.in_qty || 0) - Number(row.out_qty || 0);
+      return map;
+    }, {});
+    const tableRows = Object.values(grouped).sort((a,b) => String(a.rm_code).localeCompare(String(b.rm_code)));
+    const html = `
+      <html>
+      <head>
+        <title>Pergerakan Stok RM</title>
+        <style>
+          body{font-family:Arial,sans-serif;padding:20px;color:#0F172A}
+          .head{display:flex;justify-content:space-between;gap:20px;margin-bottom:20px}
+          .brand{font-size:12px;font-weight:800;color:#B45309;text-transform:uppercase;letter-spacing:.08em}
+          h1{margin:4px 0 8px;font-size:22px}
+          .sub{font-size:12px;color:#64748B;line-height:1.6}
+          table{width:100%;border-collapse:collapse;font-size:12px}
+          th,td{border:1px solid #E2E8F0;padding:8px 9px;vertical-align:top;text-align:left}
+          th{background:#F8FAFC;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+          .mono{font-family:Consolas,monospace}
+          .pos{color:#15803D;font-weight:800}
+          .neg{color:#B91C1C;font-weight:800}
+        </style>
+      </head>
+      <body>
+        <div class="head">
+          <div>
+            <div class="brand">Inventory RM</div>
+            <h1>Pergerakan Stok RM per Tanggal</h1>
+            <div class="sub">Tanggal cetak: 2026-03-24</div>
+            <div class="sub">Gudang: ${wh || 'Semua Gudang RM'} | Filter: ${dateFrom || '-'} s/d ${dateTo || '-'}</div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>RM Code</th><th>Material</th><th>UOM</th><th>Total Masuk</th><th>Total Keluar</th>${dates.map(d => `<th>${d}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${tableRows.map(r => `
+              <tr>
+                <td class="mono">${r.rm_code}</td>
+                <td>${r.rm_name}</td>
+                <td class="mono">${r.uom_code}</td>
+                <td class="mono pos">${r.total_in || ''}</td>
+                <td class="mono neg">${r.total_out || ''}</td>
+                ${dates.map(d => {
+                  const val = Number(r.by_date[d] || 0);
+                  return `<td class="mono ${val > 0 ? 'pos' : val < 0 ? 'neg' : ''}">${val > 0 ? `+${val}` : val < 0 ? `${val}` : ''}</td>`;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+    const w = window.open('', '_blank', 'width=1200,height=860');
+    if(!w) return toast('Popup print diblokir browser.');
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 250);
+    return;
+  }
+  const tableExports = {
+    rmstock: ['tbl-rmstock', 'manufacturing-rmstock.csv'],
+    rmreceipt: ['tbl-rmreceipt', 'manufacturing-rmreceipt.csv'],
+    rmtransfer: ['tbl-rmtransfer', 'manufacturing-rmtransfer.csv'],
+    rmusage: ['tbl-rmusage', 'manufacturing-rmusage.csv'],
+    wo: ['tbl-wo', 'manufacturing-perintah-produksi.csv'],
+    prod: ['tbl-prod', 'manufacturing-hasil-produksi.csv'],
+    qc: ['tbl-qc', 'manufacturing-qc-fg.csv'],
+    wastefg: ['tbl-wastefg', 'manufacturing-waste-fg.csv'],
+    wasterm: ['tbl-wasterm', 'manufacturing-waste-rm.csv']
+  };
+  if(tableExports[sec]){
+    const [bodyId, filename] = tableExports[sec];
+    return exportTableByBody(bodyId, filename);
+  }
+  toast('Export ' + sec.toUpperCase() + ' belum tersedia.');
+}
+
+function toast(msg){ alert(msg); }
+
+function openManufacturingAction(kind){
+  if(kind === 'schedule-to-order'){
+    scheduleViewMode = 'RECAP';
+    showSection('schedule');
+    renderSchedule();
+    document.getElementById('search-schedule')?.focus();
+    return;
+  }
+  if(kind === 'input-production'){
+    woViewMode = 'RECAP';
+    showSection('wo');
+    renderWo();
+    document.getElementById('search-wo')?.focus();
+    return;
+  }
+  if(kind === 'input-qc'){
+    prodViewMode = 'RECAP';
+    showSection('prod');
+    renderProd();
+    document.getElementById('search-prod')?.focus();
+    return;
+  }
+  if(kind === 'waste-fg'){
+    showSection('wastefg');
+    renderWasteFg();
+    document.getElementById('search-wastefg')?.focus();
+    return;
+  }
+  if(kind === 'input-waste-rm'){
+    const rmRows = getProductionUsageRows().sort((a,b) => String(b.prod_date || '').localeCompare(String(a.prod_date || '')));
+    const picked = rmRows[0];
+    if(!picked) return toast('Belum ada pemakaian RM untuk dibuat waste.');
+    const qtyRaw = window.prompt(`Qty waste untuk ${picked.rm_code} dari ${picked.prod_no}?`, '1');
+    if(qtyRaw === null) return;
+    const qty = Number(qtyRaw);
+    if(!qty || qty < 0) return toast('Qty waste RM tidak valid.');
+    const reason = window.prompt('Alasan waste RM?', 'Susut proses') || 'Susut proses';
+    const rows = JSON.parse(window.localStorage.getItem('erp.mfg.waste') || '[]');
+    const nums = rows.map(r => Number(String(r.waste_no || '').split('-').pop())).filter(n => !Number.isNaN(n));
+    const next = String((nums.length ? Math.max(...nums) : 0) + 1).padStart(3, '0');
+    rows.push({
+      waste_no: `WSM-202603-${next}`,
+      waste_date: APP_TODAY,
+      item_kind: 'RM',
+      item_code: picked.rm_code,
+      item_name: picked.rm_name,
+      uom_code: inferManufacturingBomUom(picked.rm_code),
+      qty,
+      reason,
+      status: 'Done',
+      ref_prod_no: picked.prod_no
+    });
+    window.localStorage.setItem('erp.mfg.waste', JSON.stringify(rows));
+    showSection('wasterm');
+    renderWasteRm();
+  }
+}
+
+function initDateRangeFilters(){
+  document.querySelectorAll('.date-range-filter').forEach(filter => {
+    const pop = filter.querySelector('.date-range-pop');
+    if(!pop || pop.querySelector('.date-range-actions')) return;
+    const actions = document.createElement('div');
+    actions.className = 'date-range-actions';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary date-range-apply';
+    btn.textContent = 'Terapkan';
+    btn.addEventListener('click', () => {
+      pop.querySelectorAll('input, select').forEach(el => {
+        el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles:true }));
+      });
+      filter.open = false;
+    });
+    actions.appendChild(btn);
+    pop.appendChild(actions);
+  });
+}
+
+document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    showSection(el.dataset.sec);
+  });
+});
+
+document.querySelectorAll('.nav-parent[data-group]').forEach(el => {
+  el.addEventListener('click', () => {
+    const target = document.getElementById(el.dataset.group);
+    const collapsed = target.classList.contains('collapsed');
+    const defaultSec = el.dataset.defaultSec || '';
+    document.querySelectorAll('.nav-parent[data-group]').forEach(parent => {
+      const panel = document.getElementById(parent.dataset.group);
+      const active = parent === el;
+      parent.classList.toggle('active', active);
+      panel.classList.toggle('collapsed', active ? !collapsed : true);
+    });
+    if(defaultSec && collapsed){
+      showSection(defaultSec);
+    }
+  });
+});
+
+[
+  ['search-schedule', renderSchedule], ['filter-schedule-date-from', renderSchedule], ['filter-schedule-date-to', renderSchedule], ['filter-schedule-status', renderSchedule],
+  ['schedule-form-fg', () => { fillScheduleFgOptions(); syncScheduleForm(); renderSchedule(); }], ['schedule-form-date', syncScheduleForm], ['schedule-form-qty', () => { syncScheduleForm(); renderSchedule(); }], ['schedule-form-note', syncScheduleForm],
+  ['rmreceipt-form-rm', () => { syncRmReceiptForm(); renderRmReceiptPicker(); }],
+  ['rmreceipt-form-category', renderRmReceiptPicker], ['rmreceipt-form-search', renderRmReceiptPicker],
+  ['rmtransfer-form-rm', () => { syncRmTransferForm(); renderRmTransferPicker(); }],
+  ['rmtransfer-form-category', renderRmTransferPicker], ['rmtransfer-form-search', renderRmTransferPicker],
+  ['rmtransfer-form-from', () => { syncRmTransferForm(); renderRmTransferPicker(); }],
+  ['rmtransfer-form-to', () => { syncRmTransferForm(); renderRmTransferPicker(); }],
+  ['search-rmstock', renderRmStock], ['filter-rmstock-category', renderRmStock], ['filter-rmstock-wh', renderRmStock],
+  ['search-rmreceipt', renderRmReceipt], ['filter-rmreceipt-date-from', renderRmReceipt], ['filter-rmreceipt-date-to', renderRmReceipt], ['filter-rmreceipt-wh', renderRmReceipt],
+  ['search-rmtransfer', renderRmTransfer], ['filter-rmtransfer-date-from', renderRmTransfer], ['filter-rmtransfer-date-to', renderRmTransfer], ['filter-rmtransfer-wh', renderRmTransfer],
+  ['search-rmusage', renderRmUsage], ['filter-rmusage-date-from', renderRmUsage], ['filter-rmusage-date-to', renderRmUsage], ['filter-rmusage-wh', renderRmUsage],
+  ['search-rmcard', renderRmCard], ['filter-rmcard-date-from', renderRmCard], ['filter-rmcard-date-to', renderRmCard], ['filter-rmcard-wh', renderRmCard],
+  ['search-wo', renderWo], ['filter-wo-date-from', renderWo], ['filter-wo-date-to', renderWo], ['filter-wo-status', renderWo],
+  ['search-prod', renderProd], ['filter-prod-date-from', renderProd], ['filter-prod-date-to', renderProd], ['filter-prod-status', renderProd],
+  ['search-qc', renderQc], ['filter-qc-date-from', renderQc], ['filter-qc-date-to', renderQc], ['filter-qc-status', renderQc],
+  ['search-wastefg', renderWasteFg], ['filter-wastefg-date-from', renderWasteFg], ['filter-wastefg-date-to', renderWasteFg], ['search-wasterm', renderWasteRm], ['filter-wasterm-date-from', renderWasteRm], ['filter-wasterm-date-to', renderWasteRm], ['filter-wasterm-wh', renderWasteRm]
+].forEach(([id, fn]) => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn);
+});
+
+['qc-final-accepted','qc-final-reject'].forEach(id => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', () => {
+    if(id === 'qc-final-accepted') syncQcFinalFromAccepted();
+    else syncQcFinalFromReject();
+  });
+});
+
+initDateRangeFilters();
+renderKpis();
+syncManufacturingFgNames();
+fillRmStockFilters();
+fillRmWarehouseOptions();
+fillRmTransferMaterialOptions();
+renderSchedule();
+renderRmStock();
+renderRmReceipt();
+renderRmTransfer();
+renderRmUsage();
+renderRmCard();
+renderWo();
+renderProd();
+renderQc();
+renderWasteFg();
+renderWasteRm();
+</script>
+</body>
+</html>
+
+
