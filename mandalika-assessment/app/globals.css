@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f3eee5;
+  --surface: #fffdf9;
+  --surface-2: #f8f2e8;
+  --gold: #b99246;
+  --gold-dim: #977538;
+  --gold-light: #d6bc85;
+  --text: #374151;
+  --muted: #6b7280;
+  --border: rgba(151, 117, 56, 0.16);
+  --border-strong: rgba(151, 117, 56, 0.32);
+  --shadow-soft: 0 10px 32px rgba(76, 62, 39, 0.08);
+  --shadow-subtle: 0 4px 14px rgba(76, 62, 39, 0.05);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply bg-ink;
+    color-scheme: light;
+  }
+
+  body {
+    @apply min-h-screen bg-ink text-text;
+    background-image:
+      radial-gradient(circle at top left, rgba(214, 188, 133, 0.22), transparent 28%),
+      linear-gradient(180deg, #f7f2e8 0%, #f3eee5 48%, #eee7db 100%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-sans font-semibold tracking-[-0.03em] text-text;
+  }
+
+  a {
+    @apply transition-colors duration-150;
+  }
+
+  ::selection {
+    background: rgba(201, 168, 76, 0.28);
+  }
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-card border border-border bg-surface;
+    box-shadow: 0 8px 24px rgba(76, 62, 39, 0.06);
+  }
+
+  .surface-panel {
+    @apply rounded-card border border-border bg-panel;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .field-base {
+    @apply w-full rounded-field border border-border bg-white px-4 py-3 text-sm text-text outline-none transition-colors placeholder:text-muted focus:border-border-strong;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-field border border-transparent px-4 py-3 text-sm font-semibold text-white transition-colors;
+    background: linear-gradient(180deg, #c5a159 0%, #b99246 100%);
+    box-shadow: 0 10px 20px rgba(151, 117, 56, 0.18);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-field border border-border bg-white px-4 py-3 text-sm font-medium text-text transition-colors hover:border-border-strong hover:text-gold;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.24em] text-gold;
+  }
+
+  .metric-value {
+    @apply font-sans text-3xl font-semibold leading-none text-text;
+  }
+
+  .glass-line {
+    @apply border border-border bg-white/80;
+    box-shadow: var(--shadow-subtle);
+  }
+}
