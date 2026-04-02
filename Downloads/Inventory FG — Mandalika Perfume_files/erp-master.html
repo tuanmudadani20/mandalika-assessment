@@ -1,0 +1,1732 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Master Data</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --ok:#10B981; --info:#2563EB; --warn:#F59E0B; --err:#DC2626;
+  --sh-sm:0 1px 2px rgba(0,0,0,.05); --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:#A1A1AA;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.nav-subwrap{margin:6px 8px 10px;padding:8px 6px 10px;border-left:2px solid rgba(212,175,55,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:0 14px 14px 0}
+.nav-group{margin:2px 0 0;padding:0;overflow:hidden;max-height:520px;transition:max-height .24s ease,opacity .2s ease,transform .2s ease,margin .18s ease}
+.nav-group.collapsed{max-height:0;opacity:0;transform:translateY(-6px);margin:0}
+.nav-parent{display:flex;align-items:center;justify-content:space-between;width:100%;margin:4px 0 2px;padding:6px 8px;border-radius:10px;color:#B8BDC7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-parent:hover{background:rgba(255,255,255,.06);color:#F4F4F5;transform:translateX(1px)}
+.nav-parent.active{background:rgba(212,175,55,.12);color:#F6D365}
+.nav-parent small{font-size:9px;color:#8E95A3;font-weight:700;text-transform:none;letter-spacing:0}
+.nav-subwrap .nav-link,.nav-subwrap .nav-item{width:100%;margin:1px 0 0;padding:6px 8px 6px 16px;border-radius:9px;font-size:10.5px}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:8px 12px;min-height:34px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.tabs{display:none}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:14px}
+.card-pad{padding:18px 20px}
+.grid-4{display:none}
+.kpi{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar-right,.toolbar-left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search,.select{padding:8px 10px;min-height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;min-width:150px;font:inherit;font-size:11.5px}
+.search{min-width:240px}
+.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.b-ok{background:#D1FAE5;color:#047857}.b-info{background:#DBEAFE;color:#1D4ED8}.b-warn{background:#FEF3C7;color:#B45309}.b-draft{background:#E5E7EB;color:#374151}.b-err{background:#FEE2E2;color:#B91C1C}
+.b-dark{background:#E2E8F0;color:#1E293B}
+.tw{overflow:auto;max-height:560px}
+.tw-master{max-height:520px;overflow:auto}
+.tw-master table thead th{position:sticky;top:0;z-index:1}
+.tw-master::-webkit-scrollbar{height:10px;width:10px}
+.tw-master::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:999px}
+.tw-master::-webkit-scrollbar-track{background:#F8FAFC}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle;white-space:nowrap}
+th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC;position:sticky;top:0;z-index:1}
+tr:hover td{background:#FCFCFD}
+.mono{font-family:'IBM Plex Mono',monospace}
+.split{display:grid;grid-template-columns:1fr;gap:10px}
+.empty{padding:28px 16px;color:var(--muted);text-align:center}
+.note{padding:10px 12px;border:1px dashed var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(212,175,55,.06),rgba(255,255,255,.98));color:var(--text);font-size:10.5px;line-height:1.5}
+.meta-list{display:grid;gap:10px}
+.meta-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.meta-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.meta-v{font-size:12px;color:var(--text-d);margin-top:4px;word-break:break-word}
+.cell-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-xs{padding:5px 8px;min-height:28px;border-radius:8px;font-size:10px;font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.52);display:none;align-items:center;justify-content:center;padding:20px;z-index:30}
+.modal.open{display:flex}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.modal-card{width:min(1080px,92vw);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:18px}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.modal-title{font-size:18px;font-weight:800;color:var(--text-d)}
+.modal-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.check-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select{padding:9px 11px;border-radius:10px;border:1px solid var(--line);font:inherit;font-size:12px;background:#fff}
+.section-title{font-size:13px;font-weight:800;color:var(--text-d);margin:18px 0 10px}
+.modal-card table input{width:100%;padding:7px 9px;border-radius:8px;border:1px solid var(--line);font:inherit;font-size:12px}
+.picker-row{display:flex;gap:6px;align-items:center}
+.picker-row input{flex:1;cursor:pointer;background:#fffdf6}
+.picker-list{display:grid;gap:6px;max-height:420px;overflow:auto}
+.picker-item{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer}
+.picker-item:hover{border-color:var(--gold);background:#fffdf6}
+.picker-item-code{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--gold-d)}
+.picker-item-name{font-size:12px;color:var(--text-d);margin-top:2px}
+.picker-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
+#material-picker-modal{z-index:45}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--line);background:#FBFCFE;font-size:11px;color:var(--muted)}
+.pager-actions{display:flex;gap:6px;flex-wrap:wrap}
+.pager .btn{padding:5px 8px;font-size:10px}
+.pager .btn[disabled]{opacity:.45;cursor:not-allowed}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)} .split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Master Data</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <div class="nav-item active">Master Data</div>
+      <div class="nav-sec-lbl">Modules</div>
+      <div class="nav-link active">Master Data</div>
+      <div class="nav-subwrap">
+        <div class="nav-parent active" id="nav-parent-master-foundation" data-group="master-foundation">Foundation <small>Lokasi dan referensi</small></div>
+        <div class="nav-group" id="nav-group-master-foundation">
+          <a class="nav-link active" href="#" data-sec="gudang">Gudang</a>
+          <a class="nav-link" href="#" data-sec="toko">Toko</a>
+          <a class="nav-link" href="#" data-sec="uom">Satuan</a>
+          <a class="nav-link" href="#" data-sec="kategori">Kategori</a>
+        </div>
+        <div class="nav-parent" id="nav-parent-master-partner" data-group="master-partner">Partner <small>Vendor dan channel</small></div>
+        <div class="nav-group" id="nav-group-master-partner">
+          <a class="nav-link" href="#" data-sec="vendor">Vendor</a>
+          <a class="nav-link" href="#" data-sec="reseller">Reseller</a>
+        </div>
+        <div class="nav-parent" id="nav-parent-master-product" data-group="master-product">Produk <small>FG, RM, dan BOM</small></div>
+        <div class="nav-group" id="nav-group-master-product">
+          <a class="nav-link" href="#" data-sec="fg">Finished Good</a>
+          <a class="nav-link" href="#" data-sec="rm">Raw Material</a>
+          <a class="nav-link" href="#" data-sec="bom">BOM</a>
+        </div>
+        <div class="nav-parent" id="nav-parent-master-audit" data-group="master-audit">Governance <small>Audit dan histori</small></div>
+        <div class="nav-group" id="nav-group-master-audit">
+          <a class="nav-link" href="#" data-sec="activity">Log Aktivitas</a>
+        </div>
+      </div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">
+        Data hidup dari <span class="mono">master-data.js</span>.<br>
+        BOM masih manual reference dari Accurate.
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><small>Master Workspace</small><div><b id="bc-parent">Master Data</b> / <b id="bc-child">Gudang</b></div></div>
+      <div>
+        <button class="btn btn-ghost" onclick="openColumnModal()">Atur Kolom</button>
+        <button class="btn btn-ghost" onclick="location.href='./ERP_ROADMAP.md'">Roadmap</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-purchasing.html'">Next: Purchasing</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Fase 1</div>
+          <div class="title">Master Data Induk</div>
+          <div class="subtitle">
+            Master induk ini jadi sumber referensi bersama untuk Purchasing, Manufacturing, Inventory, POS, dan Finance.
+            Data Gudang, Toko, Vendor, Finished Good, dan Raw Material sudah dibaca dari file master terbaru Anda.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <section class="section active" id="sec-gudang">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-gudang" placeholder="Cari kode atau nama gudang"><select class="select" id="filter-gudang-type"><option value="">Semua Tipe</option></select></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="addMaster('gudang')">+ Tambah Gudang</button><button class="btn btn-ghost" onclick="importSection('gudang')">Import</button><button class="btn btn-ghost" onclick="deleteSelected('gudang')">Hapus Terpilih</button><button class="btn btn-ghost" onclick="exportSection('gudang')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw tw-master"><table><thead><tr><th id="th-gudang-select">Pilih</th><th>Kode</th><th>Nama Gudang</th><th>Group</th><th>Tipe</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-gudang"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-toko">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-toko" placeholder="Cari kode atau nama toko"><select class="select" id="filter-toko-supply"><option value="">Semua Supply</option></select><select class="select" id="filter-toko-type"><option value="">Semua Jenis</option></select></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="addMaster('toko')">+ Tambah Toko</button><button class="btn btn-ghost" onclick="importSection('toko')">Import</button><button class="btn btn-ghost" onclick="deleteSelected('toko')">Hapus Terpilih</button><button class="btn btn-ghost" onclick="exportSection('toko')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw tw-master"><table><thead><tr><th id="th-toko-select">Pilih</th><th>Kode</th><th>Nama Toko</th><th>Supply 1</th><th>Supply 2</th><th>Jenis</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-toko"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-vendor">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-vendor" placeholder="Cari kode, nama, atau kategori vendor"><select class="select" id="filter-vendor-origin"><option value="">Lokal + Impor</option><option value="LOCAL">Lokal</option><option value="IMPORT">Impor</option></select><select class="select" id="filter-vendor-category"><option value="">Semua Kategori</option></select></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="addMaster('vendor')">+ Tambah Vendor</button><button class="btn btn-ghost" onclick="importSection('vendor')">Import</button><button class="btn btn-ghost" onclick="deleteSelected('vendor')">Hapus Terpilih</button><button class="btn btn-ghost" onclick="exportSection('vendor')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw tw-master"><table><thead><tr><th id="th-vendor-select">Pilih</th><th>Kode</th><th>Nama Vendor</th><th>Asal</th><th>Kategori</th><th>Payment Term</th><th>Kota</th><th>Mata Uang</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-vendor"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-fg">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-fg" placeholder="Cari kode, nama, atau kategori FG"><select class="select" id="filter-fg-category"><option value="">Semua Kategori</option></select></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="addMaster('fg')">+ Tambah FG</button><button class="btn btn-ghost" onclick="importSection('fg')">Import</button><button class="btn btn-ghost" onclick="deleteSelected('fg')">Hapus Terpilih</button><button class="btn btn-ghost" onclick="exportSection('fg')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw tw-master"><table><thead><tr><th id="th-fg-select">Pilih</th><th>Kode FG</th><th>Nama</th><th>Kategori</th><th>Satuan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-fg"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-rm">
+        <div class="toolbar">
+          <div class="toolbar-left"><input class="search" id="search-rm" placeholder="Cari kode, nama, kategori, atau vendor default"><select class="select" id="filter-rm-category"><option value="">Semua Kategori</option></select></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="addMaster('rm')">+ Tambah RM</button><button class="btn btn-ghost" onclick="importSection('rm')">Import</button><button class="btn btn-ghost" onclick="deleteSelected('rm')">Hapus Terpilih</button><button class="btn btn-ghost" onclick="exportSection('rm')">Export</button></div>
+        </div>
+        <div class="card"><div class="tw tw-master"><table><thead><tr><th id="th-rm-select">Pilih</th><th>Kode RM</th><th>Nama</th><th>Kategori</th><th>Satuan</th><th>Vendor Default</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbl-rm"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-uom">
+        <div class="card"><div class="tw"><table><thead><tr><th>Kode</th><th>Nama Satuan</th><th>Status</th></tr></thead><tbody id="tbl-uom"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-kategori">
+        <div class="card"><div class="tw"><table><thead><tr><th>Kategori</th><th>Group</th><th>Status</th></tr></thead><tbody id="tbl-kategori"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-reseller">
+        <div class="card"><div class="tw"><table><thead><tr><th>Kode</th><th>Nama</th><th>Tipe</th><th>Gudang Default</th><th>Kota</th><th>Status</th></tr></thead><tbody id="tbl-reseller"></tbody></table></div></div>
+      </section>
+
+      <section class="section" id="sec-bom">
+        <div class="toolbar">
+          <div class="toolbar-left"></div>
+          <div class="toolbar-right"><button class="btn btn-ghost" onclick="addMaster('bom')">+ Tambah BOM</button><button class="btn btn-ghost" onclick="exportSection('bom')">Export</button></div>
+        </div>
+        <div class="card">
+          <div class="card-pad" style="padding-bottom:12px;border-bottom:1px solid var(--line)">
+            <div class="toolbar" style="margin-bottom:0">
+              <div class="toolbar-left">
+                <div>
+                  <div style="font-size:13px;font-weight:800;color:var(--text-d)">Daftar BOM</div>
+                  <div id="bom-header-meta" style="font-size:11px;color:var(--muted);margin-top:4px">Gunakan search dan filter untuk menyaring header BOM.</div>
+                </div>
+              </div>
+              <div class="toolbar-right">
+                <input class="search" id="search-bom" placeholder="Cari BOM, FG, atau material">
+                <select class="select" id="filter-bom-match"><option value="">Semua Status Match</option><option value="MATCH">Sudah Match</option><option value="UNMATCH">Belum Match</option></select>
+                <select class="select" id="filter-bom-type"><option value="">Semua Type</option></select>
+                <select class="select" id="filter-bom-size"><option value="">Semua Size</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="tw tw-master"><table><thead><tr><th>Kode BOM</th><th>FG</th><th>Tipe</th><th>Size</th><th>Status Match</th><th>Aksi</th></tr></thead><tbody id="tbl-bom-header"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="section" id="sec-activity">
+        <div class="toolbar">
+          <div class="toolbar-left"></div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="clearActivityLog()">Clear Log</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-pad" style="padding-bottom:12px;border-bottom:1px solid var(--line)">
+            <div style="font-size:13px;font-weight:800;color:var(--text-d)">Log Aktivitas Master</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Riwayat tambah, edit, hapus, import, export, dan perubahan BOM tersimpan di sini.</div>
+          </div>
+          <div class="tw tw-master" style="max-height:520px">
+            <table>
+              <thead><tr><th>Waktu</th><th>Aktivitas</th><th>Detail</th></tr></thead>
+              <tbody id="tbl-activity-log"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal" id="fg-edit-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Edit Finished Good</div>
+          <div class="modal-sub">BOM yang punya kode FG sama akan langsung ditautkan ke FG ini supaya koreksinya lebih gampang.</div>
+        </div>
+        <button class="btn btn-ghost" onclick="closeFgEditModal()">Tutup</button>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Kode FG</label><input id="fg-edit-code"></div>
+        <div class="field"><label>Nama FG</label><input id="fg-edit-name"></div>
+        <div class="field"><label>Kategori</label><input id="fg-edit-category"></div>
+        <div class="field"><label>Satuan</label><input id="fg-edit-uom"></div>
+      </div>
+      <div class="section-title">BOM Terkait</div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Kode BOM</th><th>FG BOM</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="fg-edit-bom-head"></tbody></table></div></div>
+      <div class="card"><div class="tw"><table><thead><tr><th>BOM</th><th>Material</th><th>Qty</th><th>UOM</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="fg-edit-bom-detail"></tbody></table></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+        <button class="btn btn-ghost" onclick="closeFgEditModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveFgEditModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="bom-edit-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Edit Bill of Material</div>
+          <div class="modal-sub">Pola editnya saya dekatkan ke referensi manufaktur: header BOM di atas, komponen BOM di bawah.</div>
+        </div>
+        <button class="btn btn-ghost" onclick="closeBomEditModal()">Tutup</button>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Kode BOM</label><input id="bom-edit-code" readonly></div>
+        <div class="field"><label>FG Code</label><input id="bom-edit-fg-code"></div>
+        <div class="field"><label>FG Name</label><input id="bom-edit-fg-name"></div>
+        <div class="field"><label>Type</label><input id="bom-edit-type"></div>
+        <div class="field"><label>Size</label><input id="bom-edit-size"></div>
+        <div class="field"><label>Catatan Match</label><input id="bom-edit-note"></div>
+      </div>
+      <div class="section-title">Komponen BOM</div>
+      <div class="note" style="margin-bottom:10px">
+        Harga modal saya ambil dari master RM. Untuk baris persen, sementara saya hitung sebagai <span class="mono">(% x size pack x harga beli RM)</span>.
+      </div>
+      <div class="meta-list" style="margin-bottom:10px" id="bom-edit-cost-summary"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin:0 0 10px">
+        <button class="btn btn-ghost" onclick="addBomEditRow()">+ Tambah Baris</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>No</th><th>Material Code</th><th>Material Name</th><th>Qty</th><th>UOM</th><th>Harga Modal</th><th>Subtotal</th><th>Status</th></tr></thead><tbody id="bom-edit-detail"></tbody></table></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+        <button class="btn btn-ghost" onclick="closeBomEditModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveBomEditModal()">Simpan BOM</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="material-picker-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Pilih Raw Material</div>
+          <div class="modal-sub">Cari berdasarkan kode, nama, kategori, atau supplier.</div>
+        </div>
+        <button class="btn btn-ghost" onclick="closeMaterialPicker()">Tutup</button>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Cari Material</label>
+        <input id="material-picker-search" placeholder="Ketik kode atau nama material">
+      </div>
+      <div class="picker-list" id="material-picker-list"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="master-form-modal">
+    <div class="modal-card" style="width:min(760px,92vw)">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="master-form-title">Tambah Data</div>
+          <div class="modal-sub" id="master-form-sub">Lengkapi data master lalu simpan ke preview ini.</div>
+        </div>
+        <button class="btn btn-ghost" onclick="closeMasterFormModal()">Tutup</button>
+      </div>
+      <div class="form-grid" id="master-form-fields"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+        <button class="btn btn-ghost" onclick="closeMasterFormModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveMasterFormModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="master-import-input" accept=".csv,text/csv" style="display:none">
+  <div class="modal" id="column-modal" onclick="if(event.target===this) closeColumnModal()">
+    <div class="modal-card" style="width:min(560px,92vw)">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Atur Kolom Tabel</div>
+          <div class="modal-sub" id="column-modal-sub">Pilih kolom yang ingin ditampilkan.</div>
+        </div>
+        <button class="btn btn-ghost" type="button" onclick="closeColumnModal()">Tutup</button>
+      </div>
+      <div class="check-grid" id="column-modal-grid"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+        <button class="btn btn-ghost" type="button" onclick="resetColumnPrefs()">Reset</button>
+        <button class="btn btn-primary" type="button" onclick="saveColumnPrefs()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const DATA = window.MASTER_DATA || {
+  gudangs: [], tokos: [], vendors: [], fg_items: [], rm_items: [], uoms: [], categories: [], resellers: [], meta: {}
+};
+
+const MASTER_PREVIEW_STORAGE_KEY = 'erp.master.preview.overrides.v1';
+const MASTER_ACTIVITY_STORAGE_KEY = 'erp.master.activity.log.v1';
+let ACTIVITY_LOG = [];
+
+function clone(value){
+  return JSON.parse(JSON.stringify(value));
+}
+
+function loadMasterPreviewOverrides(){
+  try{
+    const raw = localStorage.getItem(MASTER_PREVIEW_STORAGE_KEY);
+    if(!raw) return;
+    const parsed = JSON.parse(raw);
+    ['gudangs','tokos','vendors','fg_items','rm_items','uoms','categories','resellers','bom_headers','bom_details','meta'].forEach(key => {
+      if(parsed[key]) DATA[key] = parsed[key];
+    });
+    normalizeBomDetailUoms();
+    syncBomHeaderFgNames();
+  }catch(_){}
+}
+
+function loadActivityLog(){
+  try{
+    ACTIVITY_LOG = JSON.parse(localStorage.getItem(MASTER_ACTIVITY_STORAGE_KEY) || '[]');
+  }catch(_){
+    ACTIVITY_LOG = [];
+  }
+}
+
+function persistMasterPreview(){
+  try{
+    normalizeBomDetailUoms();
+    syncBomHeaderFgNames();
+    localStorage.setItem(MASTER_PREVIEW_STORAGE_KEY, JSON.stringify({
+      gudangs: clone(DATA.gudangs || []),
+      tokos: clone(DATA.tokos || []),
+      vendors: clone(DATA.vendors || []),
+      fg_items: clone(DATA.fg_items || []),
+      rm_items: clone(DATA.rm_items || []),
+      uoms: clone(DATA.uoms || []),
+      categories: clone(DATA.categories || []),
+      resellers: clone(DATA.resellers || []),
+      bom_headers: clone(DATA.bom_headers || []),
+      bom_details: clone(DATA.bom_details || []),
+      meta: clone(DATA.meta || {})
+    }));
+  }catch(_){}
+}
+
+function persistActivityLog(){
+  try{
+    localStorage.setItem(MASTER_ACTIVITY_STORAGE_KEY, JSON.stringify(ACTIVITY_LOG.slice(0, 100)));
+  }catch(_){}
+}
+
+function addActivity(action, detail){
+  ACTIVITY_LOG.unshift({
+    time: new Date().toLocaleString('id-ID'),
+    action,
+    detail
+  });
+  ACTIVITY_LOG = ACTIVITY_LOG.slice(0, 100);
+  persistActivityLog();
+  renderActivityLog();
+}
+
+function hydrateMastersFromBom(){
+  const fgMap = new Map((DATA.fg_items || []).map(row => [row.fg_code, row]));
+  (DATA.bom_headers || []).forEach(row => {
+    if(!row?.fg_code || fgMap.has(row.fg_code)) return;
+    const placeholder = {
+      fg_code: row.fg_code,
+      fg_name: row.fg_name || row.fg_code,
+      fg_category: row.pack_size ? `${row.pack_size}ML BOM` : 'BOM Derived',
+      uom_code: 'PCS',
+      status: 'Draft',
+      source_note: 'Derived from BOM'
+    };
+    DATA.fg_items.push(placeholder);
+    fgMap.set(row.fg_code, placeholder);
+  });
+}
+
+const SECTION_TITLES = {
+  gudang: 'Gudang',
+  toko: 'Toko',
+  vendor: 'Vendor',
+  fg: 'Finished Good',
+  rm: 'Raw Material',
+  uom: 'Satuan',
+  kategori: 'Kategori',
+  reseller: 'Reseller',
+  bom: 'BOM',
+  activity: 'Log Aktivitas'
+};
+
+function badge(status){
+  const map = { Aktif:'b-ok', Draft:'b-draft', RM:'b-warn', FG:'b-info', LOCAL:'b-info', IMPORT:'b-dark', Match:'b-ok', 'Belum Match':'b-err' };
+  const cls = map[status] || 'b-info';
+  return `<span class="badge ${cls}">${status || '-'}</span>`;
+}
+
+function normalizeVendorCategory(value){
+  return String(value || '').replace(/LOGOSTIC/gi, 'LOGISTIC');
+}
+
+function getVendorOrigin(vendor){
+  return /LTD/i.test(vendor?.vendor_name || '') ? 'IMPORT' : 'LOCAL';
+}
+
+function populateSelect(id, values, placeholder){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const current = el.value;
+  const options = ['<option value="">' + placeholder + '</option>']
+    .concat(values.filter(Boolean).map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">${v}</option>`));
+  el.innerHTML = options.join('');
+  if(values.includes(current)) el.value = current;
+}
+
+function actionButtons(sec, code){
+  return `<div class="cell-actions"><button class="btn btn-ghost btn-xs" onclick="editMaster('${sec}','${code}')">Edit</button></div>`;
+}
+
+const PAGE_SIZE = 30;
+const SELECTED = { gudang:new Set(), toko:new Set(), vendor:new Set(), fg:new Set(), rm:new Set() };
+const COLUMN_PREFS_KEY = 'erp.master.columnPrefs';
+const COLUMN_CONFIG = {
+  gudang:{ title:'Gudang', bodyId:'tbl-gudang', columns:['Pilih','Kode','Nama Gudang','Group','Tipe','Status','Aksi'] },
+  toko:{ title:'Toko', bodyId:'tbl-toko', columns:['Pilih','Kode','Nama Toko','Supply 1','Supply 2','Jenis','Status','Aksi'] },
+  vendor:{ title:'Vendor', bodyId:'tbl-vendor', columns:['Pilih','Kode','Nama Vendor','Asal','Kategori','Payment Term','Kota','Mata Uang','Status','Aksi'] },
+  fg:{ title:'Finished Good', bodyId:'tbl-fg', columns:['Pilih','Kode FG','Nama','Kategori','Satuan','Status','Aksi'] },
+  rm:{ title:'Raw Material', bodyId:'tbl-rm', columns:['Pilih','Kode RM','Nama','Kategori','Satuan','Vendor Default','Status','Aksi'] },
+  uom:{ title:'Satuan', bodyId:'tbl-uom', columns:['Kode','Nama Satuan','Status'] },
+  kategori:{ title:'Kategori', bodyId:'tbl-kategori', columns:['Kategori','Group','Status'] },
+  reseller:{ title:'Reseller', bodyId:'tbl-reseller', columns:['Kode','Nama','Tipe','Gudang Default','Kota','Status'] },
+  bom:{ title:'BOM', bodyId:'tbl-bom-header', columns:['Kode BOM','FG','Tipe','Size','Status Match','Aksi'] },
+  activity:{ title:'Log Aktivitas', bodyId:'tbl-activity-log', columns:['Waktu','Aktivitas','Detail'] }
+};
+const PAGINATION = { gudang:1, toko:1, vendor:1, fg:1, rm:1, bom_header:1, bom_detail:1 };
+const PAGE_CODES = { gudang:[], toko:[], vendor:[], fg:[], rm:[] };
+let CURRENT_FG_EDIT = null;
+let CURRENT_BOM_EDIT = null;
+let CURRENT_MATERIAL_PICKER_ROW = null;
+let CURRENT_BOM_VIEW = null;
+let CURRENT_MASTER_FORM = null;
+let CURRENT_IMPORT_SECTION = null;
+let columnPrefs = loadColumnPrefs();
+let activeColumnSection = 'gudang';
+
+const MASTER_FORM_CONFIG = {
+  gudang: {
+    bucket: 'gudangs',
+    key: 'warehouse_code',
+    title: 'Gudang',
+    rerender: () => { initFilters(); renderGudang(); renderToko(); renderKpis(); },
+    fields: [
+      { name:'warehouse_code', label:'Kode Gudang', required:true },
+      { name:'warehouse_name', label:'Nama Gudang', required:true },
+      { name:'warehouse_group', label:'Group', required:true, type:'select', options:['RM','PRODUKSI','FG'] },
+      { name:'warehouse_type', label:'Tipe Gudang', required:true, type:'select', options:['raw_material','production','main_fg','branch_fg'] },
+      { name:'status', label:'Status', type:'select', options:['Aktif','Draft'] }
+    ]
+  },
+  toko: {
+    bucket: 'tokos',
+    key: 'store_code',
+    title: 'Toko',
+    rerender: () => { initFilters(); renderToko(); renderKpis(); },
+    fields: [
+      { name:'store_code', label:'Kode Toko', required:true },
+      { name:'store_name', label:'Nama Toko', required:true },
+      { name:'supply_by_1', label:'Supply By 1', required:true, type:'select', optionsFrom:() => (DATA.gudangs || []).map(r => r.warehouse_code) },
+      { name:'supply_by_2', label:'Supply By 2', type:'select', allowBlank:true, optionsFrom:() => (DATA.gudangs || []).map(r => r.warehouse_code) },
+      { name:'store_type', label:'Jenis Toko', required:true, type:'select', options:['RETAIL','KONSINYASI','JUAL PUTUS'] },
+      { name:'status', label:'Status', type:'select', options:['Aktif','Draft'] }
+    ]
+  },
+  vendor: {
+    bucket: 'vendors',
+    key: 'vendor_code',
+    title: 'Vendor',
+    rerender: () => { initFilters(); renderVendor(); renderRm(); renderKpis(); },
+    fields: [
+      { name:'vendor_code', label:'Kode Vendor', required:true },
+      { name:'vendor_name', label:'Nama Vendor', required:true },
+      { name:'vendor_category', label:'Kategori', required:true },
+      { name:'payment_term', label:'Payment Term' },
+      { name:'city', label:'Kota' },
+      { name:'currency', label:'Mata Uang' },
+      { name:'primary_contact', label:'Kontak' },
+      { name:'phone', label:'Telepon' },
+      { name:'status', label:'Status', type:'select', options:['Aktif','Draft'] }
+    ]
+  },
+  rm: {
+    bucket: 'rm_items',
+    key: 'rm_code',
+    title: 'Raw Material',
+    rerender: () => { initFilters(); renderRm(); renderKpis(); renderBom(); },
+    fields: [
+      { name:'rm_code', label:'Kode RM', required:true },
+      { name:'rm_name', label:'Nama RM', required:true },
+      { name:'rm_category', label:'Kategori', required:true, type:'select', optionsFrom:() => [...new Set((DATA.rm_items || []).map(r => r.rm_category).filter(Boolean))].sort() },
+      { name:'uom_code', label:'Satuan', required:true, type:'select', optionsFrom:() => (DATA.uoms || []).map(r => r.uom_code) },
+      { name:'primary_supplier', label:'Supplier Utama', type:'select', allowBlank:true, optionsFrom:() => (DATA.vendors || []).map(r => r.vendor_name) },
+      { name:'purchase_price', label:'Harga Beli', inputMode:'decimal' },
+      { name:'minimum_buy', label:'MOQ', inputMode:'decimal' },
+      { name:'min_stock', label:'Min Stock', inputMode:'decimal' },
+      { name:'status', label:'Status', type:'select', options:['Aktif','Draft'] }
+    ]
+  }
+};
+
+const IMPORT_CONFIG = {
+  gudang: { bucket:'gudangs', key:'warehouse_code', required:['warehouse_code','warehouse_name','warehouse_group','warehouse_type'], headers:['warehouse_code','warehouse_name','warehouse_group','warehouse_type','status'], rerender: () => { initFilters(); renderGudang(); renderToko(); renderKpis(); } },
+  toko: { bucket:'tokos', key:'store_code', required:['store_code','store_name','supply_by_1','store_type'], headers:['store_code','store_name','supply_by_1','supply_by_2','store_type','status'], rerender: () => { initFilters(); renderToko(); renderKpis(); } },
+  vendor: { bucket:'vendors', key:'vendor_code', required:['vendor_code','vendor_name','vendor_category'], headers:['vendor_code','vendor_name','vendor_origin','vendor_category','payment_term','city','currency','primary_contact','phone','status'], rerender: () => { initFilters(); renderVendor(); renderRm(); renderKpis(); } },
+  fg: { bucket:'fg_items', key:'fg_code', required:['fg_code','fg_name'], headers:['fg_code','fg_name','fg_category','uom_code','status','source_note'], rerender: () => { initFilters(); renderFg(); renderKpis(); renderBom(); } },
+  rm: { bucket:'rm_items', key:'rm_code', required:['rm_code','rm_name','rm_category','uom_code'], headers:['rm_code','rm_name','rm_category','uom_code','primary_supplier','default_vendor_code','default_vendor_category','purchase_price','minimum_buy','min_stock','status'], rerender: () => { initFilters(); renderRm(); renderKpis(); renderBom(); } }
+};
+
+function checkboxCell(sec, code){
+  return `<input type="checkbox" ${SELECTED[sec].has(code) ? 'checked' : ''} onchange="toggleSelected('${sec}','${code}', this.checked)">`;
+}
+
+function toggleSelected(sec, code, checked){
+  if(checked) SELECTED[sec].add(code); else SELECTED[sec].delete(code);
+}
+
+function clearSelected(sec){
+  SELECTED[sec].clear();
+}
+
+function headerCheckbox(sec){
+  return `<input type="checkbox" onchange="toggleSelectAll('${sec}', this.checked)" title="Pilih semua di halaman ini">`;
+}
+
+function setSelectHeader(sec){
+  const el = document.getElementById(`th-${sec}-select`);
+  if(!el) return;
+  el.innerHTML = headerCheckbox(sec);
+  const input = el.querySelector('input');
+  const codes = PAGE_CODES[sec] || [];
+  if(!input) return;
+  input.checked = !!codes.length && codes.every(code => SELECTED[sec].has(code));
+  input.indeterminate = codes.some(code => SELECTED[sec].has(code)) && !input.checked;
+}
+
+function toggleSelectAll(sec, checked){
+  (PAGE_CODES[sec] || []).forEach(code => toggleSelected(sec, code, checked));
+  ({gudang:renderGudang,toko:renderToko,vendor:renderVendor,fg:renderFg,rm:renderRm})[sec]?.();
+}
+
+function paginateRows(rows, key){
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  PAGINATION[key] = Math.min(Math.max(1, PAGINATION[key] || 1), totalPages);
+  const start = (PAGINATION[key] - 1) * PAGE_SIZE;
+  return {
+    totalPages,
+    page: PAGINATION[key],
+    totalRows: rows.length,
+    pageRows: rows.slice(start, start + PAGE_SIZE)
+  };
+}
+
+function changePage(key, delta){
+  PAGINATION[key] = Math.max(1, (PAGINATION[key] || 1) + delta);
+  ({gudang:renderGudang,toko:renderToko,vendor:renderVendor,fg:renderFg,rm:renderRm,bom_header:renderBom,bom_detail:renderBom})[key]?.();
+}
+
+function renderPager(id, pageInfo, key){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(!pageInfo.totalRows){
+    el.innerHTML = `<div>0 data</div><div class="pager-actions"></div>`;
+    return;
+  }
+  const from = ((pageInfo.page - 1) * PAGE_SIZE) + 1;
+  const to = Math.min(pageInfo.page * PAGE_SIZE, pageInfo.totalRows);
+  el.innerHTML = `
+    <div>Menampilkan ${from}-${to} dari ${pageInfo.totalRows} data</div>
+    <div class="pager-actions">
+      <button class="btn btn-ghost" onclick="changePage('${key}', -1)" ${pageInfo.page <= 1 ? 'disabled' : ''}>Sebelumnya</button>
+      <button class="btn btn-ghost" disabled>Hal ${pageInfo.page} / ${pageInfo.totalPages}</button>
+      <button class="btn btn-ghost" onclick="changePage('${key}', 1)" ${pageInfo.page >= pageInfo.totalPages ? 'disabled' : ''}>Berikutnya</button>
+    </div>
+  `;
+}
+
+function bySearch(arr, keys, q){
+  const term = (q || '').trim().toLowerCase();
+  if(!term) return arr;
+  return arr.filter(row => keys.some(k => String(row[k] || '').toLowerCase().includes(term)));
+}
+
+function normalizeKey(value){
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+
+function lastCodeToken(value){
+  const parts = String(value || '').toUpperCase().split('-').filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : '';
+}
+
+function suggestFgMatch(row){
+  const fgItems = DATA.fg_items || [];
+  if(!row || !fgItems.length) return null;
+  const targetCode = normalizeKey(row.fg_code);
+  const targetName = normalizeKey(row.fg_name);
+  const token = lastCodeToken(row.fg_code || row.fg_name);
+  const size = String(row.pack_size || '');
+  let best = null;
+  let bestScore = -1;
+  fgItems.forEach(item => {
+    let score = 0;
+    const itemCode = normalizeKey(item.fg_code);
+    const itemName = normalizeKey(item.fg_name);
+    if(itemCode === targetCode) score += 200;
+    if(token && (itemCode.endsWith(token) || itemName.includes(token))) score += 80;
+    if(targetName && (itemName.includes(targetName) || targetName.includes(itemName))) score += 60;
+    const targetWords = String(row.fg_name || '').toUpperCase().split(/\s+/).filter(w => w.length >= 3);
+    targetWords.forEach(word => { if(String(item.fg_name || '').toUpperCase().includes(word)) score += 8; });
+    if(size && (String(item.fg_name || '').includes(size) || String(item.fg_code || '').includes(size))) score += 12;
+    if(score > bestScore){
+      bestScore = score;
+      best = item;
+    }
+  });
+  return bestScore >= 70 ? best : null;
+}
+
+function getBomHeadersForFg(fgCode){
+  return (DATA.bom_headers || []).filter(row => row.fg_code === fgCode || row.bom_code === `BOM-${fgCode}` || row.bom_code.endsWith(`-${fgCode}`));
+}
+
+function getBomDetailsForFg(fgCode){
+  const bomCodes = new Set(getBomHeadersForFg(fgCode).map(row => row.bom_code));
+  return (DATA.bom_details || []).filter(row => bomCodes.has(row.bom_code));
+}
+
+function getBomHeaderByCode(bomCode){
+  return (DATA.bom_headers || []).find(row => row.bom_code === bomCode);
+}
+
+function getBomDetailsByCode(bomCode){
+  return (DATA.bom_details || []).filter(row => row.bom_code === bomCode).map(row => ({ ...row, uom: inferBomUom(row.material_code) }));
+}
+
+function dedupeBomDetails(details){
+  const map = new Map();
+  (details || []).forEach(row => {
+    const key = [row.bom_code,row.material_code,row.material_name,row.qty,row.qty_is_percent,row.uom].join('|');
+    if(!map.has(key)) map.set(key, { ...row });
+  });
+  return Array.from(map.values());
+}
+
+function getRmByCode(code){
+  return (DATA.rm_items || []).find(row => row.rm_code === code);
+}
+
+function getFgByCode(code){
+  return (DATA.fg_items || []).find(row => row.fg_code === code);
+}
+
+function getBomPackSizeMl(header){
+  const raw = Number(String(header?.pack_size || '').replace(',','.'));
+  return Number.isFinite(raw) ? raw : 0;
+}
+
+function inferBomUom(materialCode){
+  return String(materialCode || '').toUpperCase().startsWith('FO-') ? 'ML' : 'PCS';
+}
+
+function syncBomHeaderFgNames(){
+  let changed = false;
+  DATA.bom_headers = (DATA.bom_headers || []).map(row => {
+    const fg = getFgByCode(row.fg_code);
+    const nextName = fg?.fg_name || row.fg_name || row.fg_code || '';
+    if((row.fg_name || '') !== nextName){
+      changed = true;
+      return { ...row, fg_name: nextName };
+    }
+    return row;
+  });
+  return changed;
+}
+
+function normalizeBomDetailUoms(){
+  let changed = false;
+  DATA.bom_details = (DATA.bom_details || []).map(row => {
+    const inferredUom = inferBomUom(row.material_code);
+    if((row.uom || '') !== inferredUom){
+      changed = true;
+      return { ...row, uom: inferredUom };
+    }
+    return row;
+  });
+  return changed;
+}
+
+function calcBomLineCost(header, row){
+  const rm = getRmByCode(row.material_code);
+  const unitCost = Number(rm?.purchase_price || 0);
+  const qty = Number(row.qty || 0);
+  const packSize = getBomPackSizeMl(header);
+  const effectiveQty = row.qty_is_percent ? (packSize * qty) : qty;
+  return {
+    unitCost,
+    effectiveQty,
+    subtotal: effectiveQty * unitCost
+  };
+}
+
+function money(value){
+  return Number(value || 0).toLocaleString('id-ID');
+}
+
+function setBomFocus(bomCode){
+  CURRENT_BOM_VIEW = bomCode;
+  renderBom();
+}
+
+function updateBomEditRowField(rowId, field, value){
+  if(!CURRENT_BOM_EDIT) return;
+  const row = CURRENT_BOM_EDIT.details.find(x => x._row_id === rowId);
+  if(!row) return;
+  row[field] = value;
+  if(field === 'material_code'){
+    row.matched_rm = !!(DATA.rm_items || []).find(x => x.rm_code === value);
+    row.match_note = row.matched_rm ? '' : 'Perlu cek manual';
+  }
+  renderBomEditDetailTable();
+}
+
+function applySuggestedBomMatch(bomCode){
+  const row = (DATA.bom_headers || []).find(x => x.bom_code === bomCode);
+  if(!row) return toast(`BOM ${bomCode} tidak ditemukan.`);
+  const suggestion = suggestFgMatch(row);
+  if(!suggestion) return toast(`Belum ada kandidat FG yang cukup dekat untuk ${bomCode}.`);
+  row.fg_code = suggestion.fg_code;
+  row.fg_name = getFgByCode(suggestion.fg_code)?.fg_name || suggestion.fg_name;
+  row.matched_fg = true;
+  row.match_note = `Auto match ke ${suggestion.fg_code}`;
+  syncBomHeaderFgNames();
+  persistMasterPreview();
+  addActivity('Auto Match BOM', `${bomCode} -> ${suggestion.fg_code}`);
+  renderBom();
+  toast(`BOM ${bomCode} di-match ke ${suggestion.fg_code}.`);
+}
+
+function renderKpis(){
+  const el = document.getElementById('kpis');
+  el.innerHTML = `
+    <div class="kpi"><div class="kpi-label">Gudang</div><div class="kpi-val">${DATA.gudangs.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Toko</div><div class="kpi-val">${DATA.tokos.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Vendor</div><div class="kpi-val">${DATA.vendors.length}</div></div>
+    <div class="kpi"><div class="kpi-label">FG / RM</div><div class="kpi-val">${DATA.fg_items.length} / ${DATA.rm_items.length}</div></div>
+  `;
+}
+
+function renderTable(id, rows, html){
+  document.getElementById(id).innerHTML = rows.length ? rows.map((row, idx) => html(row, idx)).join('') : `<tr><td colspan="8" class="empty">Belum ada data.</td></tr>`;
+}
+
+function renderGudang(){
+  const type = document.getElementById('filter-gudang-type').value;
+  let rows = bySearch(DATA.gudangs, ['warehouse_code','warehouse_name','warehouse_group','warehouse_type'], document.getElementById('search-gudang').value);
+  if(type) rows = rows.filter(r => r.warehouse_type === type);
+  PAGE_CODES.gudang = rows.map(r => r.warehouse_code);
+  renderTable('tbl-gudang', rows, r => `<tr><td>${checkboxCell('gudang', r.warehouse_code)}</td><td class="mono">${r.warehouse_code}</td><td>${r.warehouse_name}</td><td>${badge(r.warehouse_group)}</td><td>${r.warehouse_type}</td><td>${badge(r.status)}</td><td>${actionButtons('gudang', r.warehouse_code)}</td></tr>`);
+  setSelectHeader('gudang');
+}
+
+function renderToko(){
+  const supply = document.getElementById('filter-toko-supply').value;
+  const type = document.getElementById('filter-toko-type').value;
+  let rows = bySearch(DATA.tokos, ['store_code','store_name','supply_by_1','supply_by_2','store_type'], document.getElementById('search-toko').value);
+  if(supply) rows = rows.filter(r => r.supply_by_1 === supply || r.supply_by_2 === supply);
+  if(type) rows = rows.filter(r => (r.store_type || 'RETAIL') === type);
+  PAGE_CODES.toko = rows.map(r => r.store_code);
+  renderTable('tbl-toko', rows, r => `<tr><td>${checkboxCell('toko', r.store_code)}</td><td class="mono">${r.store_code}</td><td>${r.store_name}</td><td>${r.supply_by_1 || '-'}</td><td>${r.supply_by_2 || '-'}</td><td>${badge(r.store_type || 'RETAIL')}</td><td>${badge(r.status)}</td><td>${actionButtons('toko', r.store_code)}</td></tr>`);
+  setSelectHeader('toko');
+}
+
+function renderVendor(){
+  const origin = document.getElementById('filter-vendor-origin').value;
+  const category = document.getElementById('filter-vendor-category').value;
+  let rows = bySearch(DATA.vendors, ['vendor_code','vendor_name','vendor_category','payment_term','city'], document.getElementById('search-vendor').value)
+    .map(r => ({ ...r, vendor_origin: getVendorOrigin(r), vendor_category_label: normalizeVendorCategory(r.vendor_category) }));
+  if(origin) rows = rows.filter(r => r.vendor_origin === origin);
+  if(category) rows = rows.filter(r => r.vendor_category_label === category);
+  PAGE_CODES.vendor = rows.map(r => r.vendor_code);
+  renderTable('tbl-vendor', rows, r => `<tr><td>${checkboxCell('vendor', r.vendor_code)}</td><td class="mono">${r.vendor_code}</td><td>${r.vendor_name}</td><td>${badge(r.vendor_origin)}</td><td>${r.vendor_category_label || '-'}</td><td>${r.payment_term || '-'}</td><td>${r.city || '-'}</td><td>${r.currency || '-'}</td><td>${badge(r.status)}</td><td>${actionButtons('vendor', r.vendor_code)}</td></tr>`);
+  setSelectHeader('vendor');
+}
+
+function renderFg(){
+  const category = document.getElementById('filter-fg-category').value;
+  let rows = bySearch(DATA.fg_items, ['fg_code','fg_name','fg_category','uom_code'], document.getElementById('search-fg').value);
+  if(category) rows = rows.filter(r => r.fg_category === category);
+  PAGE_CODES.fg = rows.map(r => r.fg_code);
+  renderTable('tbl-fg', rows, r => `<tr><td>${checkboxCell('fg', r.fg_code)}</td><td class="mono">${r.fg_code}</td><td><div>${r.fg_name}</div>${r.source_note ? `<div style="font-size:10px;color:#64748B;margin-top:4px">${r.source_note}</div>` : ''}</td><td>${r.fg_category}</td><td>${r.uom_code || '-'}</td><td>${badge(r.status)}</td><td>${actionButtons('fg', r.fg_code)}</td></tr>`);
+  setSelectHeader('fg');
+}
+
+function renderRm(){
+  const category = document.getElementById('filter-rm-category').value;
+  let rows = bySearch(DATA.rm_items, ['rm_code','rm_name','rm_category','default_vendor_code','default_vendor_category','primary_supplier'], document.getElementById('search-rm').value);
+  if(category) rows = rows.filter(r => r.rm_category === category);
+  PAGE_CODES.rm = rows.map(r => r.rm_code);
+  renderTable('tbl-rm', rows, r => `<tr><td>${checkboxCell('rm', r.rm_code)}</td><td class="mono">${r.rm_code}</td><td>${r.rm_name}</td><td>${r.rm_category}</td><td>${r.uom_code || '-'}</td><td>${r.primary_supplier || r.default_vendor_code || r.default_vendor_category || '-'}</td><td>${badge(r.status)}</td><td>${actionButtons('rm', r.rm_code)}</td></tr>`);
+  setSelectHeader('rm');
+}
+
+function renderUom(){
+  renderTable('tbl-uom', DATA.uoms, r => `<tr><td class="mono">${r.uom_code}</td><td>${r.uom_name}</td><td>${badge(r.status)}</td></tr>`);
+}
+
+function renderKategori(){
+  renderTable('tbl-kategori', DATA.categories, r => `<tr><td>${r.category_name}</td><td>${badge(r.category_group)}</td><td>${badge(r.status)}</td></tr>`);
+}
+
+function renderReseller(){
+  renderTable('tbl-reseller', DATA.resellers, r => `<tr><td class="mono">${r.reseller_code}</td><td>${r.reseller_name || '-'}</td><td>${r.reseller_type || '-'}</td><td>${r.default_warehouse || '-'}</td><td>${r.city || '-'}</td><td>${badge(r.status)}</td></tr>`);
+}
+
+function renderMeta(){
+  const meta = DATA.meta || {};
+  const metaSources = document.getElementById('meta-sources');
+  if(!metaSources) return;
+  metaSources.innerHTML = `
+    <div class="meta-item"><div class="meta-k">Generated At</div><div class="meta-v">${meta.generated_at || '-'}</div></div>
+    <div class="meta-item"><div class="meta-k">Gudang & Toko Source</div><div class="meta-v">${meta.source_gudang_toko || '-'}</div></div>
+    <div class="meta-item"><div class="meta-k">Vendor Source</div><div class="meta-v">${meta.source_vendor || '-'}</div></div>
+    <div class="meta-item"><div class="meta-k">Item Source</div><div class="meta-v">${meta.source_items || '-'}</div></div>
+    <div class="meta-item"><div class="meta-k">BOM Sync</div><div class="meta-v">${meta.bom_sync || '-'}</div></div>
+  `;
+}
+
+function renderActivityLog(){
+  const rows = [...ACTIVITY_LOG].sort((a,b) => String(b.time || '').localeCompare(String(a.time || ''))).slice(0, 25);
+  renderTable('tbl-activity-log', rows, r => `<tr><td>${r.time}</td><td>${r.action}</td><td>${r.detail}</td></tr>`);
+}
+
+function clearActivityLog(){
+  ACTIVITY_LOG = [];
+  persistActivityLog();
+  renderActivityLog();
+  toast('Log aktivitas dibersihkan.');
+}
+
+function renderBom(){
+  syncBomHeaderFgNames();
+  const search = (document.getElementById('search-bom')?.value || '').trim().toLowerCase();
+  const matchFilter = document.getElementById('filter-bom-match')?.value || '';
+  const typeFilter = document.getElementById('filter-bom-type')?.value || '';
+  const sizeFilter = document.getElementById('filter-bom-size')?.value || '';
+  const headers = (DATA.bom_headers || []).filter(r => {
+    const status = r.matched_fg ? 'MATCH' : 'UNMATCH';
+    const searchOk = !search || [r.bom_code,r.fg_code,r.fg_name,r.variant_type,r.match_note].some(v => String(v || '').toLowerCase().includes(search));
+    const typeOk = !typeFilter || String(r.variant_type || '') === typeFilter;
+    const sizeOk = !sizeFilter || String(r.pack_size || '') === sizeFilter;
+    return searchOk && (!matchFilter || status === matchFilter) && typeOk && sizeOk;
+  });
+  if(!headers.some(r => r.bom_code === CURRENT_BOM_VIEW)) CURRENT_BOM_VIEW = headers[0]?.bom_code || null;
+  const unmatchedFg = (DATA.bom_headers || []).filter(r => !r.matched_fg).length;
+  const unmatchedRm = (DATA.bom_details || []).filter(r => !r.matched_rm).length;
+  const bomSummary = document.getElementById('bom-summary');
+  if(bomSummary) bomSummary.innerHTML = `
+    <div class="meta-item"><div class="meta-k">Total BOM</div><div class="meta-v">${(DATA.bom_headers || []).length}</div></div>
+    <div class="meta-item"><div class="meta-k">FG Belum Match</div><div class="meta-v">${unmatchedFg}</div></div>
+    <div class="meta-item"><div class="meta-k">Material Belum Match</div><div class="meta-v">${unmatchedRm}</div></div>
+  `;
+  document.getElementById('bom-header-meta').textContent = headers.length
+    ? `${headers.length} header BOM tampil. Klik row untuk fokus ke BOM yang ingin diedit.`
+    : 'Tidak ada header BOM yang cocok dengan filter.';
+  renderTable('tbl-bom-header', headers, r => {
+    const suggestion = !r.matched_fg ? suggestFgMatch(r) : null;
+    const rowStyle = `cursor:pointer;${CURRENT_BOM_VIEW === r.bom_code ? 'background:rgba(212,175,55,.08);' : ''}`;
+    return `<tr onclick="setBomFocus('${r.bom_code}')" style="${rowStyle}"><td class="mono">${r.bom_code}</td><td><div class="mono">${r.fg_code}</div><div>${getFgByCode(r.fg_code)?.fg_name || r.fg_name}</div>${suggestion ? `<div style="font-size:10px;color:#64748B;margin-top:4px">Saran: ${suggestion.fg_code} - ${suggestion.fg_name}</div>` : ''}</td><td>${r.variant_type || '-'}</td><td>${r.pack_size || '-'}</td><td>${badge(r.matched_fg ? 'Match' : 'Belum Match')}</td><td><div class="cell-actions">${suggestion ? `<button type="button" class="btn btn-ghost btn-xs" onclick="event.stopPropagation();applySuggestedBomMatch('${r.bom_code}')">Auto Match</button>` : ''}<button type="button" class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editBomHeader('${r.bom_code}')">Edit</button></div></td></tr>`;
+  });
+}
+
+function initFilters(){
+  populateSelect('filter-gudang-type', [...new Set(DATA.gudangs.map(r => r.warehouse_type))].sort(), 'Semua Tipe');
+  populateSelect('filter-toko-supply', [...new Set(DATA.tokos.flatMap(r => [r.supply_by_1, r.supply_by_2]).filter(Boolean))].sort(), 'Semua Supply');
+  populateSelect('filter-toko-type', [...new Set(DATA.tokos.map(r => r.store_type || 'RETAIL'))].sort(), 'Semua Jenis');
+  populateSelect('filter-vendor-category', [...new Set(DATA.vendors.map(r => normalizeVendorCategory(r.vendor_category)).filter(Boolean))].sort(), 'Semua Kategori');
+  populateSelect('filter-fg-category', [...new Set(DATA.fg_items.map(r => r.fg_category).filter(Boolean))].sort(), 'Semua Kategori');
+  populateSelect('filter-rm-category', [...new Set(DATA.rm_items.map(r => r.rm_category).filter(Boolean))].sort(), 'Semua Kategori');
+  populateSelect('filter-bom-type', [...new Set((DATA.bom_headers || []).map(r => r.variant_type).filter(Boolean))].sort(), 'Semua Type');
+  populateSelect('filter-bom-size', [...new Set((DATA.bom_headers || []).map(r => String(r.pack_size || '')).filter(Boolean))].sort((a,b) => Number(a) - Number(b)), 'Semua Size');
+}
+
+function getMasterFormValue(field, row){
+  const value = row?.[field.name];
+  if(value === undefined || value === null || value === ''){
+    if(field.name === 'status') return 'Aktif';
+    return '';
+  }
+  return value;
+}
+
+function renderMasterFormFields(sec, row){
+  const cfg = MASTER_FORM_CONFIG[sec];
+  const html = cfg.fields.map(field => {
+    const value = String(getMasterFormValue(field, row)).replace(/"/g,'&quot;');
+    if(field.type === 'select'){
+      const opts = (field.optionsFrom ? field.optionsFrom() : field.options || []).filter(Boolean);
+      const optionHtml = []
+        .concat(field.allowBlank ? ['<option value=""></option>'] : [])
+        .concat(opts.map(opt => `<option value="${String(opt).replace(/"/g,'&quot;')}" ${String(opt) === String(value) ? 'selected' : ''}>${opt}</option>`))
+        .join('');
+      return `<div class="field"><label>${field.label}${field.required ? ' *' : ''}</label><select id="master-form-${field.name}">${optionHtml}</select></div>`;
+    }
+    return `<div class="field"><label>${field.label}${field.required ? ' *' : ''}</label><input id="master-form-${field.name}" value="${value}" ${field.inputMode ? `inputmode="${field.inputMode}"` : ''}></div>`;
+  }).join('');
+  document.getElementById('master-form-fields').innerHTML = html;
+}
+
+function openMasterFormModal(sec, mode, code = ''){
+  const cfg = MASTER_FORM_CONFIG[sec];
+  if(!cfg) return toast(`Form ${SECTION_TITLES[sec]} belum disiapkan.`);
+  const bucket = DATA[cfg.bucket] || [];
+  const row = mode === 'edit' ? bucket.find(item => item[cfg.key] === code) : null;
+  if(mode === 'edit' && !row) return toast(`${cfg.title} ${code} tidak ditemukan.`);
+  CURRENT_MASTER_FORM = { sec, mode, originalKey: row?.[cfg.key] || '' };
+  document.getElementById('master-form-title').textContent = `${mode === 'edit' ? 'Edit' : 'Tambah'} ${cfg.title}`;
+  document.getElementById('master-form-sub').textContent = `Lengkapi data ${cfg.title.toLowerCase()} lalu simpan ke preview ini.`;
+  renderMasterFormFields(sec, row || {});
+  document.getElementById('master-form-modal').classList.add('open');
+}
+
+function closeMasterFormModal(){
+  document.getElementById('master-form-modal').classList.remove('open');
+  CURRENT_MASTER_FORM = null;
+}
+
+function saveMasterFormModal(){
+  if(!CURRENT_MASTER_FORM) return;
+  const { sec, mode } = CURRENT_MASTER_FORM;
+  const cfg = MASTER_FORM_CONFIG[CURRENT_MASTER_FORM.sec];
+  const draft = {};
+  for(const field of cfg.fields){
+    const el = document.getElementById(`master-form-${field.name}`);
+    let value = (el?.value || '').trim();
+    if(field.required && !value) return toast(`${field.label} wajib diisi.`);
+    if(['purchase_price','minimum_buy','min_stock'].includes(field.name)){
+      value = value ? Number(String(value).replace(',','.')) : 0;
+      if(Number.isNaN(value)) return toast(`${field.label} harus berupa angka.`);
+    }
+    draft[field.name] = value;
+  }
+  const bucket = DATA[cfg.bucket] || [];
+  const duplicate = bucket.find(item => item[cfg.key] === draft[cfg.key] && item[cfg.key] !== CURRENT_MASTER_FORM.originalKey);
+  if(duplicate) return toast(`Kode ${draft[cfg.key]} sudah dipakai.`);
+  if(CURRENT_MASTER_FORM.sec === 'vendor'){
+    draft.vendor_category = normalizeVendorCategory(draft.vendor_category);
+  }
+  if(CURRENT_MASTER_FORM.sec === 'rm'){
+    const vendor = (DATA.vendors || []).find(v => v.vendor_name === draft.primary_supplier);
+    draft.default_vendor_code = vendor?.vendor_code || '';
+    draft.default_vendor_category = vendor ? normalizeVendorCategory(vendor.vendor_category) : '';
+  }
+  if(CURRENT_MASTER_FORM.mode === 'edit'){
+    const row = bucket.find(item => item[cfg.key] === CURRENT_MASTER_FORM.originalKey);
+    if(!row) return toast(`${cfg.title} gagal diperbarui.`);
+    Object.assign(row, draft);
+  }else{
+    bucket.push(draft);
+  }
+  DATA[cfg.bucket] = bucket;
+  persistMasterPreview();
+  addActivity(mode === 'edit' ? `Edit ${cfg.title}` : `Tambah ${cfg.title}`, draft[cfg.key] || '-');
+  cfg.rerender();
+  closeMasterFormModal();
+  toast(`${cfg.title} ${mode === 'edit' ? 'diperbarui' : 'ditambahkan'} di preview ini.`);
+}
+
+function addMaster(sec){
+  if(sec === 'fg'){
+    const seedCode = `FG-${String((DATA.fg_items || []).length + 1).padStart(3,'0')}`;
+    const draft = {
+      fg_code: seedCode,
+      fg_name: '',
+      fg_category: '',
+      uom_code: 'PCS',
+      status: 'Draft',
+      source_note: 'Draft manual'
+    };
+    DATA.fg_items = (DATA.fg_items || []).concat([draft]);
+    persistMasterPreview();
+    addActivity('Tambah Finished Good', seedCode);
+    initFilters();
+    renderFg();
+    renderKpis();
+    openFgEditModal(seedCode);
+    return;
+  }
+  if(sec === 'bom'){
+    const bomCode = prompt('Kode BOM baru');
+    if(!bomCode) return;
+    if((DATA.bom_headers || []).some(r => r.bom_code === bomCode.trim())) return toast(`BOM ${bomCode} sudah ada.`);
+    DATA.bom_headers = (DATA.bom_headers || []).concat([{
+      bom_code: bomCode.trim(),
+      fg_code: '',
+      fg_name: '',
+      variant_type: '',
+      pack_size: '',
+      matched_fg: false,
+      match_note: 'Baru ditambahkan'
+    }]);
+    persistMasterPreview();
+    addActivity('Tambah BOM', bomCode.trim());
+    initFilters();
+    renderBom();
+    openBomEditModal(bomCode.trim());
+    return;
+  }
+  if(MASTER_FORM_CONFIG[sec]) return openMasterFormModal(sec, 'add');
+  toast(`Form tambah data ${SECTION_TITLES[sec]} disiapkan ke langkah berikutnya.`);
+}
+
+function editMaster(sec, code){
+  if(MASTER_FORM_CONFIG[sec]) return openMasterFormModal(sec, 'edit', code);
+  if(sec === 'fg'){
+    return openFgEditModal(code);
+  }
+  toast(`Edit ${SECTION_TITLES[sec]} ${code} disiapkan ke langkah berikutnya.`);
+}
+
+function openFgEditModal(code){
+  const row = (DATA.fg_items || []).find(x => x.fg_code === code);
+  if(!row) return toast(`FG ${code} tidak ditemukan.`);
+  CURRENT_FG_EDIT = row;
+  document.getElementById('fg-edit-code').value = row.fg_code || '';
+  document.getElementById('fg-edit-name').value = row.fg_name || '';
+  document.getElementById('fg-edit-category').value = row.fg_category || '';
+  document.getElementById('fg-edit-uom').value = row.uom_code || '';
+  const headers = getBomHeadersForFg(row.fg_code);
+  const details = getBomDetailsForFg(row.fg_code);
+  renderTable('fg-edit-bom-head', headers, r => `<tr><td class="mono">${r.bom_code}</td><td><div class="mono">${r.fg_code}</div><div>${getFgByCode(r.fg_code)?.fg_name || r.fg_name}</div></td><td>${badge(r.matched_fg ? 'Match' : 'Belum Match')}</td><td><div class="cell-actions"><button class="btn btn-ghost btn-xs" onclick="editBomHeader('${r.bom_code}')">Edit BOM</button></div></td></tr>`);
+  renderTable('fg-edit-bom-detail', details, r => `<tr><td class="mono">${r.bom_code}</td><td><div class="mono">${r.material_code}</div><div>${r.material_name}</div></td><td>${r.qty_is_percent ? (Number(r.qty_percent || 0).toLocaleString('id-ID') + '%') : Number(r.qty || 0).toLocaleString('id-ID')}</td><td>${inferBomUom(r.material_code)}</td><td>${badge(r.matched_rm ? 'Match' : 'Belum Match')}</td><td><div class="cell-actions"><button class="btn btn-ghost btn-xs" onclick="editBomDetail('${r.bom_code}','${r.material_code}')">Edit Item</button></div></td></tr>`);
+  document.getElementById('fg-edit-modal').classList.add('open');
+}
+
+function closeFgEditModal(){
+  document.getElementById('fg-edit-modal').classList.remove('open');
+  CURRENT_FG_EDIT = null;
+}
+
+function saveFgEditModal(){
+  if(!CURRENT_FG_EDIT) return;
+  const savedCode = document.getElementById('fg-edit-code').value.trim();
+  if(!savedCode) return toast('Kode FG wajib diisi.');
+  if((DATA.fg_items || []).some(row => row !== CURRENT_FG_EDIT && row.fg_code === savedCode)) return toast(`Kode FG ${savedCode} sudah dipakai.`);
+  CURRENT_FG_EDIT.fg_code = document.getElementById('fg-edit-code').value.trim();
+  CURRENT_FG_EDIT.fg_name = document.getElementById('fg-edit-name').value.trim();
+  CURRENT_FG_EDIT.fg_category = document.getElementById('fg-edit-category').value.trim();
+  CURRENT_FG_EDIT.uom_code = document.getElementById('fg-edit-uom').value.trim();
+  persistMasterPreview();
+  addActivity('Edit Finished Good', savedCode);
+  renderFg();
+  renderBom();
+  closeFgEditModal();
+  toast(`FG ${savedCode} diperbarui di preview ini.`);
+}
+
+function inferBomDrivenCategory(){
+  return [...new Set((DATA.bom_headers || []).map(r => r.pack_size ? `${r.pack_size}ML BOM` : '').filter(Boolean))].sort();
+}
+
+function editBomHeader(bomCode){
+  openBomEditModal(bomCode);
+}
+
+function editBomDetail(bomCode, materialCode){
+  openBomEditModal(bomCode, materialCode);
+}
+
+function openBomEditModal(bomCode, focusMaterialCode = ''){
+  const header = getBomHeaderByCode(bomCode);
+  if(!header) return toast(`BOM ${bomCode} tidak ditemukan.`);
+  CURRENT_BOM_EDIT = {
+    bomCode,
+    focusMaterialCode,
+    header: { ...header },
+    details: dedupeBomDetails(getBomDetailsByCode(bomCode)).map((row, idx) => ({ ...row, uom: inferBomUom(row.material_code), _row_id: row._row_id || `row-${idx + 1}-${Date.now()}` }))
+  };
+  const suggestion = !header.matched_fg ? suggestFgMatch(header) : null;
+  document.getElementById('bom-edit-code').value = header.bom_code || '';
+  document.getElementById('bom-edit-fg-code').value = suggestion?.fg_code || header.fg_code || '';
+  document.getElementById('bom-edit-fg-name').value = getFgByCode(suggestion?.fg_code || header.fg_code || '')?.fg_name || suggestion?.fg_name || header.fg_name || '';
+  document.getElementById('bom-edit-type').value = header.variant_type || '';
+  document.getElementById('bom-edit-size').value = header.pack_size || '';
+  document.getElementById('bom-edit-note').value = header.match_note || '';
+  renderBomEditDetailTable();
+  document.getElementById('bom-edit-modal').classList.add('open');
+}
+
+function closeBomEditModal(){
+  document.getElementById('bom-edit-modal').classList.remove('open');
+  CURRENT_BOM_EDIT = null;
+}
+
+function renderBomEditDetailTable(){
+  if(!CURRENT_BOM_EDIT) return;
+  const costRows = CURRENT_BOM_EDIT.details.map(row => calcBomLineCost(CURRENT_BOM_EDIT.header, row));
+  const totalCost = costRows.reduce((sum, row) => sum + row.subtotal, 0);
+  document.getElementById('bom-edit-cost-summary').innerHTML = `
+    <div class="meta-item"><div class="meta-k">Estimasi Total Modal BOM</div><div class="meta-v">Rp ${money(totalCost)}</div></div>
+    <div class="meta-item"><div class="meta-k">Dasar Harga</div><div class="meta-v">Harga beli dari master RM</div></div>
+  `;
+  renderTable('bom-edit-detail', CURRENT_BOM_EDIT.details, (r, idx) => {
+    const cost = calcBomLineCost(CURRENT_BOM_EDIT.header, r);
+    return `<tr ${CURRENT_BOM_EDIT.focusMaterialCode && r.material_code === CURRENT_BOM_EDIT.focusMaterialCode ? 'style="background:rgba(212,175,55,.08)"' : ''}><td>${idx + 1}</td><td><div class="picker-row"><input readonly placeholder="Pilih material" data-row-id="${r._row_id}" data-field="material_code" onclick="openMaterialPicker('${r._row_id}')" value="${(r.material_code || '').replace(/"/g,'&quot;')}"></div></td><td><div class="picker-row"><input readonly placeholder="Pilih material" data-row-id="${r._row_id}" data-field="material_name" onclick="openMaterialPicker('${r._row_id}')" value="${(r.material_name || '').replace(/"/g,'&quot;')}"></div></td><td><input data-row-id="${r._row_id}" data-field="qty" value="${r.qty_is_percent ? (r.qty_percent || '') : (r.qty ?? '')}"></td><td><input readonly data-row-id="${r._row_id}" data-field="uom" value="${inferBomUom(r.material_code)}"></td><td>Rp ${money(cost.unitCost)}</td><td>Rp ${money(cost.subtotal)}</td><td><div class="cell-actions">${badge(r.matched_rm ? 'Match' : 'Belum Match')}<button type="button" class="btn btn-ghost btn-xs" onclick="removeBomEditRow('${r._row_id}')">Hapus</button></div></td></tr>`;
+  });
+}
+
+function addBomEditRow(){
+  if(!CURRENT_BOM_EDIT) return;
+  CURRENT_BOM_EDIT.details.push({
+    _row_id: `row-new-${Date.now()}-${CURRENT_BOM_EDIT.details.length + 1}`,
+    bom_code: CURRENT_BOM_EDIT.bomCode,
+    material_code: '',
+    material_name: '',
+    qty: 1,
+    qty_is_percent: false,
+    qty_percent: null,
+    uom: 'PCS',
+    matched_rm: false,
+    match_note: 'Baris baru'
+  });
+  renderBomEditDetailTable();
+}
+
+function removeBomEditRow(rowId){
+  if(!CURRENT_BOM_EDIT) return;
+  CURRENT_BOM_EDIT.details = CURRENT_BOM_EDIT.details.filter(row => row._row_id !== rowId);
+  renderBomEditDetailTable();
+}
+
+function openMaterialPicker(rowId){
+  CURRENT_MATERIAL_PICKER_ROW = rowId;
+  document.getElementById('material-picker-search').value = '';
+  renderMaterialPickerList();
+  document.getElementById('material-picker-modal').classList.add('open');
+}
+
+function closeMaterialPicker(){
+  document.getElementById('material-picker-modal').classList.remove('open');
+  CURRENT_MATERIAL_PICKER_ROW = null;
+}
+
+function renderMaterialPickerList(){
+  const q = (document.getElementById('material-picker-search')?.value || '').trim().toLowerCase();
+  const rows = (DATA.rm_items || [])
+    .filter(r => !q || [r.rm_code,r.rm_name,r.rm_category,r.primary_supplier].some(v => String(v || '').toLowerCase().includes(q)))
+    .slice(0, 80);
+  document.getElementById('material-picker-list').innerHTML = rows.length
+    ? rows.map(r => `<div class="picker-item" onclick="selectMaterialForBom('${(r.rm_code || '').replace(/'/g,"\\'")}')"><div class="picker-item-code">${r.rm_code}</div><div class="picker-item-name">${r.rm_name}</div><div class="picker-item-meta">${r.rm_category || '-'} â€¢ ${r.primary_supplier || '-'} â€¢ Rp ${money(r.purchase_price || 0)}</div></div>`).join('')
+    : `<div class="empty">Material tidak ditemukan.</div>`;
+}
+
+function selectMaterialForBom(rmCode){
+  if(!CURRENT_BOM_EDIT || !CURRENT_MATERIAL_PICKER_ROW) return;
+  const material = (DATA.rm_items || []).find(r => r.rm_code === rmCode);
+  if(!material) return;
+  const row = CURRENT_BOM_EDIT.details.find(x => x._row_id === CURRENT_MATERIAL_PICKER_ROW);
+  if(!row) return;
+  row.material_code = material.rm_code;
+  row.material_name = material.rm_name;
+  row.uom = inferBomUom(material.rm_code);
+  row.matched_rm = true;
+  row.match_note = '';
+  closeMaterialPicker();
+  renderBomEditDetailTable();
+}
+
+function saveBomEditModal(){
+  if(!CURRENT_BOM_EDIT) return;
+  const header = getBomHeaderByCode(CURRENT_BOM_EDIT.bomCode);
+  if(!header) return;
+  header.fg_code = document.getElementById('bom-edit-fg-code').value.trim();
+  header.fg_name = getFgByCode(header.fg_code)?.fg_name || document.getElementById('bom-edit-fg-name').value.trim();
+  header.variant_type = document.getElementById('bom-edit-type').value.trim();
+  header.pack_size = document.getElementById('bom-edit-size').value.trim();
+  header.match_note = document.getElementById('bom-edit-note').value.trim();
+  header.matched_fg = !!(DATA.fg_items || []).find(x => x.fg_code === header.fg_code);
+  syncBomHeaderFgNames();
+  document.querySelectorAll('#bom-edit-detail input').forEach(input => {
+    const row = CURRENT_BOM_EDIT.details.find(x => x._row_id === input.dataset.rowId);
+    if(!row) return;
+    const field = input.dataset.field;
+    const value = input.value.trim();
+    if(field === 'qty'){
+      const num = Number(String(value).replace(',','.'));
+      if(!Number.isNaN(num)){
+        if(row.qty_is_percent){
+          row.qty_percent = num;
+          row.qty = num / 100;
+        }else{
+          row.qty = num;
+        }
+      }
+    }else{
+      row[field] = value;
+    }
+    if(field === 'material_code'){
+      row.matched_rm = !!(DATA.rm_items || []).find(x => x.rm_code === value);
+      row.uom = inferBomUom(value);
+      row.match_note = row.matched_rm ? '' : 'Perlu cek manual';
+    }
+  });
+  CURRENT_BOM_EDIT.details.forEach(row => {
+    row.uom = inferBomUom(row.material_code);
+  });
+  DATA.bom_details = (DATA.bom_details || []).filter(row => row.bom_code !== CURRENT_BOM_EDIT.bomCode).concat(CURRENT_BOM_EDIT.details.map(({ _row_id, ...rest }) => rest));
+  persistMasterPreview();
+  addActivity('Edit BOM', header.bom_code);
+  renderBom();
+  if(CURRENT_FG_EDIT){
+    openFgEditModal(CURRENT_FG_EDIT.fg_code);
+  }
+  closeBomEditModal();
+  toast(`BOM ${header.bom_code} diperbarui di preview ini.`);
+}
+
+function deleteSelected(sec){
+  const selected = Array.from(SELECTED[sec] || []);
+  if(!selected.length){
+    toast(`Belum ada data ${SECTION_TITLES[sec]} yang dipilih.`);
+    return;
+  }
+  const config = {
+    gudang:['gudangs','warehouse_code',renderGudang],
+    toko:['tokos','store_code',renderToko],
+    vendor:['vendors','vendor_code',renderVendor],
+    fg:['fg_items','fg_code',renderFg],
+    rm:['rm_items','rm_code',renderRm]
+  }[sec];
+  if(!config) return;
+  const [bucket, key, rerender] = config;
+  DATA[bucket] = (DATA[bucket] || []).filter(row => !SELECTED[sec].has(row[key]));
+  clearSelected(sec);
+  persistMasterPreview();
+  addActivity(`Hapus ${SECTION_TITLES[sec]}`, `${selected.length} baris`);
+  rerender();
+  renderKpis();
+  toast(`${selected.length} data ${SECTION_TITLES[sec]} dihapus dari preview ini.`);
+}
+
+function showSection(sec){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  document.querySelectorAll('.nav-link[data-sec]').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+  setMasterNavState(sec);
+  activeColumnSection = sec;
+  document.getElementById('sec-' + sec).classList.add('active');
+  document.getElementById('bc-child').textContent = SECTION_TITLES[sec];
+  applyColumnVisibility(sec);
+}
+
+function loadColumnPrefs(){
+  try{
+    const raw = window.localStorage.getItem(COLUMN_PREFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(_err){
+    return {};
+  }
+}
+function persistColumnPrefs(){
+  window.localStorage.setItem(COLUMN_PREFS_KEY, JSON.stringify(columnPrefs));
+}
+function getSectionTable(section){
+  const config = COLUMN_CONFIG[section];
+  const tbody = config ? document.getElementById(config.bodyId) : null;
+  return tbody ? tbody.closest('table') : null;
+}
+function applyColumnVisibility(section){
+  const config = COLUMN_CONFIG[section];
+  const table = getSectionTable(section);
+  if(!config || !table) return;
+  const prefs = columnPrefs[section] || {};
+  table.querySelectorAll('tr').forEach(row => {
+    Array.from(row.children).forEach((cell, index) => {
+      cell.style.display = prefs[index] === false ? 'none' : '';
+    });
+  });
+}
+function openColumnModal(section = activeColumnSection){
+  activeColumnSection = section;
+  const config = COLUMN_CONFIG[section];
+  if(!config) return;
+  const prefs = columnPrefs[section] || {};
+  document.getElementById('column-modal-sub').textContent = `Atur kolom yang tampil untuk ${config.title}.`;
+  document.getElementById('column-modal-grid').innerHTML = config.columns.map((label, index) => `
+    <label class="check-item"><input type="checkbox" data-col-index="${index}" ${prefs[index] !== false ? 'checked' : ''}> <span>${label}</span></label>
+  `).join('');
+  document.getElementById('column-modal').classList.add('open');
+}
+function closeColumnModal(){
+  document.getElementById('column-modal').classList.remove('open');
+}
+function saveColumnPrefs(){
+  const picks = {};
+  document.querySelectorAll('#column-modal-grid input[type="checkbox"]').forEach(input => {
+    picks[input.dataset.colIndex] = input.checked;
+  });
+  columnPrefs[activeColumnSection] = picks;
+  persistColumnPrefs();
+  applyColumnVisibility(activeColumnSection);
+  closeColumnModal();
+}
+function resetColumnPrefs(){
+  delete columnPrefs[activeColumnSection];
+  persistColumnPrefs();
+  openColumnModal(activeColumnSection);
+  applyColumnVisibility(activeColumnSection);
+}
+
+function csvEscape(value){
+  const text = String(value ?? '');
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function parseCsvText(text){
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let inQuotes = false;
+  const normalized = String(text || '').replace(/^\uFEFF/, '');
+  for(let i = 0; i < normalized.length; i += 1){
+    const ch = normalized[i];
+    const next = normalized[i + 1];
+    if(ch === '"'){
+      if(inQuotes && next === '"'){
+        cell += '"';
+        i += 1;
+      }else{
+        inQuotes = !inQuotes;
+      }
+    }else if(ch === ',' && !inQuotes){
+      row.push(cell);
+      cell = '';
+    }else if((ch === '\n' || ch === '\r') && !inQuotes){
+      if(ch === '\r' && next === '\n') i += 1;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    }else{
+      cell += ch;
+    }
+  }
+  if(cell.length || row.length){
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows.filter(r => r.some(v => String(v || '').trim() !== ''));
+}
+
+function downloadCsv(filename, rows){
+  const csv = rows.map(row => row.map(csvEscape).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function getTemplateHeaders(sec, headers){
+  const cfg = IMPORT_CONFIG[sec];
+  if(!cfg) return headers;
+  return headers.map(header => cfg.required?.includes(header) ? `${header}*` : header);
+}
+
+function getImportHeaderLookup(sec){
+  const cfg = IMPORT_CONFIG[sec];
+  return (cfg?.headers || []).map(header => cfg.required?.includes(header) ? `${header}*` : header);
+}
+
+function getExportRows(sec){
+  const maps = {
+    gudang: {
+      rows: DATA.gudangs || [],
+      headers: ['warehouse_code','warehouse_name','warehouse_group','warehouse_type','status']
+    },
+    toko: {
+      rows: DATA.tokos || [],
+      headers: ['store_code','store_name','supply_by_1','supply_by_2','store_type','status']
+    },
+    vendor: {
+      rows: (DATA.vendors || []).map(r => ({ ...r, vendor_origin: getVendorOrigin(r), vendor_category: normalizeVendorCategory(r.vendor_category) })),
+      headers: ['vendor_code','vendor_name','vendor_origin','vendor_category','payment_term','city','currency','primary_contact','phone','status']
+    },
+    fg: {
+      rows: DATA.fg_items || [],
+      headers: ['fg_code','fg_name','fg_category','uom_code','status','source_note']
+    },
+    rm: {
+      rows: DATA.rm_items || [],
+      headers: ['rm_code','rm_name','rm_category','uom_code','primary_supplier','default_vendor_code','default_vendor_category','purchase_price','minimum_buy','min_stock','status']
+    },
+    uom: {
+      rows: DATA.uoms || [],
+      headers: ['uom_code','uom_name','status']
+    },
+    kategori: {
+      rows: DATA.categories || [],
+      headers: ['category_name','category_group','status']
+    },
+    reseller: {
+      rows: DATA.resellers || [],
+      headers: ['reseller_code','reseller_name','reseller_type','default_warehouse','city','status']
+    },
+    bom: {
+      rows: (DATA.bom_details || []).map(row => {
+        const header = getBomHeaderByCode(row.bom_code) || {};
+        const cost = calcBomLineCost(header, row);
+        return {
+          bom_code: row.bom_code,
+          fg_code: header.fg_code || '',
+          fg_name: header.fg_name || '',
+          variant_type: header.variant_type || '',
+          pack_size: header.pack_size || '',
+          matched_fg: header.matched_fg ?? '',
+          material_code: row.material_code || '',
+          material_name: row.material_name || '',
+          qty_export: row.qty_is_percent ? `${Number(row.qty_percent || 0).toLocaleString('id-ID')}%` : row.qty,
+          qty_actual: cost.effectiveQty,
+          uom: inferBomUom(row.material_code),
+          matched_rm: row.matched_rm ?? '',
+          unit_cost: cost.unitCost,
+          subtotal: cost.subtotal,
+          match_note: row.match_note || header.match_note || ''
+        };
+      }),
+      headers: ['bom_code','fg_code','fg_name','variant_type','pack_size','matched_fg','material_code','material_name','qty_export','qty_actual','uom','matched_rm','unit_cost','subtotal','match_note']
+    }
+  }[sec];
+  if(!maps) return null;
+  const headerRow = getTemplateHeaders(sec, maps.headers);
+  return [headerRow, ...maps.rows.map(row => maps.headers.map(key => row[key] ?? ''))];
+}
+
+function normalizeImportedRow(sec, row){
+  const next = { ...row };
+  if(sec === 'vendor'){
+    next.vendor_category = normalizeVendorCategory(next.vendor_category);
+  }
+  if(sec === 'rm'){
+    next.purchase_price = next.purchase_price ? Number(String(next.purchase_price).replace(',','.')) || 0 : 0;
+    next.minimum_buy = next.minimum_buy ? Number(String(next.minimum_buy).replace(',','.')) || 0 : 0;
+    next.min_stock = next.min_stock ? Number(String(next.min_stock).replace(',','.')) || 0 : 0;
+    if(next.primary_supplier && !next.default_vendor_code){
+      const vendor = (DATA.vendors || []).find(v => v.vendor_name === next.primary_supplier);
+      next.default_vendor_code = vendor?.vendor_code || '';
+      next.default_vendor_category = vendor ? normalizeVendorCategory(vendor.vendor_category) : next.default_vendor_category || '';
+    }
+  }
+  return next;
+}
+
+function importSection(sec){
+  const cfg = IMPORT_CONFIG[sec];
+  if(!cfg) return toast(`Import ${SECTION_TITLES[sec]} belum disiapkan.`);
+  CURRENT_IMPORT_SECTION = sec;
+  const input = document.getElementById('master-import-input');
+  input.value = '';
+  input.click();
+}
+
+function handleImportFile(event){
+  const file = event.target.files?.[0];
+  const sec = CURRENT_IMPORT_SECTION;
+  CURRENT_IMPORT_SECTION = null;
+  if(!file || !sec) return;
+  const cfg = IMPORT_CONFIG[sec];
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const rows = parseCsvText(reader.result);
+      if(rows.length < 2) return toast('File import kosong atau tidak valid.');
+      const headers = rows[0].map(v => String(v || '').trim());
+      if(headers.join('|') !== getImportHeaderLookup(sec).join('|')){
+        return toast(`Header template ${SECTION_TITLES[sec]} tidak cocok. Gunakan CSV hasil Export sebagai template.`);
+      }
+      const imported = rows.slice(1).map(cols => {
+        const obj = {};
+        cfg.headers.forEach((header, idx) => { obj[header] = String(cols[idx] ?? '').trim(); });
+        return normalizeImportedRow(sec, obj);
+      }).filter(row => row[cfg.key]);
+      const invalidRow = imported.find(row => (cfg.required || []).some(key => !String(row[key] ?? '').trim()));
+      if(invalidRow){
+        return toast(`Import ${SECTION_TITLES[sec]} gagal. Ada kolom wajib yang kosong pada kode ${invalidRow[cfg.key] || '-'}.`);
+      }
+      const existing = DATA[cfg.bucket] || [];
+      const map = new Map(existing.map(row => [row[cfg.key], row]));
+      imported.forEach(row => {
+        if(map.has(row[cfg.key])){
+          Object.assign(map.get(row[cfg.key]), row);
+        }else{
+          existing.push(row);
+        }
+      });
+      DATA[cfg.bucket] = existing;
+      persistMasterPreview();
+      addActivity(`Import ${SECTION_TITLES[sec]}`, `${imported.length} baris`);
+      cfg.rerender();
+      toast(`Import ${SECTION_TITLES[sec]} selesai. ${imported.length} baris diproses.`);
+    }catch(err){
+      toast(`Import gagal: ${err.message}`);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportSection(sec){
+  const stamp = new Date().toISOString().slice(0,10);
+  const rows = getExportRows(sec);
+  if(!rows) return toast(`Export ${SECTION_TITLES[sec]} belum disiapkan.`);
+  downloadCsv(`master-${sec}-${stamp}.csv`, rows);
+  addActivity(`Export ${SECTION_TITLES[sec]}`, `master-${sec}-${stamp}.csv`);
+  toast(`Export master ${SECTION_TITLES[sec]} dimulai.`);
+}
+
+function toast(msg){
+  alert(msg);
+}
+
+function setMasterNavState(activeSec='gudang'){
+  const groups = {
+    foundation:['gudang','toko','uom','kategori'],
+    partner:['vendor','reseller'],
+    product:['fg','rm','bom'],
+    audit:['activity']
+  };
+  document.getElementById('nav-parent-master-foundation')?.classList.toggle('active', groups.foundation.includes(activeSec));
+  document.getElementById('nav-parent-master-partner')?.classList.toggle('active', groups.partner.includes(activeSec));
+  document.getElementById('nav-parent-master-product')?.classList.toggle('active', groups.product.includes(activeSec));
+  document.getElementById('nav-parent-master-audit')?.classList.toggle('active', groups.audit.includes(activeSec));
+  document.getElementById('nav-group-master-foundation')?.classList.remove('collapsed');
+  document.getElementById('nav-group-master-partner')?.classList.remove('collapsed');
+  document.getElementById('nav-group-master-product')?.classList.remove('collapsed');
+  document.getElementById('nav-group-master-audit')?.classList.remove('collapsed');
+}
+
+document.querySelectorAll('.tab, .nav-link[data-sec]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    showSection(el.dataset.sec);
+  });
+});
+
+document.getElementById('nav-parent-master-foundation')?.addEventListener('click', e => { e.preventDefault(); showSection('gudang'); });
+document.getElementById('nav-parent-master-partner')?.addEventListener('click', e => { e.preventDefault(); showSection('vendor'); });
+document.getElementById('nav-parent-master-product')?.addEventListener('click', e => { e.preventDefault(); showSection('fg'); });
+document.getElementById('nav-parent-master-audit')?.addEventListener('click', e => { e.preventDefault(); showSection('activity'); });
+
+document.getElementById('fg-edit-modal').addEventListener('click', e => {
+  if(e.target.id === 'fg-edit-modal') closeFgEditModal();
+});
+document.getElementById('bom-edit-modal').addEventListener('click', e => {
+  if(e.target.id === 'bom-edit-modal') closeBomEditModal();
+});
+document.getElementById('material-picker-modal').addEventListener('click', e => {
+  if(e.target.id === 'material-picker-modal') closeMaterialPicker();
+});
+document.getElementById('master-form-modal').addEventListener('click', e => {
+  if(e.target.id === 'master-form-modal') closeMasterFormModal();
+});
+document.getElementById('material-picker-search').addEventListener('input', renderMaterialPickerList);
+document.getElementById('master-import-input').addEventListener('change', handleImportFile);
+
+function bindRerender(sec, ids){
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el){
+      el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+        ({gudang:renderGudang,toko:renderToko,vendor:renderVendor,fg:renderFg,rm:renderRm,bom:renderBom})[sec]();
+      });
+    }
+  });
+}
+
+loadMasterPreviewOverrides();
+loadActivityLog();
+hydrateMastersFromBom();
+initFilters();
+bindRerender('gudang', ['search-gudang','filter-gudang-type']);
+bindRerender('toko', ['search-toko','filter-toko-supply','filter-toko-type']);
+bindRerender('vendor', ['search-vendor','filter-vendor-origin','filter-vendor-category']);
+bindRerender('fg', ['search-fg','filter-fg-category']);
+bindRerender('rm', ['search-rm','filter-rm-category']);
+bindRerender('bom', ['search-bom','filter-bom-match','filter-bom-type','filter-bom-size']);
+
+renderKpis();
+renderGudang();
+renderToko();
+renderVendor();
+renderFg();
+renderRm();
+if(normalizeBomDetailUoms()){
+  persistMasterPreview();
+}
+renderUom();
+renderKategori();
+renderReseller();
+renderMeta();
+renderActivityLog();
+renderBom();
+setMasterNavState('gudang');
+Object.keys(COLUMN_CONFIG).forEach(applyColumnVisibility);
+</script>
+</body>
+</html>
+

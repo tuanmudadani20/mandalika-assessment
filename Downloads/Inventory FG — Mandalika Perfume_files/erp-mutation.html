@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP Mandalika Adjustment Gudang & Toko</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./master-data.js"></script>
+<style>
+:root{
+  --gold:#D4AF37; --gold-d:#B49020; --bg:#F8FAFC; --card:#FFFFFF; --line:#E2E8F0;
+  --text:#334155; --text-d:#0F172A; --muted:#64748B; --sb:#18181B; --sb2:#27272A; --sbm:#71717A;
+  --info:#2563EB; --ok:#10B981; --warn:#F59E0B; --sh:0 10px 20px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+.sb{width:250px;background:var(--sb);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.sb-logo{padding:22px 22px 18px;border-bottom:1px solid var(--sb2)}
+.sb-logo-name{font-size:16px;font-weight:800}
+.sb-logo-sub{font-size:10px;color:var(--sbm);text-transform:uppercase;letter-spacing:.12em;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-sec-lbl{padding:10px 22px 6px;font-size:10px;color:var(--sbm);font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.nav-link,.nav-item{display:block;position:relative;overflow:hidden;width:calc(100% - 16px);margin:3px 8px;padding:10px 13px;border-radius:12px;color:#E4E4E7;text-decoration:none;font-size:12px;font-weight:600;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .22s ease}
+.nav-link:hover,.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(2px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.nav-link.active,.nav-item.active{background:linear-gradient(90deg,rgba(212,175,55,.24),rgba(212,175,55,.08));color:#F6D365;box-shadow:inset 2px 0 0 var(--gold),0 10px 22px rgba(15,23,42,.16)}
+.sb-foot{margin-top:auto;padding:16px 18px;border-top:1px solid var(--sb2)}
+.sb-note{font-size:10px;color:var(--sbm);line-height:1.5}
+.main{margin-left:250px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 22px rgba(15,23,42,.05);display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:sticky;top:0;z-index:10;gap:12px}
+.bc{display:flex;flex-direction:column;gap:4px}
+.bc small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.bc b{color:var(--text-d);font-size:14px}
+.btn{border:none;border-radius:10px;padding:9px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--gold);color:#fff;box-shadow:0 10px 20px rgba(212,175,55,.2)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.content{padding:18px 20px 22px;max-width:1380px;width:100%;margin:0 auto}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#FFFFFF,rgba(248,250,252,.94))}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d)}
+.title{font-size:18px;font-weight:800;color:var(--text-d);margin:6px 0}
+.subtitle{font-size:11.5px;color:var(--muted);line-height:1.55;max-width:980px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#fafafa)}
+.kpi-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text-d);margin-top:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);margin-bottom:20px}
+.card-pad{padding:20px 22px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar-left,.toolbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.tab{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+.form-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.flow-form-card{max-width:980px;margin:0 auto 14px}
+.inline-form{display:none;margin-bottom:14px}
+.inline-form.active{display:block}
+.section{display:none}
+.section.active{display:block;animation:sectionFade .24s ease}
+.flow-form-card .ph{align-items:center}
+.flow-form-card .title{font-size:18px;margin:4px 0}
+.flow-form-card .subtitle{font-size:12px}
+.mut-head{display:grid;grid-template-columns:1fr 1.25fr;gap:12px}
+.mut-col{display:grid;gap:10px}
+.field{display:grid;gap:6px}
+.field label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.search,.select{padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-size:12px;width:100%}
+.picker-card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#FCFDFE,#F8FAFC);padding:10px 10px 6px}
+.picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.picker-title{font-size:11px;font-weight:800;color:var(--text-d);text-transform:uppercase;letter-spacing:.06em}
+.picker-meta{font-size:11px;color:var(--muted)}
+.picker-tools{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:12px;width:100%}
+.picker-tools .tool-col{display:grid;gap:6px}
+.picker-table{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff;width:100%;min-width:0}
+.picker-table table{width:100%;border-collapse:collapse;min-width:0;table-layout:fixed}
+.picker-table th,.picker-table td{padding:8px 8px;border-bottom:1px solid var(--line);font-size:10px;vertical-align:top;overflow:hidden}
+.picker-table th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC;position:sticky;top:0;z-index:1}
+.picker-table tr:hover td{background:#FFFBEA}
+.picker-table td{word-break:break-word}
+.picker-table .code-cell,.picker-table .cat-cell,.picker-table .stock-cell,.picker-table .input-cell{white-space:nowrap;text-overflow:ellipsis}
+.picker-table .name-cell{white-space:nowrap;max-width:0}
+.picker-table .name-line{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35}
+.mono{font-family:'IBM Plex Mono',monospace}
+.qty-cell{text-align:right;white-space:nowrap}
+.pick-qty{width:100%;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 8px;font:inherit;font-size:10.5px}
+.flow-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mini-item{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.mini-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mini-v{font-size:12px;color:var(--text-d);margin-top:4px}
+.muted-line{font-size:11px;color:var(--muted);line-height:1.5}
+.table-compact .tw{max-height:420px;overflow:auto;width:100%;min-width:0}
+.table-compact table{width:100%;border-collapse:collapse;min-width:0;table-layout:fixed}
+.table-compact th,.table-compact td{padding:8px 8px;border-bottom:1px solid var(--line);font-size:10px;vertical-align:top;overflow:hidden}
+.table-compact th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#F8FAFC;position:sticky;top:0;z-index:1}
+.table-compact tr:hover td{background:#FCFCFD}
+.table-compact td{word-break:break-word}
+.note{padding:16px 18px;border:1px dashed var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(212,175,55,.08),rgba(255,255,255,.96));color:var(--text);font-size:12px;line-height:1.6}
+.empty{padding:32px 18px;color:var(--muted);text-align:center}
+.workspace-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.workspace-badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:#DBEAFE;color:#1D4ED8;font-size:11px;font-weight:800}
+.mut-recap td:nth-child(1),.mut-recap td:nth-child(2),.mut-recap td:nth-child(6),.mut-recap td:nth-child(7){white-space:nowrap}
+.mut-recap td:nth-child(3),.mut-recap td:nth-child(4),.mut-recap td:nth-child(5),.mut-recap td:nth-child(8){white-space:nowrap}
+.recap-name,.recap-loc,.recap-note{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35}
+.mut-summary-line{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:11px;color:var(--text-d);min-height:39px}
+.mut-workspace-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.mut-workspace-tools{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:12px}
+.table-fit-mutation col:nth-child(1){width:11%}
+.table-fit-mutation col:nth-child(2){width:19%}
+.table-fit-mutation col:nth-child(3){width:10%}
+.table-fit-mutation col:nth-child(4){width:8%}
+.table-fit-mutation col:nth-child(5){width:9%}
+.table-fit-mutation col:nth-child(6){width:11%}
+.table-fit-mutation col:nth-child(7){width:9%}
+.table-fit-mutation col:nth-child(8){width:23%}
+.table-fit-recap-mutation col:nth-child(1){width:14%}
+.table-fit-recap-mutation col:nth-child(2){width:10%}
+.table-fit-recap-mutation col:nth-child(3){width:14%}
+.table-fit-recap-mutation col:nth-child(4){width:18%}
+.table-fit-recap-mutation col:nth-child(5){width:18%}
+.table-fit-recap-mutation col:nth-child(6){width:7%}
+.table-fit-recap-mutation col:nth-child(7){width:7%}
+.table-fit-recap-mutation col:nth-child(8){width:12%}
+.table-fit-adjustment col:nth-child(1){width:14%}
+.table-fit-adjustment col:nth-child(2){width:28%}
+.table-fit-adjustment col:nth-child(3){width:14%}
+.table-fit-adjustment col:nth-child(4){width:12%}
+.table-fit-adjustment col:nth-child(5){width:14%}
+.table-fit-adjustment col:nth-child(6){width:18%}
+.adj-recap td:nth-child(1),.adj-recap td:nth-child(2),.adj-recap td:nth-child(5){white-space:nowrap}
+.adj-recap td:nth-child(3),.adj-recap td:nth-child(4),.adj-recap td:nth-child(6){white-space:normal}
+@keyframes sectionFade{from{opacity:.48;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}
+@media (max-width:900px){.mut-head,.flow-summary{grid-template-columns:1fr}.picker-tools,.mut-workspace-tools{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-name">ERP Mandalika</div>
+      <div class="sb-logo-sub">Adjustment</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-sec-lbl">Core</div>
+      <a class="nav-link" href="./erp-shell.html">Dashboard</a>
+      <a class="nav-link" href="./erp-master.html">Master Data</a>
+      <div class="nav-sec-lbl">Modules</div>
+      <a class="nav-link" href="./erp-purchasing.html">Purchasing</a>
+      <a class="nav-link" href="./erp-manufacturing.html">Manufacturing</a>
+      <a class="nav-link active" href="./erp-mutation.html">Adjustment</a>
+      <a class="nav-link" href="./erp-inventory.html">Inventory</a>
+      <a class="nav-link" href="./erp-pos.html">POS</a>
+      <a class="nav-link" href="./erp-finance.html">Finance</a>
+      <a class="nav-link" href="./erp-reports.html">Reports</a>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-note">Halaman ini terpisah dari inventory aktif supaya eksperimen adjustment dan mutasi tidak merusak flow `DO / Transfer / Retur`.</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="bc"><b>Inventory</b> / <b id="bc-child">Adjustment</b></div>
+      <div>
+        <button class="btn btn-ghost" onclick="openAdjustmentWorkspace('GUDANG')">Adjustment Gudang</button>
+        <button class="btn btn-ghost" onclick="openAdjustmentWorkspace('TOKO')">Adjustment Toko</button>
+        <button class="btn btn-ghost" onclick="location.href='./erp-inventory.html'">Kembali ke Inventory</button>
+        <button class="btn btn-ghost" onclick="resetMutationModule()">Reset Mutasi</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="ph">
+        <div>
+          <div class="eyebrow">Experimental Safe Module</div>
+          <div class="title">Adjustment Gudang & Toko</div>
+          <div class="subtitle">Halaman ini dipakai untuk adjustment dan mutasi stok gudang maupun toko dalam modul terpisah yang aman, tanpa mengganggu flow inventory utama.</div>
+        </div>
+      </div>
+
+      <div class="grid-4" id="kpis"></div>
+
+      <div class="tabs">
+        <button class="tab active" data-sec="mutation">Mutasi</button>
+        <button class="tab" data-sec="adjustment">Adjustment</button>
+      </div>
+
+      <section class="section active" id="sec-mutation">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input class="search" id="search-mutation" placeholder="Cari no mutasi, lokasi, item asal, item tujuan">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" type="button" onclick="toggleMutationForm(true)">+ Tambah Mutasi</button>
+        </div>
+      </div>
+
+      <div>
+          <div class="card card-pad flow-form-card inline-form" id="mutation-form-card">
+            <div class="form-grid">
+              <div class="workspace-top">
+                <div>
+                  <div class="eyebrow">Item Mutation</div>
+                  <div class="title">Buat Mutasi Barang</div>
+                  <div class="subtitle">Pilih 1 item asal dan 1 item tujuan dalam lokasi yang sama, lalu simpan mutasinya ke rekap bawah.</div>
+                </div>
+                <div class="workspace-badge">Mutation Flow</div>
+              </div>
+              <div class="mut-head">
+                <div class="mut-col">
+                  <div class="field">
+                    <label>Tipe Lokasi</label>
+                    <select class="select" id="mutation-form-location-type">
+                      <option value="GUDANG">Gudang</option>
+                      <option value="TOKO">Toko</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Tanggal</label>
+                    <input class="search" id="mutation-form-date" type="date" value="2026-03-22">
+                  </div>
+                </div>
+                <div class="mut-col">
+                  <div class="field">
+                    <label>Lokasi</label>
+                    <select class="select" id="mutation-form-location"></select>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Keterangan</label>
+                <input class="search" id="mutation-form-note" placeholder="Contoh: repack display, koreksi item, konversi varian">
+              </div>
+              <div class="mut-summary-line" id="mutation-doc-line">Mutasi item dalam lokasi yang sama, tanpa status berlapis.</div>
+
+              <div class="picker-card">
+                <div class="mut-workspace-head">
+                  <div>
+                    <div class="picker-title">Workspace Mutasi</div>
+                    <div class="picker-meta" id="mutation-meta">Pilih 1 item asal dan 1 item tujuan. Qty asal tidak boleh melebihi stok lokasi.</div>
+                  </div>
+                </div>
+                <div class="mut-workspace-tools">
+                  <div class="tool-col">
+                    <label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Filter Item Asal</label>
+                    <select class="select" id="mutation-form-source-category"></select>
+                    <input class="search" id="mutation-form-source-search" placeholder="Cari kode atau nama item asal">
+                  </div>
+                  <div class="tool-col">
+                    <label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Filter Item Tujuan</label>
+                    <select class="select" id="mutation-form-target-category"></select>
+                    <input class="search" id="mutation-form-target-search" placeholder="Cari kode atau nama item tujuan">
+                  </div>
+                </div>
+                <div class="picker-table" style="margin-top:8px">
+                  <table>
+                    <colgroup class="table-fit-mutation">
+                      <col><col><col><col><col><col><col><col>
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>Kode Asal</th>
+                        <th>Nama Item Asal</th>
+                        <th>Kategori</th>
+                        <th>Stok Lokasi</th>
+                        <th>Qty Keluar</th>
+                        <th>Kode Tujuan</th>
+                        <th>Qty Masuk</th>
+                        <th>Nama Item Tujuan</th>
+                      </tr>
+                    </thead>
+                    <tbody id="mutation-combined-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="flow-summary" id="mutation-summary"></div>
+
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="clearMutationDrafts()">Bersihkan Pilihan</button>
+                <button class="btn btn-ghost" type="button" onclick="toggleMutationForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitMutationForm()">Simpan Mutasi</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card table-compact">
+            <div class="tw">
+              <table>
+                <colgroup class="table-fit-recap-mutation">
+                  <col><col><col><col><col><col><col><col>
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>No Mutasi</th>
+                    <th>Tanggal</th>
+                    <th>Lokasi</th>
+                    <th>Item Asal</th>
+                    <th>Item Tujuan</th>
+                    <th>Qty Keluar</th>
+                    <th>Qty Masuk</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tbl-mutation"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="card card-pad">
+              <div class="note">
+                Rule mutasi versi aman:
+                pilih 1 item asal, pilih 1 item tujuan, lalu simpan. Tidak ada status berlapis dulu. Setelah alur ini stabil dan enak dipakai, baru nanti kita naikkan lagi jika perlu.
+              </div>
+            </div>
+            <div class="card card-pad">
+              <div class="flow-summary" id="mutation-side"></div>
+            </div>
+          </div>
+      </div>
+      </section>
+
+      <section class="section" id="sec-adjustment">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="search" id="search-adjustment" placeholder="Cari no adjustment, lokasi, item">
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" type="button" onclick="downloadAdjustmentTemplate()">Download Template</button>
+            <button class="btn btn-primary" type="button" onclick="toggleAdjustmentForm(true)">+ Tambah Adjustment</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="card card-pad flow-form-card inline-form" id="adjustment-form-card">
+            <div class="form-grid">
+              <div class="workspace-top">
+                <div>
+                  <div class="eyebrow">Stock Adjustment</div>
+                  <div class="title">Buat Adjustment</div>
+                  <div class="subtitle">Pilih lokasi, tentukan tipe plus/minus, lalu pilih item yang akan disesuaikan stoknya.</div>
+                </div>
+                <div class="workspace-badge">Adjustment Flow</div>
+              </div>
+              <div class="mut-head">
+                <div class="mut-col">
+                  <div class="field">
+                    <label>Tipe Lokasi</label>
+                    <select class="select" id="adjustment-form-location-type">
+                      <option value="GUDANG">Gudang</option>
+                      <option value="TOKO">Toko</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Tanggal</label>
+                    <input class="search" id="adjustment-form-date" type="date" value="2026-03-22">
+                  </div>
+                </div>
+                <div class="mut-col">
+                  <div class="field">
+                    <label>Lokasi</label>
+                    <select class="select" id="adjustment-form-location"></select>
+                  </div>
+                  <div class="field">
+                    <label>Mode Adjustment</label>
+                    <div class="mut-summary-line">Rekonsiliasi Stock Opname</div>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Keterangan</label>
+                <input class="search" id="adjustment-form-note" placeholder="Contoh: selisih opname, barang rusak, koreksi sistem">
+              </div>
+              <div class="picker-card">
+                <div class="mut-workspace-head">
+                  <div>
+                    <div class="picker-title">Import Hasil SO</div>
+                    <div class="picker-meta">Import CSV dengan kolom <span class="mono">item_code</span> dan <span class="mono">qty_fisik</span>.</div>
+                  </div>
+                </div>
+                <div class="picker-tools">
+                  <div class="tool-col">
+                    <label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Template</label>
+                    <div class="mut-summary-line">Gunakan header: item_code, qty_fisik, note</div>
+                  </div>
+                  <div class="tool-col">
+                    <label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">File SO</label>
+                    <input class="search" id="adjustment-import-file" type="file" accept=".csv">
+                  </div>
+                </div>
+              </div>
+              <div class="mut-summary-line" id="adjustment-doc-line">Adjustment dipakai untuk rekonsiliasi SO: stok fisik dibandingkan stok sistem per tanggal adjustment.</div>
+
+              <div class="picker-card">
+                <div class="mut-workspace-head">
+                  <div>
+                    <div class="picker-title">Rekonsiliasi SO</div>
+                    <div class="picker-meta" id="adjustment-meta">Import hasil SO atau isi manual per item. Sistem membandingkan stok fisik vs stok sistem per tanggal.</div>
+                  </div>
+                </div>
+                <div class="picker-tools">
+                  <div class="tool-col">
+                    <label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Filter Kategori</label>
+                    <select class="select" id="adjustment-form-category"></select>
+                  </div>
+                  <div class="tool-col">
+                    <label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Cari Item</label>
+                    <input class="search" id="adjustment-form-search" placeholder="Cari kode atau nama item">
+                  </div>
+                </div>
+                <div class="picker-table" style="margin-top:8px">
+                  <table>
+                    <colgroup class="table-fit-adjustment">
+                      <col><col><col><col><col><col>
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>Kode</th>
+                        <th>Nama Item</th>
+                        <th>Kategori</th>
+                        <th>Stok Sistem</th>
+                        <th>Qty Fisik</th>
+                        <th>Selisih</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adjustment-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="flow-summary" id="adjustment-summary"></div>
+
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-ghost" type="button" onclick="clearAdjustmentDrafts()">Bersihkan Pilihan</button>
+                <button class="btn btn-ghost" type="button" onclick="toggleAdjustmentForm(false)">Batal</button>
+                <button class="btn btn-primary" type="button" onclick="submitAdjustmentForm()">Simpan Adjustment</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card table-compact">
+            <div class="tw">
+              <table>
+                <colgroup class="table-fit-adjustment">
+                  <col><col><col><col><col><col>
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>No Adjustment</th>
+                    <th>Tanggal</th>
+                    <th>Lokasi</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tbl-adjustment"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="card card-pad">
+              <div class="note">
+                Adjustment dipakai untuk koreksi stok langsung, misalnya selisih opname, barang rusak, atau koreksi input sebelumnya.
+              </div>
+            </div>
+            <div class="card card-pad">
+              <div class="flow-summary" id="adjustment-side"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+const DATA = window.MASTER_DATA || {};
+const FG = DATA.fg_items || [];
+const TOKOS = DATA.tokos || [];
+const FG_WH = (DATA.gudangs || []).filter(x => x.warehouse_group === 'FG');
+const CURRENT_USER_NAME = 'User Login';
+let mutationSourceDraft = {};
+let mutationTargetDraft = {};
+let adjustmentQtyDraft = {};
+let adjustmentImportRows = [];
+
+function bySearch(arr, keys, q){
+  const term = String(q || '').trim().toLowerCase();
+  if(!term) return arr;
+  return arr.filter(row => keys.some(k => String(row[k] || '').toLowerCase().includes(term)));
+}
+
+function nextDailyDoc(prefix, rows, key, dateStr){
+  const stamp = String(dateStr || '').replaceAll('-', '');
+  const todayRows = rows.filter(r => String(r[key] || '').startsWith(`${prefix}-${stamp}-`));
+  const nextNo = String(todayRows.length + 1).padStart(3,'0');
+  return `${prefix}-${stamp}-${nextNo}`;
+}
+
+function toggleMutationForm(force){
+  const card = document.getElementById('mutation-form-card');
+  const show = typeof force === 'boolean' ? force : !card.classList.contains('active');
+  card.classList.toggle('active', show);
+}
+
+function toggleAdjustmentForm(force){
+  const card = document.getElementById('adjustment-form-card');
+  const show = typeof force === 'boolean' ? force : !card.classList.contains('active');
+  card.classList.toggle('active', show);
+}
+
+function openAdjustmentWorkspace(type = 'GUDANG', locationCode = ''){
+  setSection('adjustment');
+  const typeEl = document.getElementById('adjustment-form-location-type');
+  typeEl.value = type;
+  fillAdjustmentLocationOptions();
+  if(locationCode){
+    const locationEl = document.getElementById('adjustment-form-location');
+    if(Array.from(locationEl.options).some(opt => opt.value === locationCode)) locationEl.value = locationCode;
+  }
+  renderAdjustmentTable();
+  syncAdjustmentSummary();
+  toggleAdjustmentForm(true);
+  document.getElementById('bc-child').textContent = type === 'TOKO' ? 'Adjustment Toko' : 'Adjustment Gudang';
+}
+
+function getMutationRows(){
+  return JSON.parse(window.localStorage.getItem('erp.extra.inv_mutation') || '[]');
+}
+
+function getAdjustmentRows(){
+  return JSON.parse(window.localStorage.getItem('erp.extra.inv_adjustment') || '[]');
+}
+
+function stockAtLocation(fgCode, locationType, locationCode){
+  const base = (fgCode || '').split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  const mod = locationType === 'TOKO' ? 17 : 29;
+  const codeWeight = String(locationCode || '').length || 5;
+  const usedRows = getMutationRows();
+  const usedAdjustments = getAdjustmentRows();
+  let qty = (base % 80) + mod + codeWeight;
+  usedRows.forEach(r => {
+    if(r.location_type === locationType && r.location_code === locationCode){
+      if(r.source_fg_code === fgCode) qty -= Number(r.source_qty || 0);
+      if(r.target_fg_code === fgCode) qty += Number(r.target_qty || 0);
+    }
+  });
+  usedAdjustments.forEach(r => {
+    if(r.location_type === locationType && r.location_code === locationCode && r.fg_code === fgCode){
+      qty += Number(r.adj_qty || 0);
+    }
+  });
+  return Math.max(0, qty);
+}
+
+function fillMutationLocationOptions(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const select = document.getElementById('mutation-form-location');
+  const current = select.value;
+  const rows = type === 'TOKO'
+    ? TOKOS.map(t => ({ code:t.store_code, name:t.store_name }))
+    : FG_WH.map(w => ({ code:w.warehouse_code, name:w.warehouse_name }));
+  select.innerHTML = rows.map(r => `<option value="${r.code}">${r.code} - ${r.name}</option>`).join('');
+  if(rows.some(r => r.code === current)) select.value = current;
+  else if(rows[0]) select.value = rows[0].code;
+}
+
+function fillAdjustmentLocationOptions(){
+  const type = document.getElementById('adjustment-form-location-type').value;
+  const select = document.getElementById('adjustment-form-location');
+  const current = select.value;
+  const rows = type === 'TOKO'
+    ? TOKOS.map(t => ({ code:t.store_code, name:t.store_name }))
+    : FG_WH.map(w => ({ code:w.warehouse_code, name:w.warehouse_name }));
+  select.innerHTML = rows.map(r => `<option value="${r.code}">${r.code} - ${r.name}</option>`).join('');
+  if(rows.some(r => r.code === current)) select.value = current;
+  else if(rows[0]) select.value = rows[0].code;
+}
+
+function renderMutationCombinedTable(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const sourceCategory = document.getElementById('mutation-form-source-category').value;
+  const sourceSearch = document.getElementById('mutation-form-source-search').value;
+  const targetCategory = document.getElementById('mutation-form-target-category').value;
+  const targetSearch = document.getElementById('mutation-form-target-search').value;
+
+  let sourceRows = FG.slice();
+  if(sourceCategory) sourceRows = sourceRows.filter(f => f.fg_category === sourceCategory);
+  sourceRows = bySearch(sourceRows, ['fg_code','fg_name','fg_category'], sourceSearch).slice(0,60);
+
+  let targetRows = FG.slice();
+  if(targetCategory) targetRows = targetRows.filter(f => f.fg_category === targetCategory);
+  targetRows = bySearch(targetRows, ['fg_code','fg_name','fg_category'], targetSearch).slice(0,60);
+
+  const body = document.getElementById('mutation-combined-body');
+  const rowCount = Math.max(sourceRows.length, targetRows.length);
+  body.innerHTML = rowCount ? Array.from({length:rowCount}, (_, idx) => {
+    const source = sourceRows[idx];
+    const target = targetRows[idx];
+    return `
+      <tr>
+        <td class="mono code-cell" title="${source?.fg_code || ''}">${source?.fg_code || ''}</td>
+        <td class="name-cell" title="${source?.fg_name || ''}"><div class="name-line">${source?.fg_name || ''}</div></td>
+        <td class="cat-cell" title="${source?.fg_category || ''}">${source?.fg_category || ''}</td>
+        <td class="qty-cell stock-cell">${source ? stockAtLocation(source.fg_code, type, locationCode) : ''}</td>
+        <td class="input-cell">${source ? `<input class="pick-qty" type="number" min="0" placeholder="Qty" value="${mutationSourceDraft[source.fg_code] ?? ''}" oninput="updateMutationSourceDraft('${source.fg_code}', this.value)">` : ''}</td>
+        <td class="mono code-cell" title="${target?.fg_code || ''}">${target?.fg_code || ''}</td>
+        <td class="input-cell">${target ? `<input class="pick-qty" type="number" min="0" placeholder="Qty" value="${mutationTargetDraft[target.fg_code] ?? ''}" oninput="updateMutationTargetDraft('${target.fg_code}', this.value)">` : ''}</td>
+        <td class="name-cell" title="${target?.fg_name || ''}"><div class="name-line">${target?.fg_name || ''}</div></td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="8" class="empty">Tidak ada item cocok.</td></tr>`;
+}
+
+function updateMutationSourceDraft(code, value){
+  if(value === '') delete mutationSourceDraft[code];
+  else mutationSourceDraft[code] = value;
+  syncMutationSummary();
+}
+
+function updateMutationTargetDraft(code, value){
+  if(value === '') delete mutationTargetDraft[code];
+  else mutationTargetDraft[code] = value;
+  syncMutationSummary();
+}
+
+function updateAdjustmentDraft(code, value){
+  if(value === '') delete adjustmentQtyDraft[code];
+  else adjustmentQtyDraft[code] = value;
+  syncAdjustmentSummary();
+  renderAdjustmentTable();
+}
+
+function syncMutationSummary(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const sourceCount = Object.keys(mutationSourceDraft).filter(code => Number(mutationSourceDraft[code] || 0) > 0).length;
+  const targetCount = Object.keys(mutationTargetDraft).filter(code => Number(mutationTargetDraft[code] || 0) > 0).length;
+  const sourceQty = Object.values(mutationSourceDraft).reduce((sum, qty) => sum + Number(qty || 0), 0);
+  const targetQty = Object.values(mutationTargetDraft).reduce((sum, qty) => sum + Number(qty || 0), 0);
+  document.getElementById('mutation-summary').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Lokasi</div><div class="mini-v">${locationCode || '-'}<div class="muted-line">${locationName}</div></div></div>
+    <div class="mini-item"><div class="mini-k">Item Asal</div><div class="mini-v">${sourceCount}</div></div>
+    <div class="mini-item"><div class="mini-k">Item Tujuan</div><div class="mini-v">${targetCount}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Keluar / Masuk</div><div class="mini-v">${sourceQty} / ${targetQty}</div></div>
+  `;
+}
+
+function renderAdjustmentTable(){
+  const type = document.getElementById('adjustment-form-location-type').value;
+  const locationCode = document.getElementById('adjustment-form-location').value;
+  const category = document.getElementById('adjustment-form-category').value;
+  const q = document.getElementById('adjustment-form-search').value;
+  let rows = FG.slice();
+  if(category) rows = rows.filter(f => f.fg_category === category);
+  rows = bySearch(rows, ['fg_code','fg_name','fg_category'], q).slice(0,80);
+  document.getElementById('adjustment-meta').textContent = `${rows.length} item tampil`;
+  document.getElementById('adjustment-body').innerHTML = rows.length ? rows.map(f => `
+    <tr>
+      <td class="mono code-cell" title="${f.fg_code}">${f.fg_code}</td>
+      <td class="name-cell" title="${f.fg_name}"><div class="name-line">${f.fg_name}</div></td>
+      <td class="cat-cell" title="${f.fg_category || ''}">${f.fg_category || ''}</td>
+      <td class="qty-cell stock-cell">${stockAtLocation(f.fg_code, type, locationCode)}</td>
+      <td class="input-cell"><input class="pick-qty" type="number" min="0" placeholder="Qty" value="${adjustmentQtyDraft[f.fg_code] ?? ''}" oninput="updateAdjustmentDraft('${f.fg_code}', this.value)"></td>
+      <td class="qty-cell">${Number(adjustmentQtyDraft[f.fg_code] || 0) - stockAtLocation(f.fg_code, type, locationCode) || ''}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">Tidak ada item cocok.</td></tr>`;
+}
+
+function syncAdjustmentSummary(){
+  const type = document.getElementById('adjustment-form-location-type').value;
+  const locationCode = document.getElementById('adjustment-form-location').value;
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const picked = Object.keys(adjustmentQtyDraft).filter(code => Number(adjustmentQtyDraft[code] || 0) > 0).length;
+  const totalDiff = Object.entries(adjustmentQtyDraft).reduce((sum, [code, qty]) => sum + (Number(qty || 0) - stockAtLocation(code, type, locationCode)), 0);
+  document.getElementById('adjustment-summary').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Lokasi</div><div class="mini-v">${locationCode || '-'}<div class="muted-line">${locationName}</div></div></div>
+    <div class="mini-item"><div class="mini-k">Tanggal SO</div><div class="mini-v">${document.getElementById('adjustment-form-date').value || '-'}</div></div>
+    <div class="mini-item"><div class="mini-k">Item Dipilih</div><div class="mini-v">${picked}</div></div>
+    <div class="mini-item"><div class="mini-k">Total Selisih</div><div class="mini-v">${totalDiff}</div></div>
+  `;
+}
+
+function renderMutationRows(){
+  const q = String(document.getElementById('search-mutation')?.value || '').trim().toLowerCase();
+  let rows = getMutationRows().slice().reverse();
+  if(q){
+    rows = rows.filter(r => `${r.mut_no} ${r.location_code} ${r.location_name} ${r.source_fg_code} ${r.source_fg_name} ${r.target_fg_code} ${r.target_fg_name} ${r.note || ''}`.toLowerCase().includes(q));
+  }
+  document.getElementById('tbl-mutation').innerHTML = rows.length ? rows.map(r => `
+    <tr class="mut-recap">
+      <td class="mono">${r.mut_no}</td>
+      <td>${r.mut_date}</td>
+      <td title="${r.location_code} ${r.location_name || ''}"><div class="recap-loc">${r.location_code}<div class="muted-line">${r.location_name || '-'}</div></div></td>
+      <td title="${r.source_fg_code} ${r.source_fg_name}"><span class="mono">${r.source_fg_code}</span><div class="recap-name">${r.source_fg_name}</div></td>
+      <td title="${r.target_fg_code} ${r.target_fg_name}"><span class="mono">${r.target_fg_code}</span><div class="recap-name">${r.target_fg_name}</div></td>
+      <td class="qty-cell">${r.source_qty}</td>
+      <td class="qty-cell">${r.target_qty}</td>
+      <td title="${r.note || '-'}"><div class="recap-note">${r.note || '-'}</div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="empty">Belum ada mutasi barang.</td></tr>`;
+}
+
+function renderAdjustmentRows(){
+  const q = String(document.getElementById('search-adjustment')?.value || '').trim().toLowerCase();
+  let rows = getAdjustmentRows().slice().reverse();
+  if(q){
+    rows = rows.filter(r => `${r.adj_no} ${r.location_code} ${r.location_name} ${r.fg_code} ${r.fg_name} ${r.note || ''}`.toLowerCase().includes(q));
+  }
+  document.getElementById('tbl-adjustment').innerHTML = rows.length ? rows.map(r => `
+    <tr class="adj-recap">
+      <td class="mono">${r.adj_no}</td>
+      <td>${r.adj_date}</td>
+      <td title="${r.location_code} ${r.location_name || ''}"><div class="recap-loc">${r.location_code}<div class="muted-line">${r.location_name || '-'}</div></div></td>
+      <td title="${r.fg_code} ${r.fg_name}"><span class="mono">${r.fg_code}</span><div class="recap-name">${r.fg_name}</div></td>
+      <td class="qty-cell">${r.system_qty} -> ${r.physical_qty}</td>
+      <td title="${r.note || '-'}"><div class="recap-note">${r.note || '-'}</div></td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="empty">Belum ada adjustment.</td></tr>`;
+}
+
+function renderSide(){
+  const rows = getMutationRows();
+  const totalOut = rows.reduce((sum, r) => sum + Number(r.source_qty || 0), 0);
+  const totalIn = rows.reduce((sum, r) => sum + Number(r.target_qty || 0), 0);
+  document.getElementById('mutation-side').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Jumlah Dokumen</div><div class="mini-v">${rows.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Keluar</div><div class="mini-v">${totalOut}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Masuk</div><div class="mini-v">${totalIn}</div></div>
+    <div class="mini-item"><div class="mini-k">Lokasi Aktif</div><div class="mini-v">${new Set(rows.map(r => r.location_code)).size}</div></div>
+  `;
+}
+
+function renderAdjustmentSide(){
+  const rows = getAdjustmentRows();
+  const totalQty = rows.reduce((sum, r) => sum + Math.abs(Number(r.adj_qty || 0)), 0);
+  const plusCount = rows.filter(r => Number(r.adj_qty) > 0).length;
+  const minusCount = rows.filter(r => Number(r.adj_qty) < 0).length;
+  document.getElementById('adjustment-side').innerHTML = `
+    <div class="mini-item"><div class="mini-k">Jumlah Dokumen</div><div class="mini-v">${rows.length}</div></div>
+    <div class="mini-item"><div class="mini-k">Qty Adjustment</div><div class="mini-v">${totalQty}</div></div>
+    <div class="mini-item"><div class="mini-k">PLUS / MINUS</div><div class="mini-v">${plusCount} / ${minusCount}</div></div>
+    <div class="mini-item"><div class="mini-k">Lokasi Aktif</div><div class="mini-v">${new Set(rows.map(r => r.location_code)).size}</div></div>
+  `;
+}
+
+function renderKpis(){
+  const rows = getMutationRows();
+  const adjRows = getAdjustmentRows();
+  const totalOut = rows.reduce((sum, r) => sum + Number(r.source_qty || 0), 0);
+  const totalIn = rows.reduce((sum, r) => sum + Number(r.target_qty || 0), 0);
+  const totalAdj = adjRows.reduce((sum, r) => sum + Math.abs(Number(r.adj_qty || 0)), 0);
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Master FG</div><div class="kpi-val">${FG.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Gudang FG</div><div class="kpi-val">${FG_WH.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Dokumen Mutasi</div><div class="kpi-val">${rows.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Qty Mutasi / Adjustment</div><div class="kpi-val">${totalOut + totalIn} / ${totalAdj}</div></div>
+  `;
+}
+
+function clearMutationDrafts(){
+  mutationSourceDraft = {};
+  mutationTargetDraft = {};
+  document.getElementById('mutation-form-note').value = '';
+  renderMutationCombinedTable();
+  syncMutationSummary();
+}
+
+function clearAdjustmentDrafts(){
+  adjustmentQtyDraft = {};
+  adjustmentImportRows = [];
+  document.getElementById('adjustment-form-note').value = '';
+  const fileInput = document.getElementById('adjustment-import-file');
+  if(fileInput) fileInput.value = '';
+  renderAdjustmentTable();
+  syncAdjustmentSummary();
+}
+
+function submitMutationForm(){
+  const type = document.getElementById('mutation-form-location-type').value;
+  const locationCode = document.getElementById('mutation-form-location').value;
+  const mutDate = document.getElementById('mutation-form-date').value || '2026-03-22';
+  const note = document.getElementById('mutation-form-note').value.trim();
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const sourcePicked = Object.entries(mutationSourceDraft).map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) })).filter(x => x.fg && x.qty > 0);
+  const targetPicked = Object.entries(mutationTargetDraft).map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) })).filter(x => x.fg && x.qty > 0);
+  if(!locationCode || sourcePicked.length !== 1 || targetPicked.length !== 1) return alert('Pilih 1 item asal dan 1 item tujuan.');
+  const source = sourcePicked[0];
+  const target = targetPicked[0];
+  const available = stockAtLocation(source.fg.fg_code, type, locationCode);
+  if(source.qty > available) return alert(`Qty mutasi ${source.fg.fg_code} melebihi stok lokasi.`);
+  const rows = getMutationRows();
+  rows.push({
+    mut_no: nextDailyDoc('MUT', rows, 'mut_no', mutDate),
+    mut_date: mutDate,
+    location_type: type,
+    location_code: locationCode,
+    location_name: locationName,
+    source_fg_code: source.fg.fg_code,
+    source_fg_name: source.fg.fg_name,
+    source_qty: source.qty,
+    target_fg_code: target.fg.fg_code,
+    target_fg_name: target.fg.fg_name,
+    target_qty: target.qty,
+    note,
+    created_by: CURRENT_USER_NAME
+  });
+  window.localStorage.setItem('erp.extra.inv_mutation', JSON.stringify(rows));
+  clearMutationDrafts();
+  toggleMutationForm(false);
+  renderMutationRows();
+  renderSide();
+  renderKpis();
+}
+
+function submitAdjustmentForm(){
+  const type = document.getElementById('adjustment-form-location-type').value;
+  const locationCode = document.getElementById('adjustment-form-location').value;
+  const adjDate = document.getElementById('adjustment-form-date').value || '2026-03-22';
+  const note = document.getElementById('adjustment-form-note').value.trim();
+  const locationName = type === 'TOKO'
+    ? (TOKOS.find(t => t.store_code === locationCode)?.store_name || '-')
+    : (FG_WH.find(w => w.warehouse_code === locationCode)?.warehouse_name || '-');
+  const picked = Object.entries(adjustmentQtyDraft).map(([fgCode, qty]) => ({ fg: FG.find(f => f.fg_code === fgCode), qty:Number(qty || 0) })).filter(x => x.fg && x.qty > 0);
+  if(!locationCode || picked.length < 1) return alert('Isi minimal 1 hasil stock opname.');
+  const rows = getAdjustmentRows();
+  picked.forEach(row => {
+    const systemQty = stockAtLocation(row.fg.fg_code, type, locationCode);
+    const adjQty = row.qty - systemQty;
+    if(adjQty === 0) return;
+    rows.push({
+      adj_no: nextDailyDoc('ADJ', rows, 'adj_no', adjDate),
+      adj_date: adjDate,
+      location_type: type,
+      location_code: locationCode,
+      location_name: locationName,
+      fg_code: row.fg.fg_code,
+      fg_name: row.fg.fg_name,
+      system_qty: systemQty,
+      physical_qty: row.qty,
+      adj_qty: adjQty,
+      note: note || 'Rekon SO',
+      created_by: CURRENT_USER_NAME
+    });
+  });
+  window.localStorage.setItem('erp.extra.inv_adjustment', JSON.stringify(rows));
+  clearAdjustmentDrafts();
+  toggleAdjustmentForm(false);
+  renderAdjustmentRows();
+  renderAdjustmentSide();
+  renderKpis();
+}
+
+function parseAdjustmentImport(text){
+  const lines = String(text || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+  if(lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const itemIdx = headers.indexOf('item_code');
+  const qtyIdx = headers.indexOf('qty_fisik');
+  const noteIdx = headers.indexOf('note');
+  if(itemIdx === -1 || qtyIdx === -1) throw new Error('Header CSV wajib: item_code, qty_fisik');
+  return lines.slice(1).map(line => {
+    const cols = line.split(',').map(c => c.trim());
+    return {
+      item_code: cols[itemIdx] || '',
+      qty_fisik: Number(cols[qtyIdx] || 0),
+      note: noteIdx >= 0 ? (cols[noteIdx] || '') : ''
+    };
+  }).filter(r => r.item_code);
+}
+
+function importAdjustmentFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      adjustmentImportRows = parseAdjustmentImport(reader.result);
+      adjustmentQtyDraft = {};
+      adjustmentImportRows.forEach(row => {
+        if(FG.some(f => f.fg_code === row.item_code)) adjustmentQtyDraft[row.item_code] = row.qty_fisik;
+      });
+      if(adjustmentImportRows.length && !document.getElementById('adjustment-form-note').value.trim()){
+        document.getElementById('adjustment-form-note').value = 'Import hasil stock opname';
+      }
+      renderAdjustmentTable();
+      syncAdjustmentSummary();
+    }catch(err){
+      alert(err.message || 'File import tidak valid.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function downloadAdjustmentTemplate(){
+  const rows = [
+    ['item_code','qty_fisik','note'],
+    ['15GM-24H','108','SO Maret 2026'],
+    ['15GM-DAY','95',''],
+    ['PP120E-NO1','42','Rak depan']
+  ];
+  const csv = rows.map(row => row.map(cell => {
+    const value = String(cell ?? '');
+    return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  }).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'template-adjustment-so.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function resetMutationModule(){
+  if(!window.confirm('Hapus simulasi mutasi lokal?')) return;
+  window.localStorage.removeItem('erp.extra.inv_mutation');
+  window.localStorage.removeItem('erp.extra.inv_adjustment');
+  clearMutationDrafts();
+  clearAdjustmentDrafts();
+  renderMutationRows();
+  renderSide();
+  renderAdjustmentRows();
+  renderAdjustmentSide();
+  renderKpis();
+}
+
+function setSection(sec){
+  document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.sec === sec));
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.getElementById('sec-' + sec).classList.add('active');
+  document.getElementById('bc-child').textContent = sec === 'adjustment' ? 'Adjustment' : 'Mutasi';
+}
+
+function hydrateFromHash(){
+  const hash = String(window.location.hash || '').replace('#','');
+  if(!hash) return;
+  if(hash === 'adjustment-toko') return openAdjustmentWorkspace('TOKO');
+  if(hash === 'adjustment-gudang') return openAdjustmentWorkspace('GUDANG');
+  if(hash.startsWith('adjustment-toko-')) return openAdjustmentWorkspace('TOKO', hash.replace('adjustment-toko-',''));
+  if(hash.startsWith('adjustment-gudang-')) return openAdjustmentWorkspace('GUDANG', hash.replace('adjustment-gudang-',''));
+}
+
+document.getElementById('mutation-form-location-type').addEventListener('change', () => {
+  fillMutationLocationOptions();
+  renderMutationCombinedTable();
+  syncMutationSummary();
+});
+document.getElementById('mutation-form-location').addEventListener('change', () => {
+  renderMutationCombinedTable();
+  syncMutationSummary();
+});
+document.getElementById('mutation-form-source-category').addEventListener('change', renderMutationCombinedTable);
+document.getElementById('mutation-form-source-search').addEventListener('input', renderMutationCombinedTable);
+document.getElementById('mutation-form-target-category').addEventListener('change', renderMutationCombinedTable);
+document.getElementById('mutation-form-target-search').addEventListener('input', renderMutationCombinedTable);
+document.getElementById('search-mutation').addEventListener('input', renderMutationRows);
+document.getElementById('adjustment-form-location-type').addEventListener('change', () => {
+  fillAdjustmentLocationOptions();
+  renderAdjustmentTable();
+  syncAdjustmentSummary();
+});
+document.getElementById('adjustment-form-location').addEventListener('change', () => {
+  renderAdjustmentTable();
+  syncAdjustmentSummary();
+});
+document.getElementById('adjustment-form-date').addEventListener('change', () => {
+  renderAdjustmentTable();
+  syncAdjustmentSummary();
+});
+document.getElementById('adjustment-form-category').addEventListener('change', renderAdjustmentTable);
+document.getElementById('adjustment-form-search').addEventListener('input', renderAdjustmentTable);
+document.getElementById('search-adjustment').addEventListener('input', renderAdjustmentRows);
+document.getElementById('adjustment-import-file').addEventListener('change', e => importAdjustmentFile(e.target.files?.[0]));
+document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setSection(btn.dataset.sec)));
+
+const fgCategoryOptions = ['<option value="">Semua Kategori</option>']
+  .concat([...new Set(FG.map(f => f.fg_category).filter(Boolean))].sort().map(cat => `<option value="${cat}">${cat}</option>`))
+  .join('');
+document.getElementById('mutation-form-source-category').innerHTML = fgCategoryOptions;
+document.getElementById('mutation-form-target-category').innerHTML = fgCategoryOptions;
+document.getElementById('adjustment-form-category').innerHTML = fgCategoryOptions;
+fillMutationLocationOptions();
+fillAdjustmentLocationOptions();
+renderMutationCombinedTable();
+renderAdjustmentTable();
+syncMutationSummary();
+syncAdjustmentSummary();
+renderMutationRows();
+renderSide();
+renderAdjustmentRows();
+renderAdjustmentSide();
+renderKpis();
+toggleMutationForm(false);
+toggleAdjustmentForm(false);
+hydrateFromHash();
+</script>
+</body>
+</html>
