@@ -29,6 +29,7 @@ export type ProfileFlagKey =
   | 'c_player_critical'
 
 export type DimScores = Record<DimensionKey, number>
+export type DimScoresV2 = Record<string, number>
 
 export interface DimensionDefinition {
   key: DimensionKey
@@ -43,6 +44,7 @@ export interface DimensionDefinition {
 export interface TetradItem {
   dim: DimensionKey
   text: string
+  valence?: 'positive' | 'negative'
 }
 
 export interface TetradQuestion {
@@ -204,4 +206,53 @@ export interface OverrideResult {
   anyOverrideActive: boolean
   forcedCategory?: PlayerCategory
   overrideReason?: string
+}
+
+// v2 assessment structures
+export interface TetradAnswerV2 {
+  tetradId: string
+  rankings: number[] // length 4, rank 1-4 unique
+  timeSpentSeconds?: number
+}
+
+export interface SJTAnswerV2 {
+  questionId: string
+  chosenKey: string // "A" | "B" | "C" | "D"
+  timeSpentSeconds?: number
+}
+
+export interface BEIAnswer {
+  questionId: string
+  answer: string
+  evaluation?: {
+    score: number // 1-4
+    justification: string
+    strengths: string[]
+    concerns: string[]
+    follow_up_needed: boolean
+    follow_up_question: string | null
+  }
+}
+
+export interface CandidateAssessmentV2 {
+  id: string
+  name: string
+  position: string
+  timestamp: string
+  tetradAnswers: TetradAnswerV2[]
+  sjtAnswers: SJTAnswerV2[]
+  beiAnswers: BEIAnswer[]
+  tetradScores: Record<string, number>
+  sjtScores: Record<string, number>
+  beiScores: Record<string, number>
+  finalScores: Record<string, number>
+  layer1Gate: {
+    gateResults: Record<string, { score: number; threshold: number; passed: boolean }>
+    overallPassed: boolean
+  }
+  fakingAlert: {
+    hasFakingAlert: boolean
+    inconsistencyScore: number
+  }
+  classification: 'A' | 'B' | 'C' | 'C*'
 }
