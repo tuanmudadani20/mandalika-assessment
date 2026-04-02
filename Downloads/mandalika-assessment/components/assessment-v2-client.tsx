@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { BEI_QUESTIONS, DIMENSIONS, SJT_QUESTIONS, TETRADS } from '@/lib/question-bank'
+import { BEI_QUESTIONS, SJT_QUESTIONS, TETRADS } from '@/lib/question-bank'
 import {
   aggregateBEIScores,
   calculateSJTScores,
@@ -110,7 +110,6 @@ export function AssessmentV2Client() {
       const others = prev.filter((p) => p.tetradId !== tetradId)
       const rankings = existing?.rankings ? [...existing.rankings] : [0, 0, 0, 0]
       rankings[idx] = rank
-      // pastikan unik: hapus rank yang sama di indeks lain
       rankings.forEach((val, i) => {
         if (i !== idx && val === rank) rankings[i] = 0
       })
@@ -142,7 +141,6 @@ export function AssessmentV2Client() {
     setLoading(true)
     setPhase('submitting')
     try {
-      // evaluate BEI locally (placeholder API)
       const beiEvaluations: BEIEvaluation[] = []
       for (const q of BEI_QUESTIONS) {
         const answer = beiAnswers[q.id] || ''
@@ -220,6 +218,11 @@ export function AssessmentV2Client() {
   const currentIdx = phase === 'p1a' ? tetradProgress : phase === 'p1b' ? sjtProgress : beiProgress
   const currentTotal = phase === 'p1a' ? TETRADS.length : phase === 'p1b' ? SJT_QUESTIONS.length : BEI_QUESTIONS.length
 
+  const scrollToId = (id: string) => {
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="min-h-screen bg-ink px-4 py-4">
       <header className="flex items-center justify-between border-b border-border pb-3">
@@ -234,189 +237,279 @@ export function AssessmentV2Client() {
 
       {error ? <div className="mt-3 rounded-card border border-danger bg-danger/10 px-4 py-3 text-sm text-[#f3c0c0]">{error}</div> : null}
 
-      {phase === 'identity' && (
-        <section className="mt-4 space-y-3">
-          <p className="text-sm text-muted">Isi identitas singkat sebelum mulai.</p>
-          <input className="field-base" placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} />
-          <input className="field-base" placeholder="Posisi / Jabatan" value={position} onChange={(e) => setPosition(e.target.value)} />
-          <button className="btn-primary" disabled={!canGoP1a} onClick={() => setPhase('p1a')}>
-            Mulai Phase 1A
-          </button>
-        </section>
-      )}
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_230px]">
+        <div className="space-y-4">
+          {phase === 'identity' && (
+            <section className="space-y-3 rounded-card border border-border bg-white p-4">
+              <p className="text-sm text-muted">Isi identitas singkat sebelum mulai.</p>
+              <input className="field-base" placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} />
+              <input className="field-base" placeholder="Posisi / Jabatan" value={position} onChange={(e) => setPosition(e.target.value)} />
+              <button
+                className="btn-primary"
+                disabled={!canGoP1a}
+                onClick={() => {
+                  setPhase('p1a')
+                  setTimeout(() => scrollToId('q-T01'), 150)
+                }}
+              >
+                Mulai Phase 1A
+              </button>
+            </section>
+          )}
 
-      {phase === 'p1a' && (
-        <section className="mt-4 space-y-4">
-          <h2 className="text-lg font-semibold">Phase 1A · Tetrad (33)</h2>
-          <p className="text-sm text-muted">Rank 1-4 (1 = paling sesuai, 4 = paling tidak).</p>
-          {TETRADS.map((tetrad) => {
-            const answer = tetradAnswers.find((a) => a.tetradId === tetrad.id)
-            const order = rankingsToOrder(answer?.rankings)
-            return (
-              <div key={tetrad.id} className="rounded-card border border-border bg-white p-3 space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{tetrad.id}</span>
-                  <span className="text-muted">type: {tetrad.type}</span>
-                </div>
-                <div className="space-y-2">
-                  {order.map((itemIndex, displayIdx) => {
-                    const item = tetrad.items[itemIndex]
-                    return (
-                      <div
-                        key={`${tetrad.id}-${itemIndex}`}
-                      draggable
-                        onDragStart={() => setDragInfo({ tetradId: tetrad.id, from: displayIdx })}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault()
-                          if (!dragInfo || dragInfo.tetradId !== tetrad.id) return
-                          const from = dragInfo.from
-                          const to = displayIdx
-                          if (from === to) return
-                          const nextOrder = [...order]
-                          const temp = nextOrder[to]
-                          nextOrder[to] = nextOrder[from]
-                          nextOrder[from] = temp
-                          onTetradReorder(tetrad.id, nextOrder)
-                          setDragInfo(null)
-                        }}
-                        className="flex items-start gap-2 rounded-card border border-border bg-panel p-2 shadow-sm"
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gold text-xs font-bold text-white">
-                          {displayIdx + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs uppercase text-muted">Item {itemIndex + 1}</p>
-                          <p className="text-sm">{item.text}</p>
-                        </div>
-                        <span className="text-[11px] text-muted">{item.dim}</span>
+          {phase === 'p1a' && (
+            <section className="space-y-4">
+              <div className="rounded-card border border-border bg-white p-3">
+                <h2 className="text-lg font-semibold">Phase 1A · Tetrad (33)</h2>
+                <p className="text-sm text-muted">Urutkan 1-4 (1 paling sesuai). Drag untuk mengurutkan.</p>
+              </div>
+              {TETRADS.map((tetrad) => {
+                const answer = tetradAnswers.find((a) => a.tetradId === tetrad.id)
+                const order = rankingsToOrder(answer?.rankings)
+                const answered = answer && answer.rankings?.length === 4 && [1, 2, 3, 4].every((r) => answer.rankings?.includes(r))
+                return (
+                  <div id={`q-${tetrad.id}`} key={tetrad.id} className="rounded-card border border-border bg-white p-3 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{tetrad.id}</span>
+                        <span className="rounded-field border px-2 py-0.5 text-[11px] uppercase tracking-[0.08em] text-muted">{tetrad.type}</span>
                       </div>
-                    )
-                  })}
-                </div>
+                      <span className={`text-xs ${answered ? 'text-gold' : 'text-muted'}`}>{answered ? 'Terisi' : 'Belum'}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {order.map((itemIndex, displayIdx) => {
+                        const item = tetrad.items[itemIndex]
+                        return (
+                          <div
+                            key={`${tetrad.id}-${itemIndex}`}
+                            draggable
+                            onDragStart={() => setDragInfo({ tetradId: tetrad.id, from: displayIdx })}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                              e.preventDefault()
+                              if (!dragInfo || dragInfo.tetradId !== tetrad.id) return
+                              const from = dragInfo.from
+                              const to = displayIdx
+                              if (from === to) return
+                              const nextOrder = [...order]
+                              const temp = nextOrder[to]
+                              nextOrder[to] = nextOrder[from]
+                              nextOrder[from] = temp
+                              onTetradReorder(tetrad.id, nextOrder)
+                              setDragInfo(null)
+                            }}
+                            className="flex items-start gap-2 rounded-card border border-border bg-panel p-2 shadow-sm"
+                          >
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gold text-[11px] font-bold text-white">
+                              {displayIdx + 1}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs uppercase text-muted">Item {itemIndex + 1}</p>
+                              <p className="text-sm">{item.text}</p>
+                            </div>
+                            <span className="text-[11px] text-muted">{item.dim}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+              <div className="flex flex-wrap gap-2">
+                <button className="btn-secondary" onClick={() => setPhase('identity')}>
+                  Kembali
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    const incomplete = TETRADS.find((t) => {
+                      const ans = tetradAnswers.find((a) => a.tetradId === t.id)
+                      const ranks = ans?.rankings ?? []
+                      const hasAll = ranks.length === 4 && [1, 2, 3, 4].every((r) => ranks.includes(r))
+                      return !hasAll
+                    })
+                    if (incomplete) {
+                      setError(`Tetrad ${incomplete.id} belum lengkap (rank 1-4 harus unik).`)
+                      return
+                    }
+                    setError('')
+                    setPhase('p1b')
+                    setTimeout(() => scrollToId('q-SJT01'), 150)
+                  }}
+                >
+                  Lanjut Phase 1B
+                </button>
               </div>
-            )
-          })}
-          <div className="flex gap-2">
-            <button className="btn-secondary" onClick={() => setPhase('identity')}>
-              Kembali
-            </button>
-            <button
-              className="btn-primary"
-              onClick={() => {
-                const incomplete = TETRADS.find((t) => {
-                  const ans = tetradAnswers.find((a) => a.tetradId === t.id)
-                  const ranks = ans?.rankings ?? []
-                  const hasAll = ranks.length === 4 && [1, 2, 3, 4].every((r) => ranks.includes(r))
-                  return !hasAll
-                })
-                if (incomplete) {
-                  setError(`Tetrad ${incomplete.id} belum lengkap (rank 1-4 harus unik).`)
-                  return
-                }
-                setError('')
-                setPhase('p1b')
-              }}
-            >
-              Lanjut Phase 1B
-            </button>
-          </div>
-        </section>
-      )}
+            </section>
+          )}
 
-      {phase === 'p1b' && (
-        <section className="mt-4 space-y-4">
-          <h2 className="text-lg font-semibold">Phase 1B · ML-SJT (30)</h2>
-          {SJT_QUESTIONS.map((q) => {
-            const choice = sjtAnswers.find((a) => a.questionId === q.id)?.chosenKey
-            return (
-              <div key={q.id} className="rounded-card border border-border bg-white p-3 space-y-2">
-                <div className="text-sm font-medium">{q.id}</div>
-                <p className="text-sm text-muted">{q.scenario}</p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {q.options.map((opt) => (
-                    <label key={opt.key} className="flex items-start gap-2 rounded-card border border-border bg-panel p-2 text-sm">
-                      <input
-                        type="radio"
-                        name={q.id}
-                        checked={choice === opt.key}
-                        onChange={() => setSjtChoice(q.id, opt.key)}
-                      />
-                      <span>
-                        <strong className="mr-1">{opt.key}.</strong>
-                        {opt.text}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+          {phase === 'p1b' && (
+            <section className="space-y-4">
+              <div className="rounded-card border border-border bg-white p-3">
+                <h2 className="text-lg font-semibold">Phase 1B · ML-SJT (30)</h2>
+                <p className="text-sm text-muted">Pilih opsi terbaik (A-D).</p>
               </div>
-            )
-          })}
-          <div className="flex gap-2">
-            <button className="btn-secondary" onClick={() => setPhase('p1a')}>
-              Kembali
-            </button>
-            <button
-              className="btn-primary"
-              onClick={() => {
-                const missing = SJT_QUESTIONS.find((q) => !sjtAnswers.find((a) => a.questionId === q.id))
-                if (missing) {
-                  setError(`SJT ${missing.id} belum dipilih.`)
-                  return
-                }
-                setError('')
-                setPhase('p2')
-              }}
-            >
-              Lanjut Phase 2 (BEI)
-            </button>
-          </div>
-        </section>
-      )}
+              {SJT_QUESTIONS.map((q) => {
+                const choice = sjtAnswers.find((a) => a.questionId === q.id)?.chosenKey
+                return (
+                  <div id={`q-${q.id}`} key={q.id} className="rounded-card border border-border bg-white p-3 space-y-2">
+                    <div className="flex items-center justify-between text-sm font-medium">
+                      <span>{q.id}</span>
+                      <span className={`text-xs ${choice ? 'text-gold' : 'text-muted'}`}>{choice ? 'Terisi' : 'Belum'}</span>
+                    </div>
+                    <p className="text-sm text-muted">{q.scenario}</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {q.options.map((opt) => (
+                        <label key={opt.key} className="flex items-start gap-2 rounded-card border border-border bg-panel p-2 text-sm">
+                          <input
+                            type="radio"
+                            name={q.id}
+                            checked={choice === opt.key}
+                            onChange={() => setSjtChoice(q.id, opt.key)}
+                          />
+                          <span>
+                            <strong className="mr-1">{opt.key}.</strong>
+                            {opt.text}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+              <div className="flex flex-wrap gap-2">
+                <button className="btn-secondary" onClick={() => setPhase('p1a')}>
+                  Kembali
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    const missing = SJT_QUESTIONS.find((q) => !sjtAnswers.find((a) => a.questionId === q.id))
+                    if (missing) {
+                      setError(`SJT ${missing.id} belum dipilih.`)
+                      return
+                    }
+                    setError('')
+                    setPhase('p2')
+                    setTimeout(() => scrollToId('q-BEI01'), 150)
+                  }}
+                >
+                  Lanjut Phase 2 (BEI)
+                </button>
+              </div>
+            </section>
+          )}
 
-      {phase === 'p2' && (
-        <section className="mt-4 space-y-4">
-          <h2 className="text-lg font-semibold">Phase 2 · BEI (5)</h2>
-          {BEI_QUESTIONS.map((q) => (
-            <div key={q.id} className="rounded-card border border-border bg-white p-3 space-y-2">
-              <div className="text-sm font-medium">{q.id} · {q.question}</div>
-              <textarea
-                className="field-base min-h-[140px]"
-                value={beiAnswers[q.id] || ''}
-                onChange={(e) => setBeiAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                placeholder="Jawab dengan format STAR (Situation, Task, Action, Result)."
-              />
+          {phase === 'p2' && (
+            <section className="space-y-4">
+              <div className="rounded-card border border-border bg-white p-3">
+                <h2 className="text-lg font-semibold">Phase 2 · BEI (5)</h2>
+                <p className="text-sm text-muted">Jawab format STAR. Minimal 3-4 kalimat.</p>
+              </div>
+              {BEI_QUESTIONS.map((q) => (
+                <div id={`q-${q.id}`} key={q.id} className="rounded-card border border-border bg-white p-3 space-y-2">
+                  <div className="flex items-center justify-between text-sm font-medium">
+                    <span>{q.id}</span>
+                    <span className={`text-xs ${(beiAnswers[q.id] || '').trim() ? 'text-gold' : 'text-muted'}`}>
+                      {(beiAnswers[q.id] || '').trim() ? 'Terisi' : 'Belum'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted">{q.question}</p>
+                  <textarea
+                    className="field-base min-h-[140px]"
+                    value={beiAnswers[q.id] || ''}
+                    onChange={(e) => setBeiAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                    placeholder="Jawab dengan format STAR (Situation, Task, Action, Result)."
+                  />
+                </div>
+              ))}
+              <div className="flex flex-wrap gap-2">
+                <button className="btn-secondary" onClick={() => setPhase('p1b')}>
+                  Kembali
+                </button>
+                <button className="btn-primary" disabled={loading} onClick={() => setPhase('review')}>
+                  Review & Submit
+                </button>
+              </div>
+            </section>
+          )}
+
+          {phase === 'review' && (
+            <section className="space-y-3 rounded-card border border-border bg-white p-4">
+              <h2 className="text-lg font-semibold">Review & Submit</h2>
+              <p className="text-sm text-muted">Tetrad {tetradProgress}/{TETRADS.length} · SJT {sjtProgress}/{SJT_QUESTIONS.length} · BEI {beiProgress}/{BEI_QUESTIONS.length}</p>
+              <button className="btn-primary" disabled={loading} onClick={handleSubmit}>
+                {loading ? 'Mengirim...' : 'Kirim Assessment v2'}
+              </button>
+            </section>
+          )}
+
+          {phase === 'submitting' && (
+            <section className="mt-6">
+              <div className="rounded-card border border-border bg-white p-6 text-center">
+                <p className="eyebrow">Submitting</p>
+                <p className="mt-2 text-lg">Menyimpan assessment v2...</p>
+              </div>
+            </section>
+          )}
+        </div>
+
+        <aside className="space-y-3 rounded-card border border-border bg-white p-3 sticky top-4 h-fit">
+          <div className="flex items-center justify-between">
+            <p className="text-xs uppercase tracking-[0.14em] text-muted">Navigasi</p>
+            <span className="rounded-field border px-2 py-1 text-[11px]">{phase.toUpperCase()}</span>
+          </div>
+          {currentTimer !== null ? (
+            <div className="rounded-card border border-border bg-panel px-3 py-2 text-sm">
+              Timer {fmt(currentTimer)}
+              <div className="mt-1 h-2 rounded-full bg-border">
+                <div
+                  className="h-2 rounded-full bg-gold"
+                  style={{
+                    width: `${Math.max(0, currentTimer) / (phase === 'p1a' ? TETRAD_SECONDS : phase === 'p1b' ? SJT_SECONDS : BEI_SECONDS) * 100}%`,
+                  }}
+                />
+              </div>
             </div>
-          ))}
-          <div className="flex gap-2">
-            <button className="btn-secondary" onClick={() => setPhase('p1b')}>
-              Kembali
-            </button>
-            <button className="btn-primary" disabled={loading} onClick={() => setPhase('review')}>
-              Review & Submit
-            </button>
-          </div>
-        </section>
-      )}
+          ) : null}
 
-      {phase === 'review' && (
-        <section className="mt-4 space-y-3">
-          <h2 className="text-lg font-semibold">Review & Submit</h2>
-          <p className="text-sm text-muted">Tetrad {tetradProgress}/{TETRADS.length} · SJT {sjtProgress}/{SJT_QUESTIONS.length} · BEI {beiProgress}/{BEI_QUESTIONS.length}</p>
-          <button className="btn-primary" disabled={loading} onClick={handleSubmit}>
-            {loading ? 'Mengirim...' : 'Kirim Assessment v2'}
-          </button>
-        </section>
-      )}
+          {phase === 'identity' && (
+            <p className="text-xs text-muted">Isi nama & posisi, lalu klik Mulai.</p>
+          )}
 
-      {phase === 'submitting' && (
-        <section className="mt-6">
-          <div className="rounded-card border border-border bg-white p-6 text-center">
-            <p className="eyebrow">Submitting</p>
-            <p className="mt-2 text-lg">Menyimpan assessment v2...</p>
+          {phase === 'p1a' && (
+            <NavGrid
+              title="Tetrad 1-33"
+              total={TETRADS.length}
+              answered={(tetradAnswers || []).map((a) => a.tetradId)}
+              prefix="T"
+              onJump={(n) => scrollToId(`q-T${String(n).padStart(2, '0')}`)}
+            />
+          )}
+          {phase === 'p1b' && (
+            <NavGrid
+              title="SJT 1-30"
+              total={SJT_QUESTIONS.length}
+              answered={(sjtAnswers || []).map((a) => a.questionId)}
+              prefix="SJT"
+              onJump={(n) => scrollToId(`q-SJT${String(n).padStart(2, '0')}`)}
+            />
+          )}
+          {phase === 'p2' && (
+            <NavGrid
+              title="BEI 1-5"
+              total={BEI_QUESTIONS.length}
+              answered={BEI_QUESTIONS.filter((q) => (beiAnswers[q.id] || '').trim()).map((q) => q.id)}
+              prefix="BEI"
+              onJump={(n) => scrollToId(`q-BEI${String(n).padStart(2, '0')}`)}
+            />
+          )}
+
+          <div className="rounded-card border border-border bg-panel px-3 py-2 text-xs text-muted">
+            Progress: {currentIdx}/{currentTotal}
           </div>
-        </section>
-      )}
+        </aside>
+      </div>
     </div>
   )
 }
@@ -436,4 +529,42 @@ function orderToRankings(order: number[]) {
     rankings[itemIdx] = position + 1
   })
   return rankings
+}
+
+function NavGrid({
+  title,
+  total,
+  answered,
+  prefix,
+  onJump,
+}: {
+  title: string
+  total: number
+  answered: string[]
+  prefix: string
+  onJump: (num: number) => void
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold text-text">{title}</p>
+      <div className="grid grid-cols-6 gap-2">
+        {Array.from({ length: total }).map((_, idx) => {
+          const num = idx + 1
+          const code = `${prefix}${String(num).padStart(prefix === 'T' ? 2 : 2, '0')}`
+          const done = answered.includes(code)
+          return (
+            <button
+              key={code}
+              className={`rounded-md border px-2 py-1 text-[11px] ${
+                done ? 'border-gold bg-gold/10 text-gold font-semibold' : 'border-border bg-panel text-muted'
+              }`}
+              onClick={() => onJump(num)}
+            >
+              {num}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
