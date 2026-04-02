@@ -25,9 +25,9 @@ export function AssessmentClient() {
   const [sjtAnswers, setSjtAnswers] = useState<SJTAnswer[]>(Array.from({ length: sjtQuestions.length }, blankChoice))
   const [essayAnswers, setEssayAnswers] = useState<string[]>(Array.from({ length: essayQuestions.length }, () => ''))
   const [error, setError] = useState('')
-  const [tetradSeconds, setTetradSeconds] = useState(30 * 60) // 30 menit sesi 1
+  const [tetradSeconds, setTetradSeconds] = useState(26 * 60) // 26 menit sesi 1
   const [sjtSeconds, setSjtSeconds] = useState(30 * 60) // 30 menit sesi 2
-  const [essaySeconds, setEssaySeconds] = useState(30 * 60) // opsional, tidak dikunci waktu
+  const [essaySeconds, setEssaySeconds] = useState(25 * 60) // opsional, diset 25 menit
   const [timing, setTiming] = useState<SubmissionTiming>({
     startedAt: '',
     finishedAt: '',
@@ -51,9 +51,9 @@ export function AssessmentClient() {
     setTetradAnswers(Array.from({ length: tetradQuestions.length }, blankChoice))
     setSjtAnswers(Array.from({ length: sjtQuestions.length }, blankChoice))
     setEssayAnswers(Array.from({ length: essayQuestions.length }, () => ''))
-    setTetradSeconds(30 * 60)
+    setTetradSeconds(26 * 60)
     setSjtSeconds(30 * 60)
-    setEssaySeconds(30 * 60)
+    setEssaySeconds(25 * 60)
     setTiming({
       startedAt: '',
       finishedAt: '',
@@ -111,7 +111,11 @@ export function AssessmentClient() {
   }
 
   const timerLabel =
-    stage === 'tetrad' ? formatTime(tetradSeconds) : stage === 'sjt' ? formatTime(sjtSeconds) : 'Opsional'
+    stage === 'tetrad'
+      ? formatTime(tetradSeconds)
+      : stage === 'sjt'
+        ? formatTime(sjtSeconds)
+        : `${formatTime(essaySeconds)} (opsional)`
   const isTimerCritical =
     stage === 'tetrad'
       ? tetradSeconds <= 5 * 60
@@ -210,9 +214,9 @@ export function AssessmentClient() {
       sjt: {},
       essay: {},
     })
-    setTetradSeconds(30 * 60)
+    setTetradSeconds(26 * 60)
     setSjtSeconds(30 * 60)
-    setEssaySeconds(30 * 60)
+    setEssaySeconds(25 * 60)
     setError(''); setStage('tetrad')
   }
 
@@ -352,7 +356,7 @@ export function AssessmentClient() {
                     style={{ width: `${overallProgress}%` }}
                   />
                 </div>
-                <p className="mt-2 text-[12px] leading-5 text-muted">Estimasi total waktu: 75 menit</p>
+                <p className="mt-2 text-[12px] leading-5 text-muted">Estimasi total waktu: 81 menit</p>
               </div>
           </div>
         </header>
@@ -363,7 +367,7 @@ export function AssessmentClient() {
               <div><p className="eyebrow">Assessment Brief</p><h2 className="mt-2.5 max-w-4xl text-[1.8rem] leading-[1.08] sm:text-[1.95rem]">Flow yang rapi, tenang, dan fokus ke pengerjaan.</h2><p className="mt-3 max-w-2xl text-[13px] leading-5 text-muted">Tiga sesi, satu viewport, dan fokus penuh ke kualitas jawaban.</p></div>
               <div className="mt-5 grid gap-2.5 md:grid-cols-3 xl:grid-cols-1">
                 {[
-                  ['Part 1', '26 Tetrad Most/Least', 'Sekitar 20 menit. Memetakan preferensi perilaku.'],
+                  ['Part 1', '26 Tetrad Most/Least', 'Sekitar 26 menit. Memetakan preferensi perilaku.'],
                   ['Part 2', '26 ML-SJT', 'Sekitar 30 menit. Menguji judgement kerja nyata.'],
                   ['Part 3', '5 Kritik, Saran, dan Ide', 'Opsional, alokasikan 25 menit bila perlu.'],
                 ].map(([part, title, detail]) => <div key={part} className="rounded-card border border-border bg-white p-3.5"><p className="text-[10px] uppercase tracking-[0.18em] text-gold">{part}</p><p className="mt-1 text-[15px] font-medium leading-5 text-text">{title}</p><p className="mt-1 text-[13px] leading-5 text-muted">{detail}</p></div>)}
