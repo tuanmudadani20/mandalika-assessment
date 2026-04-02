@@ -25,6 +25,8 @@ export function AssessmentClient() {
   const [sjtAnswers, setSjtAnswers] = useState<SJTAnswer[]>(Array.from({ length: sjtQuestions.length }, blankChoice))
   const [essayAnswers, setEssayAnswers] = useState<string[]>(Array.from({ length: essayQuestions.length }, () => ''))
   const [error, setError] = useState('')
+  const [tetradSjtSeconds, setTetradSjtSeconds] = useState(60 * 60) // 60 menit total untuk sesi 1 & 2
+  const [essaySeconds, setEssaySeconds] = useState(30 * 60) // 30 menit untuk sesi 3
 
   useEffect(() => {
     try {
@@ -57,6 +59,30 @@ export function AssessmentClient() {
     } catch {}
   }, [dept, essayAnswers, essayIndex, name, role, sjtAnswers, sjtIndex, stage, tenure, tetradAnswers, tetradIndex])
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null
+    if (stage === 'tetrad' || stage === 'sjt') {
+      timer = setInterval(() => setTetradSjtSeconds((prev) => Math.max(0, prev - 1)), 1000)
+    } else if (stage === 'essay') {
+      timer = setInterval(() => setEssaySeconds((prev) => Math.max(0, prev - 1)), 1000)
+    }
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [stage])
+
+  useEffect(() => {
+    if ((stage === 'tetrad' || stage === 'sjt') && tetradSjtSeconds === 0) {
+      setError('Waktu 60 menit untuk sesi 1-2 sudah habis. Segera kirim jawaban.')
+    }
+  }, [stage, tetradSjtSeconds])
+
+  useEffect(() => {
+    if (stage === 'essay' && essaySeconds === 0) {
+      setError('Waktu 30 menit untuk sesi 3 sudah habis. Segera kirim jawaban.')
+    }
+  }, [stage, essaySeconds])
+
   const completedTetrad = tetradAnswers.filter(isCompletedChoice).length
   const completedSjt = sjtAnswers.filter(isCompletedChoice).length
   const completedEssay = essayAnswers.length // feedback opsional tetap dihitung selesai
@@ -64,6 +90,15 @@ export function AssessmentClient() {
   const overallProgress = Math.round(((completedTetrad + completedSjt + completedEssay) / totalBlocks) * 100)
   const canOpenSjt = completedTetrad === tetradQuestions.length || stage === 'sjt' || stage === 'essay'
   const canOpenEssay = completedSjt === sjtQuestions.length || stage === 'essay'
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
+
+  const timerLabel = stage === 'essay' ? formatTime(essaySeconds) : formatTime(tetradSjtSeconds)
+  const isTimerCritical = (stage === 'essay' ? essaySeconds : tetradSjtSeconds) <= 5 * 60
 
   const meta = useMemo(() => {
     if (stage === 'tetrad') return { title: `Tetrad ${tetradIndex + 1}`, subtitle: 'Pilih satu Most dan satu Least dari empat pernyataan.', description: '', current: tetradIndex, total: tetradQuestions.length }
@@ -256,6 +291,8 @@ export function AssessmentClient() {
                   goPrev={goPrev}
                   goNext={goNext}
                   nextLabel={nextLabel}
+                  timerLabel={timerLabel}
+                  isTimerCritical={isTimerCritical}
                 />
               ) : null}
             </section>
@@ -317,6 +354,8 @@ function QuestionStage({
   goPrev,
   goNext,
   nextLabel,
+  timerLabel,
+  isTimerCritical,
 }: {
   stage: Exclude<Stage, 'intro' | 'submitting'>
   meta: { title: string; subtitle: string; description: string; current: number; total: number }
@@ -335,6 +374,8 @@ function QuestionStage({
   goPrev: () => void
   goNext: () => void
   nextLabel: string
+  timerLabel: string
+  isTimerCritical: boolean
 }) {
   const essayQuestion = essayQuestions[essayIndex]
   const answer = stage === 'tetrad' ? tetradAnswers[tetradIndex] : sjtAnswers[sjtIndex]
@@ -342,7 +383,7 @@ function QuestionStage({
     stage === 'tetrad' ? tetradQuestions[tetradIndex].items : stage === 'sjt' ? sjtQuestions[sjtIndex].options : []
 
   return (
-    <div className="surface-card flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="surface-card relative flex h-full min-h-0 flex-col overflow-hidden">
       <div className="border-b border-border bg-[#fcf8f1] px-3 py-2 sm:px-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -350,39 +391,47 @@ function QuestionStage({
             <h2 className="mt-1 text-lg sm:text-xl">{meta.title}</h2>
             <p className="mt-1 text-[13px] leading-5 text-muted">{meta.subtitle}</p>
           </div>
-          <div className="flex w-full flex-col items-end gap-2 sm:w-auto">
-            <div className="rounded-field border border-border bg-white px-2.5 py-1.5 text-[10px] uppercase tracking-[0.16em] text-muted">
-              {meta.current + 1}/{meta.total}
+          <div className="hidden lg:flex flex-col items-end gap-2">
+            <div className={`rounded-field border px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] ${isTimerCritical ? 'border-[#e9b5b5] bg-[#fff1f1] text-[#c43d3d]' : 'border-border bg-white text-muted'}`}>
+              Timer: {timerLabel}
             </div>
-            <div className="flex max-w-full flex-wrap justify-end gap-1.5">
-              {Array.from({ length: activeNumbers }, (_, index) => {
-                const done = isNumberDone(index)
-                const active = index === activeIndex
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => jumpToNumber(index)}
-                    className={`h-8 rounded-field border px-3 text-[11px] font-medium transition-all ${
-                      active
-                        ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
-                        : done
-                          ? 'border-[#d9c7a8] bg-white text-[#8a7037]'
-                          : 'border-border bg-white text-muted'
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                )
-              })}
-            </div>
-            <div className="flex w-full justify-end gap-2 sm:w-auto">
-              <button type="button" className="btn-secondary px-4 py-2 text-[12px]" onClick={goPrev}>
-                Sebelumnya
-              </button>
-              <button type="button" className="btn-primary px-4 py-2 text-[12px]" onClick={goNext}>
-                {nextLabel}
-              </button>
+            <div className="rounded-card border border-border bg-white px-3 py-2 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted">No. Soal</p>
+                <span className="rounded-field border border-border bg-panel px-2 py-1 text-[11px] text-text">
+                  {meta.current + 1}/{meta.total}
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-4 gap-1">
+                {Array.from({ length: activeNumbers }, (_, index) => {
+                  const done = isNumberDone(index)
+                  const active = index === activeIndex
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => jumpToNumber(index)}
+                      className={`h-8 rounded-field border text-[11px] font-medium transition-all ${
+                        active
+                          ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
+                          : done
+                            ? 'border-[#d9c7a8] bg-white text-[#8a7037]'
+                            : 'border-border bg-white text-muted'
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="mt-2 flex gap-2">
+                <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[12px]" onClick={goPrev}>
+                  Sebelumnya
+                </button>
+                <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[12px]" onClick={goNext}>
+                  {nextLabel}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -395,6 +444,49 @@ function QuestionStage({
 
       <div className="flex-1 px-2 py-2 sm:px-4">
         <div className="flex h-full flex-col gap-3">
+          {/* Mobile/Tablet navigator & timer */}
+          <div className="flex flex-col gap-2 rounded-card border border-border bg-[#fcf8f1] px-3 py-2 shadow-sm lg:hidden">
+            <div className={`rounded-field border px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-center ${isTimerCritical ? 'border-[#e9b5b5] bg-[#fff1f1] text-[#c43d3d]' : 'border-border bg-white text-muted'}`}>
+              Timer: {timerLabel}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted">No. Soal</p>
+              <span className="rounded-field border border-border bg-panel px-2 py-1 text-[11px] text-text">
+                {meta.current + 1}/{meta.total}
+              </span>
+            </div>
+            <div className="grid grid-cols-5 gap-1.5">
+              {Array.from({ length: activeNumbers }, (_, index) => {
+                const done = isNumberDone(index)
+                const active = index === activeIndex
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => jumpToNumber(index)}
+                    className={`h-8 rounded-field border text-[11px] font-medium transition-all ${
+                      active
+                        ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
+                        : done
+                          ? 'border-[#d9c7a8] bg-white text-[#8a7037]'
+                          : 'border-border bg-white text-muted'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="flex w-full justify-end gap-2">
+              <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[12px]" onClick={goPrev}>
+                Sebelumnya
+              </button>
+              <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[12px]" onClick={goNext}>
+                {nextLabel}
+              </button>
+            </div>
+          </div>
+
           {stage === 'essay' ? (
             <div className="surface-panel h-full p-3.5 sm:p-4">
               <p className="text-[13px] leading-5 text-muted">{essayQuestion.hint}</p>
