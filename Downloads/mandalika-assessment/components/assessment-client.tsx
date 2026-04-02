@@ -271,7 +271,7 @@ export function AssessmentClient() {
         ) : null}
 
         {stage !== 'intro' ? (
-          <section className="mt-2.5 grid h-[calc(100vh-82px)] gap-2 xl:grid-cols-[minmax(0,1fr)_248px]">
+          <section className="mt-2.5 grid h-[calc(100vh-82px)] items-stretch gap-2 xl:grid-cols-[minmax(0,1fr)_248px]">
             <section className="order-1 flex h-full min-h-0 flex-col gap-3">
               {error ? <ErrorBanner text={error} /> : null}
               {stage === 'submitting' ? <div className="surface-card flex min-h-[420px] items-center justify-center p-8 text-center"><div><p className="eyebrow">Submitting</p><h2 className="mt-3 text-3xl sm:text-4xl">Menyimpan hasil assessment...</h2><p className="mt-4 text-sm leading-7 text-muted">Sistem sedang menghitung skor dan menyimpan data ke storage.</p></div></div> : null}
@@ -327,7 +327,7 @@ export function AssessmentClient() {
                           active
                             ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
                             : done
-                              ? 'border-[#d9c7a8] bg-white text-[#8a7037]'
+                              ? 'border-[#cbb072] bg-[#fdf4e2] text-[#8a6a2a]'
                               : 'border-border bg-white text-muted'
                         }`}
                       >
@@ -473,7 +473,7 @@ function QuestionStage({
                       active
                         ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
                         : done
-                          ? 'border-[#d9c7a8] bg-white text-[#8a7037]'
+                          ? 'border-[#cbb072] bg-[#fdf4e2] text-[#8a6a2a]'
                           : 'border-border bg-white text-muted'
                     }`}
                   >
