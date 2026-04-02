@@ -297,21 +297,21 @@ export function AssessmentClient() {
               ) : null}
             </section>
             <aside className="order-2 space-y-2.5 xl:order-2 xl:sticky xl:top-24 xl:self-start">
-              <div className="surface-card p-3">
-                <div className="flex items-start justify-between gap-2">
+              <div className="surface-card p-2.5">
+                <div className="flex items-start justify-between gap-1.5">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.16em] text-gold">Navigasi Soal</p>
-                    <p className="text-[11px] text-muted">Klik nomor untuk lompat</p>
+                    <p className="text-[10px] text-muted">Klik nomor untuk lompat</p>
                   </div>
                   <span
-                    className={`rounded-field border px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] ${
+                    className={`rounded-field border px-2.5 py-1.5 text-[10px] uppercase tracking-[0.18em] ${
                       isTimerCritical ? 'border-[#e9b5b5] bg-[#fff1f1] text-[#c43d3d]' : 'border-border bg-panel text-muted'
                     }`}
                   >
                     {timerLabel}
                   </span>
                 </div>
-                <div className="mt-2 grid grid-cols-4 gap-1">
+                <div className="mt-2 grid grid-cols-5 gap-1">
                   {Array.from({ length: activeNumbers }, (_, index) => {
                     const done = isNumberDone(index)
                     const active = index === activeIndex
@@ -320,7 +320,7 @@ export function AssessmentClient() {
                         key={index}
                         type="button"
                         onClick={() => jumpToNumber(index)}
-                        className={`h-9 rounded-field border text-[12px] font-medium transition-all ${
+                        className={`h-7 rounded-field border px-2 text-[10px] font-medium transition-all ${
                           active
                             ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
                             : done
@@ -333,18 +333,18 @@ export function AssessmentClient() {
                     )
                   })}
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[12px]" onClick={goPrev}>
+                <div className="mt-2 flex gap-2">
+                  <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[11px]" onClick={goPrev}>
                     Sebelumnya
                   </button>
-                  <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[12px]" onClick={goNext}>
+                  <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[11px]" onClick={goNext}>
                     {nextLabel}
                   </button>
                 </div>
               </div>
               <div className="surface-card p-2">
                 <p className="text-[10px] uppercase tracking-[0.16em] text-gold">Sesi</p>
-                <div className="mt-2 space-y-1">
+                <div className="mt-1.5 space-y-1">
                   {sessionCards.map((item) => (
                     <button
                       key={item.key}
@@ -356,7 +356,7 @@ export function AssessmentClient() {
                           setStage(item.key)
                         }
                       }}
-                      className={`w-full rounded-card border px-2 py-2 text-left transition-all ${
+                      className={`w-full rounded-card border px-2 py-1.5 text-left transition-all ${
                         item.active
                           ? 'border-[#c4a160] bg-[#fbf5e9] shadow-[0_8px_18px_rgba(151,117,56,0.12)]'
                           : item.disabled
@@ -447,17 +447,17 @@ function QuestionStage({
       <div className="flex-1 px-2 py-2 sm:px-4">
         <div className="flex h-full flex-col gap-3">
           {/* Mobile/Tablet navigator & timer */}
-          <div className="flex flex-col gap-2 rounded-card border border-border bg-[#fcf8f1] px-3 py-2 shadow-sm lg:hidden">
-            <div className={`rounded-field border px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-center ${isTimerCritical ? 'border-[#e9b5b5] bg-[#fff1f1] text-[#c43d3d]' : 'border-border bg-white text-muted'}`}>
+          <div className="flex flex-col gap-1.5 rounded-card border border-border bg-[#fcf8f1] px-3 py-2 shadow-sm lg:hidden">
+            <div className={`rounded-field border px-2.5 py-1.5 text-[10px] uppercase tracking-[0.18em] text-center ${isTimerCritical ? 'border-[#e9b5b5] bg-[#fff1f1] text-[#c43d3d]' : 'border-border bg-white text-muted'}`}>
               Timer: {timerLabel}
             </div>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted">No. Soal</p>
-              <span className="rounded-field border border-border bg-panel px-2 py-1 text-[11px] text-text">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-muted">No. Soal</p>
+              <span className="rounded-field border border-border bg-panel px-2 py-1 text-[10px] text-text">
                 {meta.current + 1}/{meta.total}
               </span>
             </div>
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-5 gap-1">
               {Array.from({ length: activeNumbers }, (_, index) => {
                 const done = isNumberDone(index)
                 const active = index === activeIndex
@@ -466,7 +466,7 @@ function QuestionStage({
                     key={index}
                     type="button"
                     onClick={() => jumpToNumber(index)}
-                    className={`h-8 rounded-field border text-[11px] font-medium transition-all ${
+                    className={`h-7 rounded-field border px-2 text-[10px] font-medium transition-all ${
                       active
                         ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
                         : done
@@ -480,10 +480,10 @@ function QuestionStage({
               })}
             </div>
             <div className="flex w-full justify-end gap-2">
-              <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[12px]" onClick={goPrev}>
+              <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[11px]" onClick={goPrev}>
                 Sebelumnya
               </button>
-              <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[12px]" onClick={goNext}>
+              <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[11px]" onClick={goNext}>
                 {nextLabel}
               </button>
             </div>
