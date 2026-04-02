@@ -30,25 +30,20 @@ export function AssessmentClient() {
   const [essaySeconds, setEssaySeconds] = useState(30 * 60) // opsional, tidak dikunci waktu
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY)
-      if (!raw) return
-      const draft = JSON.parse(raw) as {
-        stage?: Stage; name?: string; dept?: string; role?: string; tenure?: string
-        tetradIndex?: number; sjtIndex?: number; essayIndex?: number
-        tetradAnswers?: TetradAnswer[]; sjtAnswers?: SJTAnswer[]; essayAnswers?: string[]
-      }
-      setStage(draft.stage && draft.stage !== 'submitting' ? draft.stage : 'intro')
-      setName(draft.name || ''); setDept(draft.dept || ''); setRole(draft.role || ''); setTenure(draft.tenure || '')
-      setTetradIndex(clampIndex(draft.tetradIndex, tetradQuestions.length))
-      setSjtIndex(clampIndex(draft.sjtIndex, sjtQuestions.length))
-      setEssayIndex(clampIndex(draft.essayIndex, essayQuestions.length))
-      setTetradAnswers(normalizeChoiceAnswers(draft.tetradAnswers, tetradQuestions.length))
-      setSjtAnswers(normalizeChoiceAnswers(draft.sjtAnswers, sjtQuestions.length))
-      setEssayAnswers(normalizeEssayAnswers(draft.essayAnswers, essayQuestions.length))
-    } catch {
-      localStorage.removeItem(DRAFT_KEY)
-    }
+    // Selalu mulai sebagai user baru: bersihkan draft lokal
+    localStorage.removeItem(DRAFT_KEY)
+    setStage('intro')
+    setName('')
+    setDept('')
+    setRole('')
+    setTenure('')
+    setTetradIndex(0)
+    setSjtIndex(0)
+    setEssayIndex(0)
+    setTetradAnswers(Array.from({ length: tetradQuestions.length }, blankChoice))
+    setSjtAnswers(Array.from({ length: sjtQuestions.length }, blankChoice))
+    setEssayAnswers(Array.from({ length: essayQuestions.length }, () => ''))
+    setError('')
   }, [])
 
   useEffect(() => {
@@ -350,12 +345,12 @@ export function AssessmentClient() {
                   </button>
                 </div>
               </div>
-              <div className="surface-card p-2">
-                <p className="text-[10px] uppercase tracking-[0.16em] text-gold">Sesi</p>
-                <div className="mt-1.5 space-y-1">
-                  {sessionCards.map((item) => (
-                    <button
-                      key={item.key}
+          <div className="surface-card p-1.5">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-gold">Sesi</p>
+            <div className="mt-1.5 space-y-1">
+              {sessionCards.map((item) => (
+                <button
+                  key={item.key}
                       type="button"
                       disabled={item.disabled}
                       onClick={() => {
