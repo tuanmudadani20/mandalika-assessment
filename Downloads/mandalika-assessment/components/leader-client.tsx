@@ -257,6 +257,15 @@ export function LeaderClient() {
   const exportCsv = () => {
     const header = [
       'Timestamp',
+      'Start',
+      'Finish',
+      'Total Seconds',
+      'Tetrad Start',
+      'Tetrad End',
+      'SJT Start',
+      'SJT End',
+      'Essay Start',
+      'Essay End',
       'Name',
       'Department',
       'Role',
@@ -289,6 +298,15 @@ export function LeaderClient() {
 
     const rows = submissions.map((submission) => [
       submission.timestamp,
+      submission.timings.startedAt,
+      submission.timings.finishedAt,
+      submission.timings.totalSeconds,
+      submission.timings.tetrad.start || '',
+      submission.timings.tetrad.end || '',
+      submission.timings.sjt.start || '',
+      submission.timings.sjt.end || '',
+      submission.timings.essay.start || '',
+      submission.timings.essay.end || '',
       submission.name,
       submission.dept,
       submission.role,
@@ -657,6 +675,24 @@ function LeaderDetail({
             </div>
           </div>
 
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <TimingCard label="Mulai" value={formatDateTime(submission.timings.startedAt)} />
+            <TimingCard label="Selesai" value={formatDateTime(submission.timings.finishedAt)} />
+            <TimingCard label="Total Waktu" value={formatDurationText(submission.timings.totalSeconds)} />
+            <TimingCard
+              label="Sesi 1 · Tetrad"
+              value={formatRangeWithDuration(submission.timings.tetrad.start, submission.timings.tetrad.end)}
+            />
+            <TimingCard
+              label="Sesi 2 · ML-SJT"
+              value={formatRangeWithDuration(submission.timings.sjt.start, submission.timings.sjt.end)}
+            />
+            <TimingCard
+              label="Sesi 3 · Feedback (Opsional)"
+              value={formatRangeWithDuration(submission.timings.essay.start, submission.timings.essay.end, true)}
+            />
+          </div>
+
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard label="Weighted Score" value={String(submission.scores.weightedScore)} />
             <StatCard label="Gate 1" value={submission.scores.gate1.passed ? 'Passed' : 'Failed'} />
@@ -885,6 +921,60 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="mt-2.5 text-xl font-semibold text-text">{value}</p>
     </div>
   )
+}
+
+function TimingCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-card border border-border bg-panel px-3 py-3">
+      <p className="text-[10px] uppercase tracking-[0.16em] text-muted">{label}</p>
+      <p className="mt-1.5 text-sm text-text">{value}</p>
+    </div>
+  )
+}
+
+function formatDateTime(value?: string) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleString('id-ID', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+}
+
+function formatClock(value?: string) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatDurationText(seconds?: number | null) {
+  if (typeof seconds !== 'number' || Number.isNaN(seconds)) return '-'
+  const totalSeconds = Math.max(0, Math.round(seconds))
+  const mins = Math.floor(totalSeconds / 60)
+  const secs = totalSeconds % 60
+  const hours = Math.floor(mins / 60)
+  const remainingMins = mins % 60
+  if (hours > 0) {
+    return `${hours}j ${remainingMins}m${secs ? ` ${secs}d` : ''}`.trim()
+  }
+  if (mins > 0) {
+    return `${mins}m${secs ? ` ${secs}d` : ''}`.trim()
+  }
+  return `${secs}d`
+}
+
+function diffSeconds(start?: string, end?: string) {
+  if (!start || !end) return null
+  const startDate = new Date(start)
+  const endDate = new Date(end)
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return null
+  return Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / 1000))
+}
+
+function formatRangeWithDuration(start?: string, end?: string, allowEmpty = false) {
+  if (!start && !end) return allowEmpty ? '-' : 'Belum tercatat'
+  const range = start && end ? `${formatClock(start)} - ${formatClock(end)}` : start ? `Mulai ${formatClock(start)}` : `Selesai ${formatClock(end)}`
+  const duration = diffSeconds(start, end)
+  return duration !== null ? `${range} • ${formatDurationText(duration)}` : range
 }
 
 function InfoCard({

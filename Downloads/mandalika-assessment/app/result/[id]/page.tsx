@@ -12,6 +12,47 @@ import {
 
 export const dynamic = 'force-dynamic'
 
+function formatDateTime(value?: string) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function formatClock(value?: string) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatDuration(seconds?: number | null) {
+  if (typeof seconds !== 'number' || Number.isNaN(seconds)) return '-'
+  const total = Math.max(0, Math.round(seconds))
+  const mins = Math.floor(total / 60)
+  const secs = total % 60
+  const hours = Math.floor(mins / 60)
+  const restMins = mins % 60
+  if (hours > 0) return `${hours}j ${restMins}m${secs ? ` ${secs}d` : ''}`.trim()
+  if (mins > 0) return `${mins}m${secs ? ` ${secs}d` : ''}`.trim()
+  return `${secs}d`
+}
+
+function formatRange(start?: string, end?: string) {
+  if (!start && !end) return '-'
+  const range = start && end ? `${formatClock(start)} - ${formatClock(end)}` : start ? `Mulai ${formatClock(start)}` : `Selesai ${formatClock(end)}`
+  if (start && end) {
+    const duration = Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 1000))
+    return `${range} • ${formatDuration(duration)}`
+  }
+  return range
+}
+
 export default async function ResultPage({
   params,
 }: {
@@ -54,6 +95,22 @@ export default async function ResultPage({
             </Link>
           </div>
         </div>
+
+        <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ['Mulai', formatDateTime(submission.timings.startedAt)],
+            ['Selesai', formatDateTime(submission.timings.finishedAt)],
+            ['Total Waktu', formatDuration(submission.timings.totalSeconds)],
+            ['Sesi 1 · Tetrad', formatRange(submission.timings.tetrad.start, submission.timings.tetrad.end)],
+            ['Sesi 2 · ML-SJT', formatRange(submission.timings.sjt.start, submission.timings.sjt.end)],
+            ['Sesi 3 · Feedback', formatRange(submission.timings.essay.start, submission.timings.essay.end)],
+          ].map(([label, value]) => (
+            <div key={label} className="surface-card p-4">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-muted">{label}</p>
+              <p className="mt-1.5 text-sm text-text">{value}</p>
+            </div>
+          ))}
+        </section>
 
         <section className="mt-8 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="surface-card p-6 sm:p-8">

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import { useRouter } from 'next/navigation'
 import { essayQuestions, sjtQuestions, tetradQuestions } from '@/lib/assessment-data'
-import type { SJTAnswer, TetradAnswer } from '@/lib/types'
+import type { SJTAnswer, SubmissionTiming, TetradAnswer } from '@/lib/types'
 
 type Stage = 'intro' | 'tetrad' | 'sjt' | 'essay' | 'submitting'
 
@@ -28,6 +28,14 @@ export function AssessmentClient() {
   const [tetradSeconds, setTetradSeconds] = useState(30 * 60) // 30 menit sesi 1
   const [sjtSeconds, setSjtSeconds] = useState(30 * 60) // 30 menit sesi 2
   const [essaySeconds, setEssaySeconds] = useState(30 * 60) // opsional, tidak dikunci waktu
+  const [timing, setTiming] = useState<SubmissionTiming>({
+    startedAt: '',
+    finishedAt: '',
+    totalSeconds: 0,
+    tetrad: {},
+    sjt: {},
+    essay: {},
+  })
 
   useEffect(() => {
     // Selalu mulai sebagai user baru: bersihkan draft lokal
@@ -43,6 +51,17 @@ export function AssessmentClient() {
     setTetradAnswers(Array.from({ length: tetradQuestions.length }, blankChoice))
     setSjtAnswers(Array.from({ length: sjtQuestions.length }, blankChoice))
     setEssayAnswers(Array.from({ length: essayQuestions.length }, () => ''))
+    setTetradSeconds(30 * 60)
+    setSjtSeconds(30 * 60)
+    setEssaySeconds(30 * 60)
+    setTiming({
+      startedAt: '',
+      finishedAt: '',
+      totalSeconds: 0,
+      tetrad: {},
+      sjt: {},
+      essay: {},
+    })
     setError('')
   }, [])
 
@@ -114,8 +133,86 @@ export function AssessmentClient() {
     { key: 'essay' as const, part: 'Part 3', label: 'Kritik & Saran (Opsional)', progress: `${completedEssay}/${essayQuestions.length}`, active: stage === 'essay', disabled: !canOpenEssay },
   ]
 
+  const goToSjt = () => {
+    const now = new Date().toISOString()
+    setTiming((prev) => ({
+      startedAt: prev.startedAt || now,
+      finishedAt: '',
+      totalSeconds: prev.totalSeconds,
+      tetrad: {
+        start: prev.tetrad.start || prev.startedAt || now,
+        end: prev.tetrad.end || now,
+      },
+      sjt: {
+        start: prev.sjt.start || now,
+        end: prev.sjt.end,
+      },
+      essay: prev.essay,
+    }))
+    setStage('sjt')
+  }
+
+  const goToEssay = () => {
+    const now = new Date().toISOString()
+    setTiming((prev) => ({
+      startedAt: prev.startedAt || now,
+      finishedAt: '',
+      totalSeconds: prev.totalSeconds,
+      tetrad: {
+        start: prev.tetrad.start || prev.startedAt || now,
+        end: prev.tetrad.end || now,
+      },
+      sjt: {
+        start: prev.sjt.start || prev.tetrad.end || prev.startedAt || now,
+        end: prev.sjt.end || now,
+      },
+      essay: {
+        start: prev.essay.start || now,
+        end: prev.essay.end,
+      },
+    }))
+    setStage('essay')
+  }
+
+  const buildTimingPayload = (
+    finishedAtOverride?: string,
+    overrides?: { tetradEnd?: string; sjtEnd?: string; essayEnd?: string },
+  ): SubmissionTiming => {
+    const finishedAt = finishedAtOverride || new Date().toISOString()
+    const startedAt = timing.startedAt || finishedAt
+    return {
+      startedAt,
+      finishedAt,
+      totalSeconds: Math.max(0, Math.round((Date.parse(finishedAt) - Date.parse(startedAt)) / 1000)),
+      tetrad: {
+        start: timing.tetrad.start || startedAt,
+        end: overrides?.tetradEnd || timing.tetrad.end || finishedAt,
+      },
+      sjt: {
+        start: timing.sjt.start || timing.tetrad.end || startedAt,
+        end: overrides?.sjtEnd || timing.sjt.end || finishedAt,
+      },
+      essay: {
+        start: timing.essay.start,
+        end: overrides?.essayEnd || timing.essay.end,
+      },
+    }
+  }
+
   const startAssessment = () => {
     if (!name.trim() || !dept.trim() || !role.trim() || !tenure.trim()) return setError('Nama, departemen, role, dan masa kerja wajib diisi.')
+    const now = new Date().toISOString()
+    setTiming({
+      startedAt: now,
+      finishedAt: '',
+      totalSeconds: 0,
+      tetrad: { start: now },
+      sjt: {},
+      essay: {},
+    })
+    setTetradSeconds(30 * 60)
+    setSjtSeconds(30 * 60)
+    setEssaySeconds(30 * 60)
     setError(''); setStage('tetrad')
   }
 
@@ -130,18 +227,21 @@ export function AssessmentClient() {
     })
   }
 
-  const submitAssessment = async () => {
+  const submitAssessment = async (options?: { finishedAt?: string; tetradEnd?: string; sjtEnd?: string; essayEnd?: string }) => {
     const openTetrad = tetradAnswers.findIndex((answer) => !isCompletedChoice(answer))
     if (openTetrad >= 0) { setStage('tetrad'); setTetradIndex(openTetrad); return setError(`Tetrad ${openTetrad + 1} belum lengkap.`) }
     const openSjt = sjtAnswers.findIndex((answer) => !isCompletedChoice(answer))
-    if (openSjt >= 0) { setStage('sjt'); setSjtIndex(openSjt); return setError(`ML-SJT ${openSjt + 1} belum lengkap.`) }
+    if (openSjt >= 0) { goToSjt(); setSjtIndex(openSjt); return setError(`ML-SJT ${openSjt + 1} belum lengkap.`) }
+    const finishedAt = options?.finishedAt || new Date().toISOString()
+    const timingPayload = buildTimingPayload(finishedAt, options)
+    setTiming(timingPayload)
     setError(''); setStage('submitting')
     const normalizedEssayAnswers = essayAnswers.map((answer) => {
       const trimmed = (answer || '').trim()
       return trimmed.length ? trimmed : '-'
     })
     try {
-      const response = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dept, role, tenure, tetradAnswers, sjtAnswers, essayAnswers: normalizedEssayAnswers }) })
+      const response = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dept, role, tenure, timings: timingPayload, tetradAnswers, sjtAnswers, essayAnswers: normalizedEssayAnswers }) })
       const data = await response.json().catch(() => ({})) as { id?: string; error?: string }
       if (!response.ok || !data.id) throw new Error(data.error || 'Gagal menyimpan assessment.')
       localStorage.removeItem(DRAFT_KEY); router.push(`/result/${data.id}`)
@@ -190,7 +290,7 @@ export function AssessmentClient() {
       else setSjtIndex((value) => value - 1)
     }
     if (stage === 'essay') {
-      if (essayIndex === 0) setStage('sjt')
+      if (essayIndex === 0) goToSjt()
       else setEssayIndex((value) => value - 1)
     }
   }
@@ -199,18 +299,28 @@ export function AssessmentClient() {
     setError('')
     if (stage === 'tetrad') {
       if (!isCompletedChoice(tetradAnswers[tetradIndex])) return setError('Pilih satu Most dan satu Least yang berbeda.')
-      if (tetradIndex === tetradQuestions.length - 1) setStage('sjt')
+      if (tetradIndex === tetradQuestions.length - 1) goToSjt()
       else setTetradIndex((value) => value + 1)
     } else if (stage === 'sjt') {
       if (!isCompletedChoice(sjtAnswers[sjtIndex])) return setError('Pilih satu Most dan satu Least yang berbeda.')
       if (sjtIndex === sjtQuestions.length - 1) {
-        await submitAssessment()
+        const now = new Date().toISOString()
+        setTiming((prev) => ({
+          ...prev,
+          sjt: { ...prev.sjt, end: prev.sjt.end || now },
+        }))
+        await submitAssessment({ finishedAt: now, sjtEnd: now })
       } else {
         setSjtIndex((value) => value + 1)
       }
     } else if (stage === 'essay') {
       if (essayIndex === essayQuestions.length - 1) {
-        void submitAssessment()
+        const now = new Date().toISOString()
+        setTiming((prev) => ({
+          ...prev,
+          essay: { ...prev.essay, end: prev.essay.end || now },
+        }))
+        void submitAssessment({ finishedAt: now, essayEnd: now })
       } else {
         setEssayIndex((value) => value + 1)
       }
@@ -360,7 +470,9 @@ export function AssessmentClient() {
                       onClick={() => {
                         if (!item.disabled) {
                           setError('')
-                          setStage(item.key)
+                          if (item.key === 'sjt') goToSjt()
+                          else if (item.key === 'essay') goToEssay()
+                          else setStage(item.key)
                         }
                       }}
                       className={`w-full rounded-card border px-2 py-1.5 text-left transition-all ${
