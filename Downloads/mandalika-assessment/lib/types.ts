@@ -13,7 +13,7 @@ export type DimensionKey =
   | 'decisive'
   | 'innovative'
 
-export type PlayerCategory = 'A Player' | 'B Solid Player' | 'B Player' | 'C Player'
+export type PlayerCategory = 'A Player' | 'B Solid Player' | 'B Player' | 'C Player' | 'C Player Kritis'
 export type LayerKey = 1 | 2 | 3 | 4
 export type AlertLevel = 'critical' | 'warning' | 'info'
 export type ProfileFlagKey =
@@ -24,6 +24,9 @@ export type ProfileFlagKey =
   | 'anchor_player'
   | 'strategic_thinker'
   | 'culture_builder'
+  | 'character_collapse'
+  | 'character_foundation_absent'
+  | 'c_player_critical'
 
 export type DimScores = Record<DimensionKey, number>
 
@@ -96,6 +99,11 @@ export interface Scores {
   finalCategory: PlayerCategory
   wasDowngraded: boolean
   downgradeReason?: string
+  css: number
+  pgs: number
+  totalDeduction: number
+  cssBreakdown: CSSBreakdown
+  overrides: OverrideResult
   gate1: Gate1Summary
   gate2: Gate2Summary
   profileFlags: ProfileFlagKey[]
@@ -181,4 +189,19 @@ export interface ProfileFlagDefinition {
   alert: 'critical' | 'info'
   description: string
   placement: string
+}
+
+export interface CSSBreakdown {
+  integritas: number
+  ownership: number
+  standarPribadi: number
+  emotionallyControlled: number
+}
+
+export interface OverrideResult {
+  characterCollapse: boolean
+  characterFoundationAbsent: boolean
+  anyOverrideActive: boolean
+  forcedCategory?: PlayerCategory
+  overrideReason?: string
 }
