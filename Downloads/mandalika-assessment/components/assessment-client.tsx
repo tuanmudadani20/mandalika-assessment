@@ -277,7 +277,7 @@ export function AssessmentClient() {
         : 'Soal Berikutnya'
       : stage === 'sjt'
         ? sjtIndex === sjtQuestions.length - 1
-          ? 'Lanjut ke Feedback'
+          ? 'Ke Feedback (opsional)'
           : 'Soal Berikutnya'
         : essayIndex === essayQuestions.length - 1
           ? 'Kirim Assessment'
@@ -312,8 +312,10 @@ export function AssessmentClient() {
         setTiming((prev) => ({
           ...prev,
           sjt: { ...prev.sjt, end: prev.sjt.end || now },
+          essay: { ...prev.essay, start: prev.essay.start || now },
         }))
-        await submitAssessment({ finishedAt: now, sjtEnd: now })
+        setStage('essay')
+        setEssayIndex(0)
       } else {
         setSjtIndex((value) => value + 1)
       }
