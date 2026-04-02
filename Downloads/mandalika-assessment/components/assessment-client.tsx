@@ -66,11 +66,12 @@ export function AssessmentClient() {
   const canOpenEssay = completedSjt === sjtQuestions.length || stage === 'essay'
 
   const meta = useMemo(() => {
-  if (stage === 'tetrad') return { title: `Tetrad ${tetradIndex + 1}`, subtitle: 'Pilih satu Most dan satu Least dari empat pernyataan.', description: '', current: tetradIndex, total: tetradQuestions.length }
-  if (stage === 'sjt') return { title: `ML-SJT ${sjtIndex + 1}`, subtitle: 'Pilih respons yang paling mendekati dan paling tidak mendekati tindakan Anda.', description: sjtQuestions[sjtIndex].scenario, current: sjtIndex, total: sjtQuestions.length }
-  if (stage === 'essay') return { title: `Kritik & Saran ${essayIndex + 1}`, subtitle: 'Opsional — berikan kritik, saran, atau ide yang ingin Anda bagi.', description: essayQuestions[essayIndex].question, current: essayIndex, total: essayQuestions.length }
-  return { title: 'Identitas Peserta', subtitle: 'Lengkapi data singkat sebelum memulai.', description: '', current: 0, total: 0 }
+    if (stage === 'tetrad') return { title: `Tetrad ${tetradIndex + 1}`, subtitle: 'Pilih satu Most dan satu Least dari empat pernyataan.', description: '', current: tetradIndex, total: tetradQuestions.length }
+    if (stage === 'sjt') return { title: `ML-SJT ${sjtIndex + 1}`, subtitle: 'Pilih respons yang paling mendekati dan paling tidak mendekati tindakan Anda.', description: sjtQuestions[sjtIndex].scenario, current: sjtIndex, total: sjtQuestions.length }
+    if (stage === 'essay') return { title: `Kritik & Saran ${essayIndex + 1}`, subtitle: 'Opsional — berikan kritik, saran, atau ide yang ingin Anda bagi.', description: essayQuestions[essayIndex].question, current: essayIndex, total: essayQuestions.length }
+    return { title: 'Identitas Peserta', subtitle: 'Lengkapi data singkat sebelum memulai.', description: '', current: 0, total: 0 }
   }, [essayIndex, sjtIndex, stage, tetradIndex])
+
 
   const sessionCards = [
     { key: 'tetrad' as const, part: 'Part 1', label: 'Tetrad Most/Least', progress: `${completedTetrad}/${tetradQuestions.length}`, active: stage === 'tetrad', disabled: false },
@@ -260,8 +261,8 @@ export function AssessmentClient() {
             </section>
             <aside className="order-2 space-y-2.5 xl:order-2 xl:sticky xl:top-24 xl:self-start">
               <div className="surface-card p-2">
-                <p className="eyebrow">Sesi</p>
-                <div className="mt-2 space-y-1.5">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-gold">Sesi</p>
+                <div className="mt-2 space-y-1">
                   {sessionCards.map((item) => (
                     <button
                       key={item.key}
@@ -343,14 +344,46 @@ function QuestionStage({
   return (
     <div className="surface-card flex h-full min-h-0 flex-col overflow-hidden">
       <div className="border-b border-border bg-[#fcf8f1] px-3 py-2 sm:px-4">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="eyebrow">Question View</p>
             <h2 className="mt-1 text-lg sm:text-xl">{meta.title}</h2>
             <p className="mt-1 text-[13px] leading-5 text-muted">{meta.subtitle}</p>
           </div>
-          <div className="rounded-field border border-border bg-white px-2.5 py-1.5 text-[10px] uppercase tracking-[0.16em] text-muted">
-            {meta.current + 1}/{meta.total}
+          <div className="flex w-full flex-col items-end gap-2 sm:w-auto">
+            <div className="rounded-field border border-border bg-white px-2.5 py-1.5 text-[10px] uppercase tracking-[0.16em] text-muted">
+              {meta.current + 1}/{meta.total}
+            </div>
+            <div className="flex max-w-full flex-wrap justify-end gap-1.5">
+              {Array.from({ length: activeNumbers }, (_, index) => {
+                const done = isNumberDone(index)
+                const active = index === activeIndex
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => jumpToNumber(index)}
+                    className={`h-8 rounded-field border px-3 text-[11px] font-medium transition-all ${
+                      active
+                        ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
+                        : done
+                          ? 'border-[#d9c7a8] bg-white text-[#8a7037]'
+                          : 'border-border bg-white text-muted'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="flex w-full justify-end gap-2 sm:w-auto">
+              <button type="button" className="btn-secondary px-4 py-2 text-[12px]" onClick={goPrev}>
+                Sebelumnya
+              </button>
+              <button type="button" className="btn-primary px-4 py-2 text-[12px]" onClick={goNext}>
+                {nextLabel}
+              </button>
+            </div>
           </div>
         </div>
         {meta.description ? (
@@ -444,38 +477,6 @@ function QuestionStage({
             </div>
           )}
 
-          <div className="mt-auto flex flex-col items-end gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
-            <div className="flex max-w-[520px] flex-wrap justify-end gap-1.5">
-              {Array.from({ length: activeNumbers }, (_, index) => {
-                const done = isNumberDone(index)
-                const active = index === activeIndex
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => jumpToNumber(index)}
-                    className={`h-9 rounded-field border px-3 text-[12px] font-medium transition-all ${
-                      active
-                        ? 'border-[#c5a159] bg-[#f6e9d4] text-[#7a5a1f]'
-                        : done
-                          ? 'border-[#d9c7a8] bg-white text-[#8a7037]'
-                          : 'border-border bg-white text-muted'
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                )
-              })}
-            </div>
-            <div className="flex w-full justify-end gap-2 sm:w-auto">
-              <button type="button" className="btn-secondary px-4 py-2 text-[12px]" onClick={goPrev}>
-                Sebelumnya
-              </button>
-              <button type="button" className="btn-primary px-4 py-2 text-[12px]" onClick={goNext}>
-                {nextLabel}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -507,6 +508,7 @@ function normalizeEssayAnswers(answers: string[] | undefined, size: number) {
 function isCompletedChoice(answer: TetradAnswer | SJTAnswer) {
   return !!answer && Number.isInteger(answer.mostIndex) && Number.isInteger(answer.leastIndex) && answer.mostIndex >= 0 && answer.leastIndex >= 0 && answer.mostIndex !== answer.leastIndex
 }
+
 
 
 
