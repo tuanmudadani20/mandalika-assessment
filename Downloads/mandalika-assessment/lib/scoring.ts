@@ -11,7 +11,6 @@ import type {
   DimScores,
   DimensionAlert,
   DimensionKey,
-  Gate1Summary,
   Layer1GateStatus,
   PlayerCategory,
   ProfileFlagKey,
@@ -110,10 +109,9 @@ export function computeScores(
   const { css, breakdown: cssBreakdown } = computeCSS(dims)
   const pgs = computePGS(dims)
   const totalDeduction = css + pgs
-  const finalScoreExact = clampScore(weightedScoreExact - totalDeduction)
+  const postDeductionScore = clampScore(weightedScoreExact - totalDeduction)
 
-  const categoryFromWeighted = scoreToCategory(weightedScoreExact)
-  const rawCategory = scoreToCategory(finalScoreExact)
+  const rawCategory = scoreToCategory(weightedScoreExact)
 
   const gate1 = {
     passed: gate1Passed,
@@ -126,13 +124,24 @@ export function computeScores(
     average: round1(layer2AvgExact),
   }
 
-  const overrides = computeOverrides(dims, gate1)
+  const overrides = computeOverrides(dims)
 
-  let finalCategory = overrides.anyOverrideActive && overrides.forcedCategory
-    ? worseCategory(rawCategory, overrides.forcedCategory)
-    : rawCategory
+  const postDeductionCategory = scoreToCategory(postDeductionScore)
+  const finalCategory = overrides.anyOverrideActive && overrides.forcedCategory
+    ? worseCategory(postDeductionCategory, overrides.forcedCategory)
+    : postDeductionCategory
 
-  const wasDowngraded = finalCategory !== categoryFromWeighted
+  const CAT_MAX: Record<PlayerCategory, number> = {
+    'A Player': 100,
+    'B Solid Player': 81,
+    'B Player': 66,
+    'C Player': 47,
+    'C Player Kritis': 29,
+  }
+
+  const finalScoreExact = Math.min(postDeductionScore, CAT_MAX[finalCategory])
+
+  const wasDowngraded = finalCategory !== rawCategory
   const downgradeReason = wasDowngraded
     ? buildDowngradeReason(css, cssBreakdown, pgs, overrides)
     : undefined
@@ -319,27 +328,50 @@ function getProfileFlags(
 }
 
 function computeCSS(dims: DimScores) {
+  const integritas = (() => {
+    const s = dims.integritas
+    if (s >= 50) return 0
+    if (s >= 35) return 5
+    if (s >= 25) return 12
+    return 22
+  })()
+
+  const ownership = (() => {
+    const s = dims.ownership
+    if (s >= 50) return 0
+    if (s >= 35) return 5
+    if (s >= 25) return 12
+    return 22
+  })()
+
+  const standarPribadi = (() => {
+    const s = dims.standarPribadi
+    if (s >= 45) return 0
+    if (s >= 30) return 5
+    if (s >= 20) return 10
+    return 18
+  })()
+
+  const emotionallyControlled = (() => {
+    const s = dims.emotionallyControlled
+    if (s >= 40) return 0
+    if (s >= 25) return 4
+    if (s >= 15) return 8
+    return 14
+  })()
+
   const breakdown = {
-    integritas: computeDeduction(dims.integritas, [50, 45, 35, 25], [0, 3, 8, 15, 25]),
-    ownership: computeDeduction(dims.ownership, [50, 45, 35, 25], [0, 3, 8, 15, 25]),
-    standarPribadi: computeDeduction(dims.standarPribadi, [45, 40, 30, 20], [0, 3, 8, 12, 20]),
-    emotionallyControlled: computeDeduction(dims.emotionallyControlled, [40, 35, 25, 15], [0, 2, 6, 10, 18]),
+    integritas,
+    ownership,
+    standarPribadi,
+    emotionallyControlled,
   }
-  const css = breakdown.integritas + breakdown.ownership + breakdown.standarPribadi + breakdown.emotionallyControlled
+  const css = integritas + ownership + standarPribadi + emotionallyControlled
   return { css, breakdown }
 }
 
-function computeDeduction(score: number, thresholds: number[], deductions: number[]) {
-  // thresholds descending arrays; deductions align segments
-  if (score >= thresholds[0]) return deductions[0]
-  if (score >= thresholds[1]) return deductions[1]
-  if (score >= thresholds[2]) return deductions[2]
-  if (score >= thresholds[3]) return deductions[3]
-  return deductions[4]
-}
-
 function computePGS(dims: DimScores) {
-  const avg = average(layerDimensions[2].map((key) => dims[key]))
+  const avg = Math.round(average(layerDimensions[2].map((key) => dims[key])))
   if (avg >= 55) return 0
   if (avg >= 50) return 4
   if (avg >= 40) return 10
@@ -347,38 +379,57 @@ function computePGS(dims: DimScores) {
   return 28
 }
 
-function computeOverrides(dims: DimScores, gate1: Gate1Summary) {
+function computeOverrides(dims: DimScores) {
   const characterCollapse = dims.integritas < 25 || dims.ownership < 25
-  const foundationFailures = [
-    dims.integritas < 50,
-    dims.ownership < 50,
-    dims.standarPribadi < 45,
-    dims.emotionallyControlled < 40,
-  ].filter(Boolean).length
-  const characterFoundationAbsent = foundationFailures >= 3
 
-  const overrides = {
+  const L1_THRESHOLDS = {
+    integritas: 50,
+    ownership: 50,
+    standarPribadi: 45,
+    emotionallyControlled: 40,
+  }
+  const failedCount = Object.entries(L1_THRESHOLDS).filter(
+    ([key, threshold]) => dims[key as keyof DimScores] < threshold,
+  ).length
+  const characterFoundationAbsent = failedCount >= 3
+
+  const anyOverrideActive = characterCollapse || characterFoundationAbsent
+
+  let forcedCategory: PlayerCategory | undefined
+  let overrideReason: string | undefined
+
+  if (characterCollapse) {
+    forcedCategory = 'C Player Kritis'
+    const who =
+      dims.integritas < 25 && dims.ownership < 25
+        ? 'Integritas dan Ownership'
+        : dims.integritas < 25
+          ? 'Integritas'
+          : 'Ownership'
+    overrideReason = `${who} berada di bawah 25% (level kritis). Skor dimensi lain tidak dapat mengkompensasi ini.`
+  }
+
+  if (characterFoundationAbsent) {
+    const failed = Object.entries(L1_THRESHOLDS)
+      .filter(([key, threshold]) => dims[key as keyof DimScores] < threshold)
+      .map(([key]) => key)
+    const reason = `${failedCount} dimensi fondasi karakter (${failed.join(', ')}) di bawah threshold.`
+
+    if (!forcedCategory) {
+      forcedCategory = 'C Player'
+      overrideReason = reason
+    } else {
+      overrideReason = `${overrideReason ?? ''} Selain itu, ${reason}`.trim()
+    }
+  }
+
+  return {
     characterCollapse,
     characterFoundationAbsent,
-    anyOverrideActive: characterCollapse || characterFoundationAbsent,
-    forcedCategory: undefined as PlayerCategory | undefined,
-    overrideReason: undefined as string | undefined,
+    anyOverrideActive,
+    forcedCategory,
+    overrideReason,
   }
-
-  const reasons: string[] = []
-  if (characterCollapse) {
-    overrides.forcedCategory = 'C Player Kritis'
-    const lowDims = []
-    if (dims.integritas < 25) lowDims.push('Integritas')
-    if (dims.ownership < 25) lowDims.push('Ownership')
-    reasons.push(`Character collapse: ${lowDims.join(', ')} < 25%`)
-  }
-  if (characterFoundationAbsent) {
-    overrides.forcedCategory = overrides.forcedCategory ?? 'C Player'
-    reasons.push('Fondasi karakter lemah: >=3 dimensi Layer 1 di bawah threshold')
-  }
-  overrides.overrideReason = reasons.join(' | ') || undefined
-  return overrides
 }
 
 function scoreToCategory(score: number): PlayerCategory {
@@ -406,11 +457,22 @@ function clampScore(value: number) {
 
 function buildDowngradeReason(css: number, cssBreakdown: { [k: string]: number }, pgs: number, overrides: { anyOverrideActive: boolean; overrideReason?: string }) {
   const parts: string[] = []
-  if (css > 0) {
-    const hitDims = Object.entries(cssBreakdown).filter(([, val]) => val > 0).map(([key, val]) => `${key} -${val}`)
-    parts.push(`Deduksi karakter ${css} (${hitDims.join(', ')})`)
+
+  if (overrides.overrideReason) {
+    parts.push(overrides.overrideReason)
   }
-  if (pgs > 0) parts.push(`Gap performa ${pgs}`)
-  if (overrides.anyOverrideActive && overrides.overrideReason) parts.push(`Override: ${overrides.overrideReason}`)
-  return parts.join('; ')
+
+  if (css > 0) {
+    const affected = Object.entries(cssBreakdown)
+      .filter(([, v]) => v > 0)
+      .map(([k, v]) => `${k} (−${v})`)
+      .join(', ')
+    parts.push(`Deduction karakter: ${affected}. Total CSS: −${css} poin.`)
+  }
+
+  if (pgs > 0) {
+    parts.push(`Deduction performa: rata-rata Layer 2 di bawah 55%. Total PGS: −${pgs} poin.`)
+  }
+
+  return parts.join(' ')
 }
