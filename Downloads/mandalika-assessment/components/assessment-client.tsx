@@ -98,9 +98,13 @@ export function AssessmentClient() {
 
   const completedTetrad = tetradAnswers.filter(isCompletedChoice).length
   const completedSjt = sjtAnswers.filter(isCompletedChoice).length
-  const completedEssay = essayAnswers.length // feedback opsional tetap dihitung selesai
+  const completedEssay = essayAnswers.filter((text) => (text || '').trim().length > 0).length
   const totalBlocks = tetradQuestions.length + sjtQuestions.length + essayQuestions.length
-  const overallProgress = Math.round(((completedTetrad + completedSjt + completedEssay) / totalBlocks) * 100)
+  // Hitung progress wajib + opsional: Part 3 tetap dianggap selesai walau kosong, tapi akan tampil sebagai "opsional".
+  const mandatoryDone = completedTetrad + completedSjt
+  const mandatoryTotal = tetradQuestions.length + sjtQuestions.length
+  const optionalWeight = essayQuestions.length // treat opsional sebagai blok terpisah
+  const overallProgress = Math.round(((mandatoryDone + essayQuestions.length) / (mandatoryTotal + optionalWeight)) * 100)
   const canOpenSjt = completedTetrad === tetradQuestions.length || stage === 'sjt' || stage === 'essay'
   const canOpenEssay = completedSjt === sjtQuestions.length || stage === 'essay'
 
@@ -358,7 +362,7 @@ export function AssessmentClient() {
                     style={{ width: `${overallProgress}%` }}
                   />
                 </div>
-                <p className="mt-2 text-[12px] leading-5 text-muted">Estimasi total waktu: 81 menit</p>
+                <p className="mt-2 text-[12px] leading-5 text-muted">Estimasi total waktu: 81 menit (maks, Part 3 opsional)</p>
               </div>
           </div>
         </header>
@@ -377,8 +381,8 @@ export function AssessmentClient() {
               <div className="mt-5 grid gap-2.5 md:grid-cols-3 xl:grid-cols-1">
                 {[
                   ['Part 1', '26 Tetrad Most/Least', 'Waktu 26 menit. Wajib; pilih Most & Least berbeda di tiap blok.'],
-                  ['Part 2', '26 ML-SJT', 'Waktu 30 menit. Wajib; tetap diurutkan setelah Part 1.'],
-                  ['Part 3', '5 Kritik, Saran, Ide (Opsional)', 'Waktu diset 25 menit, tapi boleh kosong dan langsung submit.'],
+                  ['Part 2', '26 ML-SJT', 'Waktu 30 menit. Wajib; lanjut setelah Part 1.'],
+                  ['Part 3', '5 Kritik, Saran, Ide (Opsional)', 'Waktu diset 25 menit, boleh kosong lalu submit.'],
                 ].map(([part, title, detail]) => (
                   <div key={part} className="rounded-card border border-border bg-white p-3.5">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-gold">{part}</p>
