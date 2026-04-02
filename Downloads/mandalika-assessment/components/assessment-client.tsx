@@ -86,7 +86,7 @@ export function AssessmentClient() {
 
   useEffect(() => {
     if (stage === 'tetrad' && tetradSeconds === 0) {
-      setError('Waktu 30 menit untuk sesi 1 sudah habis. Segera kirim jawaban.')
+      setError('Waktu 26 menit untuk sesi 1 sudah habis. Segera kirim jawaban.')
     }
   }, [stage, tetradSeconds])
 
