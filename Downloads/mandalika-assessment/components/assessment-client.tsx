@@ -25,8 +25,9 @@ export function AssessmentClient() {
   const [sjtAnswers, setSjtAnswers] = useState<SJTAnswer[]>(Array.from({ length: sjtQuestions.length }, blankChoice))
   const [essayAnswers, setEssayAnswers] = useState<string[]>(Array.from({ length: essayQuestions.length }, () => ''))
   const [error, setError] = useState('')
-  const [tetradSjtSeconds, setTetradSjtSeconds] = useState(60 * 60) // 60 menit total untuk sesi 1 & 2
-  const [essaySeconds, setEssaySeconds] = useState(30 * 60) // 30 menit untuk sesi 3
+  const [tetradSeconds, setTetradSeconds] = useState(30 * 60) // 30 menit sesi 1
+  const [sjtSeconds, setSjtSeconds] = useState(30 * 60) // 30 menit sesi 2
+  const [essaySeconds, setEssaySeconds] = useState(30 * 60) // opsional, tidak dikunci waktu
 
   useEffect(() => {
     try {
@@ -61,27 +62,25 @@ export function AssessmentClient() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
-    if (stage === 'tetrad' || stage === 'sjt') {
-      timer = setInterval(() => setTetradSjtSeconds((prev) => Math.max(0, prev - 1)), 1000)
-    } else if (stage === 'essay') {
-      timer = setInterval(() => setEssaySeconds((prev) => Math.max(0, prev - 1)), 1000)
-    }
+    if (stage === 'tetrad') timer = setInterval(() => setTetradSeconds((prev) => Math.max(0, prev - 1)), 1000)
+    else if (stage === 'sjt') timer = setInterval(() => setSjtSeconds((prev) => Math.max(0, prev - 1)), 1000)
+    else if (stage === 'essay') timer = setInterval(() => setEssaySeconds((prev) => Math.max(0, prev - 1)), 1000)
     return () => {
       if (timer) clearInterval(timer)
     }
   }, [stage])
 
   useEffect(() => {
-    if ((stage === 'tetrad' || stage === 'sjt') && tetradSjtSeconds === 0) {
-      setError('Waktu 60 menit untuk sesi 1-2 sudah habis. Segera kirim jawaban.')
+    if (stage === 'tetrad' && tetradSeconds === 0) {
+      setError('Waktu 30 menit untuk sesi 1 sudah habis. Segera kirim jawaban.')
     }
-  }, [stage, tetradSjtSeconds])
+  }, [stage, tetradSeconds])
 
   useEffect(() => {
-    if (stage === 'essay' && essaySeconds === 0) {
-      setError('Waktu 30 menit untuk sesi 3 sudah habis. Segera kirim jawaban.')
+    if (stage === 'sjt' && sjtSeconds === 0) {
+      setError('Waktu 30 menit untuk sesi 2 sudah habis. Segera kirim jawaban.')
     }
-  }, [stage, essaySeconds])
+  }, [stage, sjtSeconds])
 
   const completedTetrad = tetradAnswers.filter(isCompletedChoice).length
   const completedSjt = sjtAnswers.filter(isCompletedChoice).length
@@ -97,8 +96,14 @@ export function AssessmentClient() {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 
-  const timerLabel = stage === 'essay' ? formatTime(essaySeconds) : formatTime(tetradSjtSeconds)
-  const isTimerCritical = (stage === 'essay' ? essaySeconds : tetradSjtSeconds) <= 5 * 60
+  const timerLabel =
+    stage === 'tetrad' ? formatTime(tetradSeconds) : stage === 'sjt' ? formatTime(sjtSeconds) : 'Opsional'
+  const isTimerCritical =
+    stage === 'tetrad'
+      ? tetradSeconds <= 5 * 60
+      : stage === 'sjt'
+        ? sjtSeconds <= 5 * 60
+        : false
 
   const meta = useMemo(() => {
     if (stage === 'tetrad') return { title: `Tetrad ${tetradIndex + 1}`, subtitle: 'Pilih satu Most dan satu Least dari empat pernyataan.', description: '', current: tetradIndex, total: tetradQuestions.length }
@@ -191,7 +196,7 @@ export function AssessmentClient() {
     }
   }
 
-  const goNext = () => {
+  const goNext = async () => {
     setError('')
     if (stage === 'tetrad') {
       if (!isCompletedChoice(tetradAnswers[tetradIndex])) return setError('Pilih satu Most dan satu Least yang berbeda.')
@@ -199,8 +204,11 @@ export function AssessmentClient() {
       else setTetradIndex((value) => value + 1)
     } else if (stage === 'sjt') {
       if (!isCompletedChoice(sjtAnswers[sjtIndex])) return setError('Pilih satu Most dan satu Least yang berbeda.')
-      if (sjtIndex === sjtQuestions.length - 1) setStage('essay')
-      else setSjtIndex((value) => value + 1)
+      if (sjtIndex === sjtQuestions.length - 1) {
+        await submitAssessment()
+      } else {
+        setSjtIndex((value) => value + 1)
+      }
     } else if (stage === 'essay') {
       if (essayIndex === essayQuestions.length - 1) {
         void submitAssessment()
@@ -334,10 +342,10 @@ export function AssessmentClient() {
                   })}
                 </div>
                 <div className="mt-2 flex gap-2">
-                  <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[11px]" onClick={goPrev}>
+                  <button type="button" className="btn-secondary w-1/2 px-3 py-1.5 text-[10px]" onClick={goPrev}>
                     Sebelumnya
                   </button>
-                  <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[11px]" onClick={goNext}>
+                  <button type="button" className="btn-primary w-1/2 px-3 py-1.5 text-[10px]" onClick={goNext}>
                     {nextLabel}
                   </button>
                 </div>
@@ -365,7 +373,7 @@ export function AssessmentClient() {
                       }`}
                     >
                       <p className="text-[9px] uppercase tracking-[0.18em] text-gold">{item.part}</p>
-                      <p className="mt-0.5 text-[12px] font-medium leading-[1.05rem] text-text">
+                      <p className="mt-0.5 text-[11px] font-medium leading-[1.05rem] text-text">
                         {item.label}
                       </p>
                       <p className="mt-0.5 text-[10px] text-muted">{item.progress}</p>
@@ -479,14 +487,14 @@ function QuestionStage({
                 )
               })}
             </div>
-            <div className="flex w-full justify-end gap-2">
-              <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[11px]" onClick={goPrev}>
-                Sebelumnya
-              </button>
-              <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[11px]" onClick={goNext}>
-                {nextLabel}
-              </button>
-            </div>
+          <div className="flex w-full justify-end gap-2">
+            <button type="button" className="btn-secondary w-1/2 px-3 py-2 text-[10px]" onClick={goPrev}>
+              Sebelumnya
+            </button>
+            <button type="button" className="btn-primary w-1/2 px-3 py-2 text-[10px]" onClick={goNext}>
+              {nextLabel}
+            </button>
+          </div>
           </div>
 
           {stage === 'essay' ? (
