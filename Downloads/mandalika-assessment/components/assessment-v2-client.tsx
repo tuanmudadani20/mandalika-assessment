@@ -109,6 +109,10 @@ export function AssessmentV2Client() {
       const others = prev.filter((p) => p.tetradId !== tetradId)
       const rankings = existing?.rankings ? [...existing.rankings] : [0, 0, 0, 0]
       rankings[idx] = rank
+      // pastikan unik: hapus rank yang sama di indeks lain
+      rankings.forEach((val, i) => {
+        if (i !== idx && val === rank) rankings[i] = 0
+      })
       return [...others, { tetradId, rankings }]
     })
   }
@@ -269,7 +273,23 @@ export function AssessmentV2Client() {
             <button className="btn-secondary" onClick={() => setPhase('identity')}>
               Kembali
             </button>
-            <button className="btn-primary" onClick={() => setPhase('p1b')}>
+            <button
+              className="btn-primary"
+              onClick={() => {
+                const incomplete = TETRADS.find((t) => {
+                  const ans = tetradAnswers.find((a) => a.tetradId === t.id)
+                  const ranks = ans?.rankings ?? []
+                  const hasAll = ranks.length === 4 && [1, 2, 3, 4].every((r) => ranks.includes(r))
+                  return !hasAll
+                })
+                if (incomplete) {
+                  setError(`Tetrad ${incomplete.id} belum lengkap (rank 1-4 harus unik).`)
+                  return
+                }
+                setError('')
+                setPhase('p1b')
+              }}
+            >
               Lanjut Phase 1B
             </button>
           </div>
@@ -308,7 +328,18 @@ export function AssessmentV2Client() {
             <button className="btn-secondary" onClick={() => setPhase('p1a')}>
               Kembali
             </button>
-            <button className="btn-primary" onClick={() => setPhase('p2')}>
+            <button
+              className="btn-primary"
+              onClick={() => {
+                const missing = SJT_QUESTIONS.find((q) => !sjtAnswers.find((a) => a.questionId === q.id))
+                if (missing) {
+                  setError(`SJT ${missing.id} belum dipilih.`)
+                  return
+                }
+                setError('')
+                setPhase('p2')
+              }}
+            >
               Lanjut Phase 2 (BEI)
             </button>
           </div>
