@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moka Style POS Preview</title>
+<style>
+  :root{
+    --bg:#edf2f7;
+    --surface:#ffffff;
+    --surface-soft:#f8fafc;
+    --line:#d9e2ec;
+    --text:#0f172a;
+    --muted:#64748b;
+    --brand:#00aeef;
+    --brand-dark:#0284c7;
+    --danger:#ef4444;
+    --shadow:0 18px 40px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(0,174,239,.12), transparent 24%),
+      linear-gradient(180deg, #f6f9fc 0%, var(--bg) 100%);
+    color:var(--text);
+  }
+  button,input{font:inherit}
+  .app{
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:84px minmax(0,1fr) 360px;
+  }
+  .sidebar{
+    background:rgba(255,255,255,.88);
+    backdrop-filter:blur(12px);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+    padding:24px 0;
+  }
+  .logo{
+    width:48px;
+    height:48px;
+    border-radius:16px;
+    background:linear-gradient(135deg, var(--brand), #40c9ff);
+    color:#fff;
+    display:grid;
+    place-items:center;
+    box-shadow:0 14px 24px rgba(0,174,239,.26);
+    font-weight:800;
+    letter-spacing:.04em;
+  }
+  .nav-icon{
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:14px;
+    background:transparent;
+    color:#94a3b8;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+  }
+  .nav-icon.active,.nav-icon:hover{
+    background:#e0f2fe;
+    color:var(--brand-dark);
+  }
+  .nav-bottom{margin-top:auto}
+  .main{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+  .topbar{
+    height:78px;
+    padding:0 28px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.86);
+    backdrop-filter:blur(12px);
+  }
+  .search{
+    flex:1;
+    position:relative;
+    max-width:560px;
+  }
+  .search input{
+    width:100%;
+    height:46px;
+    border:1px solid var(--line);
+    background:#f8fafc;
+    border-radius:15px;
+    padding:0 16px 0 46px;
+    outline:none;
+  }
+  .search svg{
+    position:absolute;
+    top:13px;
+    left:14px;
+    color:#94a3b8;
+  }
+  .account{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#cbd5e1,#e2e8f0);
+  }
+  .workspace{
+    min-height:0;
+    display:grid;
+    grid-template-columns:132px minmax(0,1fr);
+    flex:1;
+  }
+  .categories{
+    background:rgba(255,255,255,.86);
+    border-right:1px solid var(--line);
+    padding:18px 12px;
+    overflow:auto;
+  }
+  .category{
+    width:100%;
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--muted);
+    padding:14px 10px;
+    border-radius:14px;
+    margin-bottom:10px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .category.active{
+    background:#eff6ff;
+    color:var(--brand-dark);
+    border-color:#bae6fd;
+  }
+  .products{
+    padding:26px;
+    overflow:auto;
+  }
+  .hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    gap:18px;
+    margin-bottom:22px;
+  }
+  .hero h1{
+    margin:0;
+    font-size:28px;
+    line-height:1.1;
+  }
+  .hero p{
+    margin:6px 0 0;
+    color:var(--muted);
+  }
+  .stat{
+    background:rgba(255,255,255,.74);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:12px 16px;
+    box-shadow:var(--shadow);
+  }
+  .stat b{display:block;font-size:22px}
+  .stat span{font-size:12px;color:var(--muted)}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+    gap:16px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid #dbe6f0;
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    padding:15px;
+    transition:transform .18s ease, border-color .18s ease;
+    cursor:pointer;
+  }
+  .card:hover{
+    transform:translateY(-3px);
+    border-color:#7dd3fc;
+  }
+  .thumb{
+    height:110px;
+    border-radius:18px;
+    background:
+      linear-gradient(135deg, rgba(0,174,239,.16), rgba(14,165,233,.04)),
+      #f8fafc;
+    display:grid;
+    place-items:center;
+    margin-bottom:14px;
+  }
+  .card h3{
+    margin:0;
+    font-size:15px;
+  }
+  .sku{
+    margin:6px 0 12px;
+    color:var(--muted);
+    font-size:12px;
+  }
+  .price-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .price{
+    color:var(--brand-dark);
+    font-size:18px;
+    font-weight:800;
+  }
+  .chip{
+    padding:6px 10px;
+    border-radius:999px;
+    background:#ecfeff;
+    color:#0f766e;
+    font-size:11px;
+    font-weight:800;
+  }
+  .order{
+    background:rgba(255,255,255,.92);
+    border-left:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+  .order-head{
+    padding:24px 22px 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .order-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .order-top h2{
+    margin:0;
+    font-size:22px;
+  }
+  .clear{
+    border:none;
+    background:none;
+    color:var(--danger);
+    font-weight:800;
+    cursor:pointer;
+  }
+  .order-sub{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .cart{
+    flex:1;
+    padding:20px 22px;
+    overflow:auto;
+    display:grid;
+    gap:14px;
+    align-content:start;
+  }
+  .item{
+    border:1px solid var(--line);
+    border-radius:18px;
+    background:var(--surface);
+    padding:14px;
+  }
+  .item-top{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .item-name{
+    font-weight:800;
+    margin:0;
+  }
+  .item-note{
+    margin:5px 0 0;
+    color:var(--muted);
+    font-size:12px;
+  }
+  .qty{
+    margin-top:12px;
+    display:inline-flex;
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .qty button,.qty span{
+    width:34px;
+    height:34px;
+    display:grid;
+    place-items:center;
+    border:none;
+    background:#fff;
+  }
+  .qty button{cursor:pointer}
+  .summary{
+    padding:20px 22px 24px;
+    background:var(--surface-soft);
+    border-top:1px solid var(--line);
+  }
+  .sum-row{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:12px;
+    color:#334155;
+  }
+  .sum-row.total{
+    margin:18px 0;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:24px;
+    font-weight:800;
+    color:var(--brand-dark);
+  }
+  .charge{
+    width:100%;
+    height:54px;
+    border:none;
+    border-radius:18px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+    color:#fff;
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:.03em;
+    cursor:pointer;
+    box-shadow:0 16px 28px rgba(2,132,199,.24);
+  }
+  @media (max-width:1180px){
+    .app{grid-template-columns:76px 1fr}
+    .order{
+      grid-column:1 / -1;
+      min-height:auto;
+      border-left:none;
+      border-top:1px solid var(--line);
+    }
+  }
+  @media (max-width:860px){
+    .app{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .workspace{grid-template-columns:1fr}
+    .categories{display:none}
+    .topbar{padding:0 16px}
+    .products{padding:18px 16px}
+    .hero{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Navigasi">
+      <div class="logo">M</div>
+      <button class="nav-icon active" aria-label="Dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h7v7H4zm9 0h7v11h-7zM4 13h7v7H4zm9 4h7v3h-7z"/></svg>
+      </button>
+      <button class="nav-icon" aria-label="Riwayat">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.32 4H3l3.5-3.5L10 9H7.74A5 5 0 1 0 12 7v5l4 2-.8 1.79L10 13V5z"/></svg>
+      </button>
+      <button class="nav-icon" aria-label="Pengaturan">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m19.14 12.94.04-.94-.04-.94 2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.33 7.33 0 0 0-1.62-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.57.22-1.11.54-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.72 8.48a.5.5 0 0 0 .12.64l2.03 1.58-.04.94.04.94-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.51.4 1.05.72 1.62.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.57-.22 1.11-.54 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z"/></svg>
+      </button>
+      <div class="nav-bottom">
+        <button class="nav-icon" aria-label="Keluar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 17v-2h4V9h-4V7h6v10zm-5 2V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7v-2zm12-12-1.41 1.41L17.17 10H9v2h8.17l-1.58 1.59L17 15l4-4z"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <label class="search" aria-label="Cari item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 4a6 6 0 1 0 3.87 10.58l4.27 4.28 1.41-1.41-4.28-4.27A6 6 0 0 0 10 4zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>
+          <input type="text" placeholder="Search item">
+        </label>
+        <div class="account">
+          <div>
+            <strong style="display:block">Mandalika Perfume</strong>
+            <span style="color:var(--muted);font-size:12px">Store cashier preview</span>
+          </div>
+          <div class="avatar" aria-hidden="true"></div>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <nav class="categories" aria-label="Kategori produk">
+          <button class="category active">All Items</button>
+          <button class="category">EDP 30ml</button>
+          <button class="category">EDP 50ml</button>
+          <button class="category">Body Mist</button>
+          <button class="category">Gift Set</button>
+        </nav>
+
+        <section class="products">
+          <div class="hero">
+            <div>
+              <h1>POS Interface, Moka-style</h1>
+              <p>Versi preview lokal yang rapi, ringan, dan bisa dibuka langsung tanpa CDN.</p>
+            </div>
+            <div class="stat">
+              <b>24</b>
+              <span>Active Items Today</span>
+            </div>
+          </div>
+
+          <div class="grid">
+            <article class="card">
+              <div class="thumb">
+                <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                  <rect x="22" y="10" width="20" height="10" rx="4" fill="#7dd3fc"/>
+                  <rect x="16" y="18" width="32" height="34" rx="10" fill="#38bdf8"/>
+                  <rect x="22" y="26" width="20" height="18" rx="6" fill="white" opacity=".9"/>
+                </svg>
+              </div>
+              <h3>Ocean Breeze</h3>
+              <p class="sku">EDP-30-OCEAN</p>
+              <div class="price-row">
+                <span class="price">Rp 125.000</span>
+                <span class="chip">Ready</span>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="thumb">
+                <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                  <rect x="22" y="10" width="20" height="10" rx="4" fill="#38bdf8"/>
+                  <rect x="16" y="18" width="32" height="34" rx="10" fill="#0f172a"/>
+                  <rect x="22" y="26" width="20" height="18" rx="6" fill="white" opacity=".14"/>
+                </svg>
+              </div>
+              <h3>Midnight Musk</h3>
+              <p class="sku">EDP-50-MUSK</p>
+              <div class="price-row">
+                <span class="price">Rp 150.000</span>
+                <span class="chip">Best Seller</span>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="thumb">
+                <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                  <rect x="18" y="14" width="28" height="34" rx="12" fill="#7c3aed"/>
+                  <rect x="24" y="10" width="16" height="10" rx="4" fill="#c4b5fd"/>
+                  <rect x="24" y="26" width="16" height="12" rx="4" fill="white" opacity=".78"/>
+                </svg>
+              </div>
+              <h3>Velvet Bloom</h3>
+              <p class="sku">MIST-VELVET</p>
+              <div class="price-row">
+                <span class="price">Rp 89.000</span>
+                <span class="chip">Promo</span>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="thumb">
+                <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                  <rect x="18" y="16" width="28" height="30" rx="10" fill="#f59e0b"/>
+                  <rect x="26" y="10" width="12" height="10" rx="4" fill="#fde68a"/>
+                  <circle cx="32" cy="31" r="8" fill="white" opacity=".82"/>
+                </svg>
+              </div>
+              <h3>Citrus Ember</h3>
+              <p class="sku">EDP-30-CITRUS</p>
+              <div class="price-row">
+                <span class="price">Rp 135.000</span>
+                <span class="chip">Ready</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <aside class="order">
+      <div class="order-head">
+        <div class="order-top">
+          <h2>Current Order</h2>
+          <button class="clear" type="button">Clear</button>
+        </div>
+        <div class="order-sub">Kasir 01 • Shift pagi • 24 Mar 2026</div>
+      </div>
+
+      <div class="cart">
+        <article class="item">
+          <div class="item-top">
+            <div>
+              <p class="item-name">Ocean Breeze</p>
+              <p class="item-note">No notes</p>
+            </div>
+            <strong>Rp 125.000</strong>
+          </div>
+          <div class="qty" aria-label="Jumlah item">
+            <button type="button">-</button>
+            <span>1</span>
+            <button type="button">+</button>
+          </div>
+        </article>
+
+        <article class="item">
+          <div class="item-top">
+            <div>
+              <p class="item-name">Midnight Musk</p>
+              <p class="item-note">Gift wrap</p>
+            </div>
+            <strong>Rp 150.000</strong>
+          </div>
+          <div class="qty" aria-label="Jumlah item">
+            <button type="button">-</button>
+            <span>1</span>
+            <button type="button">+</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="summary">
+        <div class="sum-row"><span>Subtotal</span><strong>Rp 275.000</strong></div>
+        <div class="sum-row"><span>Tax (11%)</span><strong>Rp 30.250</strong></div>
+        <div class="sum-row total"><span>Total</span><span>Rp 305.250</span></div>
+        <button class="charge" type="button">CHARGE</button>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

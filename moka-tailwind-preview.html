@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandalika POS - Moka Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none !important; }
+        .moka-blue { color: #00AEEF; }
+        .bg-moka-blue { background-color: #00AEEF; }
+        .active-category { border-left: 4px solid #00AEEF; background-color: #f0f9ff; color: #00AEEF; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans h-screen overflow-hidden" x-data="posSystem()">
+
+    <div class="flex h-full">
+        <div class="w-20 bg-white border-r flex flex-col items-center py-6 gap-8 shadow-sm">
+            <div class="bg-moka-blue p-3 rounded-xl text-white shadow-md">
+                <i class="fas fa-store fa-lg"></i>
+            </div>
+            <nav class="flex flex-col gap-8 text-gray-400">
+                <i class="fas fa-th-large cursor-pointer hover:text-blue-500 transition text-blue-500"></i>
+                <i class="fas fa-history cursor-pointer hover:text-blue-500 transition"></i>
+                <i class="fas fa-file-invoice-dollar cursor-pointer hover:text-blue-500 transition"></i>
+                <i class="fas fa-cog cursor-pointer hover:text-blue-500 transition"></i>
+            </nav>
+            <div class="mt-auto text-gray-400">
+                <i class="fas fa-sign-out-alt cursor-pointer hover:text-red-500"></i>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col">
+            <header class="bg-white h-16 border-b flex items-center px-6 justify-between">
+                <div class="relative w-96">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" x-model="searchQuery" class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-100" placeholder="Cari Produk...">
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-gray-800 leading-none">Mandalika Perfume</p>
+                        <p class="text-xs text-green-500 font-medium">Kasir: Admin</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border border-blue-200">
+                        M
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex flex-1 overflow-hidden">
+                <div class="w-40 bg-white border-r overflow-y-auto">
+                    <template x-for="cat in categories" :key="cat">
+                        <button 
+                            @click="activeCategory = cat"
+                            :class="activeCategory === cat ? 'active-category font-bold' : 'text-gray-500'"
+                            class="w-full text-left py-4 px-5 text-sm transition-all hover:bg-gray-50 border-b border-gray-50"
+                            x-text="cat">
+                        </button>
+                    </template>
+                </div>
+
+                <div class="flex-1 p-6 overflow-y-auto">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        <template x-for="product in filteredProducts()" :key="product.id">
+                            <div @click="addToCart(product)" class="bg-white rounded-2xl shadow-sm border border-transparent hover:border-blue-400 cursor-pointer transition p-3 flex flex-col items-center text-center group">
+                                <div class="w-full aspect-square bg-gray-100 rounded-xl mb-3 flex items-center justify-center group-hover:bg-blue-50 transition">
+                                    <i class="fas fa-wine-bottle text-gray-300 group-hover:text-blue-300 fa-2x"></i>
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-sm truncate w-full" x-text="product.name"></h3>
+                                <p class="text-moka-blue font-bold text-sm mt-1" x-text="formatPrice(product.price)"></p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-96 bg-white border-l flex flex-col shadow-2xl">
+            <div class="p-5 border-b flex justify-between items-center bg-white sticky top-0">
+                <div>
+                    <h2 class="font-bold text-xl">Pesanan Baru</h2>
+                    <p class="text-xs text-gray-400" x-text="new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })"></p>
+                </div>
+                <button @click="cart = []" class="text-xs text-red-500 font-bold hover:bg-red-50 px-2 py-1 rounded">HAPUS</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-4">
+                <template x-if="cart.length === 0">
+                    <div class="h-full flex flex-col items-center justify-center text-gray-300">
+                        <i class="fas fa-shopping-basket fa-3x mb-4"></i>
+                        <p class="font-medium">Belum ada pesanan</p>
+                    </div>
+                </template>
+
+                <template x-for="(item, index) in cart" :key="index">
+                    <div class="flex justify-between items-start animate-fade-in">
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800 text-sm" x-text="item.name"></p>
+                            <div class="flex items-center gap-3 mt-1">
+                                <button @click="updateQty(index, -1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100">-</button>
+                                <span class="text-sm font-medium" x-text="item.qty"></span>
+                                <button @click="updateQty(index, 1)" class="w-6 h-6 border rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100">+</button>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-gray-800 text-sm" x-text="formatPrice(item.price * item.qty)"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="p-6 bg-gray-50 border-t space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Subtotal</span>
+                    <span class="font-semibold text-gray-700" x-text="formatPrice(subtotal())"></span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Pajak (11%)</span>
+                    <span class="font-semibold text-gray-700" x-text="formatPrice(tax())"></span>
+                </div>
+                <div class="flex justify-between pt-3 border-t">
+                    <span class="font-bold text-lg">Total</span>
+                    <span class="font-bold text-xl text-moka-blue" x-text="formatPrice(total())"></span>
+                </div>
+                <button 
+                    @click="alert('Proses Pembayaran Rp ' + total())"
+                    :disabled="cart.length === 0"
+                    :class="cart.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-moka-blue hover:bg-blue-600 shadow-lg'"
+                    class="w-full text-white py-4 rounded-xl font-bold text-lg transition-all transform active:scale-95 mt-4 uppercase">
+                    Bayar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function posSystem() {
+            return {
+                searchQuery: '',
+                activeCategory: 'Semua Produk',
+                categories: ['Semua Produk', 'EDP 30ml', 'EDP 50ml', 'Body Mist', 'Aksesoris'],
+                products: [
+                    { id: 1, name: 'Ocean Breeze EDP 30ml', price: 125000, category: 'EDP 30ml' },
+                    { id: 2, name: 'Midnight Musk EDP 30ml', price: 135000, category: 'EDP 30ml' },
+                    { id: 3, name: 'Vanilla Sky EDP 50ml', price: 185000, category: 'EDP 50ml' },
+                    { id: 4, name: 'Rose Petals Mist', price: 95000, category: 'Body Mist' },
+                    { id: 5, name: 'Golden Amber EDP 50ml', price: 210000, category: 'EDP 50ml' },
+                    { id: 6, name: 'Paper Bag Exclusive', price: 5000, category: 'Aksesoris' },
+                ],
+                cart: [],
+                
+                filteredProducts() {
+                    return this.products.filter(p => {
+                        const matchSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        const matchCat = this.activeCategory === 'Semua Produk' || p.category === this.activeCategory;
+                        return matchSearch && matchCat;
+                    });
+                },
+
+                addToCart(product) {
+                    let found = this.cart.find(item => item.id === product.id);
+                    if (found) {
+                        found.qty++;
+                    } else {
+                        this.cart.push({ ...product, qty: 1 });
+                    }
+                },
+
+                updateQty(index, amount) {
+                    this.cart[index].qty += amount;
+                    if (this.cart[index].qty <= 0) {
+                        this.cart.splice(index, 1);
+                    }
+                },
+
+                subtotal() {
+                    return this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                },
+
+                tax() {
+                    return this.subtotal() * 0.11;
+                },
+
+                total() {
+                    return this.subtotal() + this.tax();
+                },
+
+                formatPrice(val) {
+                    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
