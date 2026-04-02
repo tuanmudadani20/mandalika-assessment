@@ -37,6 +37,7 @@ export function AssessmentV2Client() {
   const [beiSeconds, setBeiSeconds] = useState(BEI_SECONDS)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [dragInfo, setDragInfo] = useState<{ tetradId: string; from: number } | null>(null)
 
   // load draft
   useEffect(() => {
@@ -113,6 +114,14 @@ export function AssessmentV2Client() {
       rankings.forEach((val, i) => {
         if (i !== idx && val === rank) rankings[i] = 0
       })
+      return [...others, { tetradId, rankings }]
+    })
+  }
+
+  const onTetradReorder = (tetradId: string, order: number[]) => {
+    const rankings = orderToRankings(order)
+    setTetradAnswers((prev) => {
+      const others = prev.filter((p) => p.tetradId !== tetradId)
       return [...others, { tetradId, rankings }]
     })
   }
@@ -242,30 +251,49 @@ export function AssessmentV2Client() {
           <p className="text-sm text-muted">Rank 1-4 (1 = paling sesuai, 4 = paling tidak).</p>
           {TETRADS.map((tetrad) => {
             const answer = tetradAnswers.find((a) => a.tetradId === tetrad.id)
+            const order = rankingsToOrder(answer?.rankings)
             return (
               <div key={tetrad.id} className="rounded-card border border-border bg-white p-3 space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-medium">{tetrad.id}</span>
                   <span className="text-muted">type: {tetrad.type}</span>
                 </div>
-                {tetrad.items.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <span className="w-6 text-xs font-semibold text-muted">A{idx + 1}</span>
-                    <p className="flex-1 text-sm">{item.text}</p>
-                    <select
-                      className="field-base w-24"
-                      value={answer?.rankings?.[idx] || ''}
-                      onChange={(e) => setTetradRanking(tetrad.id, idx, Number(e.target.value))}
-                    >
-                      <option value="">Rank</option>
-                      {[1, 2, 3, 4].map((n) => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  {order.map((itemIndex, displayIdx) => {
+                    const item = tetrad.items[itemIndex]
+                    return (
+                      <div
+                        key={`${tetrad.id}-${itemIndex}`}
+                      draggable
+                        onDragStart={() => setDragInfo({ tetradId: tetrad.id, from: displayIdx })}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          if (!dragInfo || dragInfo.tetradId !== tetrad.id) return
+                          const from = dragInfo.from
+                          const to = displayIdx
+                          if (from === to) return
+                          const nextOrder = [...order]
+                          const temp = nextOrder[to]
+                          nextOrder[to] = nextOrder[from]
+                          nextOrder[from] = temp
+                          onTetradReorder(tetrad.id, nextOrder)
+                          setDragInfo(null)
+                        }}
+                        className="flex items-start gap-2 rounded-card border border-border bg-panel p-2 shadow-sm"
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gold text-xs font-bold text-white">
+                          {displayIdx + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs uppercase text-muted">Item {itemIndex + 1}</p>
+                          <p className="text-sm">{item.text}</p>
+                        </div>
+                        <span className="text-[11px] text-muted">{item.dim}</span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )
           })}
@@ -391,4 +419,21 @@ export function AssessmentV2Client() {
       )}
     </div>
   )
+}
+
+function rankingsToOrder(rankings?: number[]) {
+  const defaultOrder = [0, 1, 2, 3]
+  if (!rankings || rankings.length !== 4 || rankings.some((r) => !r)) return defaultOrder
+  return defaultOrder
+    .map((idx) => ({ idx, rank: rankings[idx] }))
+    .sort((a, b) => a.rank - b.rank)
+    .map((item) => item.idx)
+}
+
+function orderToRankings(order: number[]) {
+  const rankings = [0, 0, 0, 0]
+  order.forEach((itemIdx, position) => {
+    rankings[itemIdx] = position + 1
+  })
+  return rankings
 }
