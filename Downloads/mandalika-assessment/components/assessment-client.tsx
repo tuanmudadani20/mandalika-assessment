@@ -364,13 +364,26 @@ export function AssessmentClient() {
         {stage === 'intro' ? (
           <section className="mt-3 grid min-h-[calc(100vh-104px)] gap-3 xl:grid-cols-[0.84fr_1.16fr]">
             <div className="surface-card flex flex-col justify-between p-4 sm:p-5">
-              <div><p className="eyebrow">Assessment Brief</p><h2 className="mt-2.5 max-w-4xl text-[1.8rem] leading-[1.08] sm:text-[1.95rem]">Flow yang rapi, tenang, dan fokus ke pengerjaan.</h2><p className="mt-3 max-w-2xl text-[13px] leading-5 text-muted">Tiga sesi, satu viewport, dan fokus penuh ke kualitas jawaban.</p></div>
+              <div>
+                <p className="eyebrow">Assessment Brief</p>
+                <h2 className="mt-2.5 max-w-4xl text-[1.8rem] leading-[1.08] sm:text-[1.95rem]">Tiga sesi ringkas, waktu tercatat otomatis.</h2>
+                <p className="mt-3 max-w-2xl text-[13px] leading-5 text-muted">
+                  Isi identitas, lalu ikuti urutan Part 1 → Part 2. Part 3 feedback bersifat opsional; boleh dilewati dan langsung submit.
+                  Timer per sesi berjalan otomatis, semua cap waktu dan total durasi akan muncul di rekap dan PDF.
+                </p>
+              </div>
               <div className="mt-5 grid gap-2.5 md:grid-cols-3 xl:grid-cols-1">
                 {[
-                  ['Part 1', '26 Tetrad Most/Least', 'Sekitar 26 menit. Memetakan preferensi perilaku.'],
-                  ['Part 2', '26 ML-SJT', 'Sekitar 30 menit. Menguji judgement kerja nyata.'],
-                  ['Part 3', '5 Kritik, Saran, dan Ide', 'Opsional, alokasikan 25 menit bila perlu.'],
-                ].map(([part, title, detail]) => <div key={part} className="rounded-card border border-border bg-white p-3.5"><p className="text-[10px] uppercase tracking-[0.18em] text-gold">{part}</p><p className="mt-1 text-[15px] font-medium leading-5 text-text">{title}</p><p className="mt-1 text-[13px] leading-5 text-muted">{detail}</p></div>)}
+                  ['Part 1', '26 Tetrad Most/Least', 'Waktu 26 menit. Wajib; pilih Most & Least berbeda di tiap blok.'],
+                  ['Part 2', '26 ML-SJT', 'Waktu 30 menit. Wajib; tetap diurutkan setelah Part 1.'],
+                  ['Part 3', '5 Kritik, Saran, Ide (Opsional)', 'Waktu diset 25 menit, tapi boleh kosong dan langsung submit.'],
+                ].map(([part, title, detail]) => (
+                  <div key={part} className="rounded-card border border-border bg-white p-3.5">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-gold">{part}</p>
+                    <p className="mt-1 text-[15px] font-medium leading-5 text-text">{title}</p>
+                    <p className="mt-1 text-[13px] leading-5 text-muted">{detail}</p>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="surface-card p-4 sm:p-5">
@@ -381,7 +394,18 @@ export function AssessmentClient() {
                 <Field label="Role / Posisi" value={role} onChange={setRole} placeholder="Staff, Supervisor, Manager" />
                 <label className="space-y-2"><span className="text-sm text-muted">Masa kerja</span><select className="field-base" value={tenure} onChange={(event) => setTenure(event.target.value)}><option value="">Pilih masa kerja</option>{tenureOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
               </div>
-              <div className="mt-5 grid gap-2.5 sm:grid-cols-3">{[['75', 'Menit total'], ['57', 'Blok'], ['13', 'Dimensi']].map(([value, label]) => <div key={label} className="rounded-card border border-border bg-white p-3"><p className="text-2xl font-semibold leading-none text-[#8f6f36]">{value}</p><p className="mt-1.5 text-[10px] uppercase tracking-[0.16em] text-muted">{label}</p></div>)}</div>
+              <div className="mt-5 grid gap-2.5 sm:grid-cols-3">
+                {[
+                  ['81', 'Menit total (maks)'],
+                  ['57', 'Blok'],
+                  ['13', 'Dimensi'],
+                ].map(([value, label]) => (
+                  <div key={label} className="rounded-card border border-border bg-white p-3">
+                    <p className="text-2xl font-semibold leading-none text-[#8f6f36]">{value}</p>
+                    <p className="mt-1.5 text-[10px] uppercase tracking-[0.16em] text-muted">{label}</p>
+                  </div>
+                ))}
+              </div>
               {error ? <ErrorBanner text={error} /> : null}
               <div className="mt-5 flex flex-col gap-3 sm:flex-row"><button type="button" className="btn-primary px-4 py-2.5" onClick={startAssessment}>Mulai Assessment</button></div>
             </div>
