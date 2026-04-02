@@ -136,8 +136,12 @@ export function AssessmentClient() {
     const openSjt = sjtAnswers.findIndex((answer) => !isCompletedChoice(answer))
     if (openSjt >= 0) { setStage('sjt'); setSjtIndex(openSjt); return setError(`ML-SJT ${openSjt + 1} belum lengkap.`) }
     setError(''); setStage('submitting')
+    const normalizedEssayAnswers = essayAnswers.map((answer) => {
+      const trimmed = (answer || '').trim()
+      return trimmed.length ? trimmed : '-'
+    })
     try {
-      const response = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dept, role, tenure, tetradAnswers, sjtAnswers, essayAnswers }) })
+      const response = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dept, role, tenure, tetradAnswers, sjtAnswers, essayAnswers: normalizedEssayAnswers }) })
       const data = await response.json().catch(() => ({})) as { id?: string; error?: string }
       if (!response.ok || !data.id) throw new Error(data.error || 'Gagal menyimpan assessment.')
       localStorage.removeItem(DRAFT_KEY); router.push(`/result/${data.id}`)
