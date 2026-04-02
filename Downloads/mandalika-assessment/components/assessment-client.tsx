@@ -520,6 +520,16 @@ export function AssessmentClient() {
                   ))}
                 </div>
               </div>
+              <div className="surface-card space-y-2 p-2.5 text-[11.5px] leading-5 text-muted">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-gold">Aturan Singkat</p>
+                <ul className="list-disc space-y-1 pl-4">
+                  <li>Sesi 1 (26m) & Sesi 2 (30m) wajib selesai, urut.</li>
+                  <li>Sesi 3 (25m) opsional; boleh kosong lalu submit.</li>
+                  <li>Most &amp; Least harus berbeda di setiap soal.</li>
+                  <li>Submit hanya aktif setelah Part 1 & 2 lengkap.</li>
+                  <li>Cap waktu per sesi otomatis masuk ke rekap & PDF.</li>
+                </ul>
+              </div>
             </aside>
           </section>
         ) : null}
