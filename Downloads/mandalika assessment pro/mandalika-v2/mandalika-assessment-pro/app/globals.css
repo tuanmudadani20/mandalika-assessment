@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #ffffff;
+  --surface: #f8f4ec;
+  --gold: #cc9933;
+  --gold-dim: #b38028;
+  --text: #1f1a11;
+  --muted: #6b6458;
+  --border: #e6dfd1;
+  --l1: #2D5A1B;
+  --l2: #1D4D8A;
+  --l3: #7A4E10;
+  --l4: #5A4A8A;
+  --cat-a: #1A5C38;
+  --cat-bs: #1D4D8A;
+  --cat-b: #7A4E10;
+  --cat-c: #8B2020;
+  --cat-ck: #5C1111;
+  --font-heading: "Reclinew05", "Plus Jakarta Sans", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body, "Plus Jakarta Sans"), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--gold);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+button {
+  cursor: pointer;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
