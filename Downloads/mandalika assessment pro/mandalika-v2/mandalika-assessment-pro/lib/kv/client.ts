@@ -20,6 +20,11 @@ export async function kvGet<T>(key: string): Promise<T | null> {
   return (mem.store.has(key) ? (mem.store.get(key) as T) : null);
 }
 
+export async function kvMGet<T>(keys: string[]): Promise<(T | null)[]> {
+  if (hasVercelKV) return (await vercelKv.mget<T[]>(keys)) as unknown as (T | null)[];
+  return keys.map((k) => (mem.store.has(k) ? (mem.store.get(k) as T) : null));
+}
+
 export async function kvSet(key: string, value: any) {
   if (hasVercelKV) return vercelKv.set(key, value);
   mem.store.set(key, value);

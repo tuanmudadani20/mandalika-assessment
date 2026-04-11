@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-import { kvDel, kvGet, kvSet, kvZAdd, kvZRange, kvZRem } from './client';
+import { kvDel, kvGet, kvMGet, kvSet, kvZAdd, kvZRange, kvZRem } from './client';
 import { AssessmentSession, BEIAnalysisResult, FinalResult, TetradAnswer, SJTAnswer, BEIAnswer } from '@/lib/scoring/types';
 
 const SESSION_KEY = (id: string) => `session:${id}`;
@@ -120,7 +120,9 @@ export async function saveAnalysis(
 
 export async function listSessions(limit = 50): Promise<AssessmentSession[]> {
   const ids = await kvZRange(INDEX_KEY, -limit, -1);
-  const sessions = await Promise.all(ids.map((id) => getSession(id)));
+  if (!ids.length) return [];
+  const keys = ids.map((id) => SESSION_KEY(id));
+  const sessions = await kvMGet<AssessmentSession>(keys);
   return sessions.filter(Boolean) as AssessmentSession[];
 }
 
