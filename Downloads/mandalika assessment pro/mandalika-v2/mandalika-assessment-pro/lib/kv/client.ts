@@ -10,7 +10,6 @@ if (KV_URL) process.env.KV_REST_API_URL = KV_URL;
 if (KV_TOKEN) process.env.KV_REST_API_TOKEN = KV_TOKEN;
 
 // Lazy require after sanitizing env
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { kv: vercelKv } = require('@vercel/kv');
 
 // Re-use a global map to persist across module reloads in dev
