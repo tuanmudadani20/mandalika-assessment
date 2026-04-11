@@ -1,8 +1,6 @@
 /* Lightweight KV wrapper with graceful fallback to in-memory store when Vercel KV env is absent.
  * This keeps local/dev and demo deploys working without real Redis.
  */
-import { kv as vercelKv } from '@vercel/kv';
-
 type ScoreMember = { score: number; member: string };
 
 // Sanitize env vars (some CLI paths inject trailing newline)
@@ -10,6 +8,10 @@ const KV_URL = process.env.KV_REST_API_URL?.trim();
 const KV_TOKEN = process.env.KV_REST_API_TOKEN?.trim();
 if (KV_URL) process.env.KV_REST_API_URL = KV_URL;
 if (KV_TOKEN) process.env.KV_REST_API_TOKEN = KV_TOKEN;
+
+// Lazy require after sanitizing env
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { kv: vercelKv } = require('@vercel/kv');
 
 // Re-use a global map to persist across module reloads in dev
 const mem = (() => {
