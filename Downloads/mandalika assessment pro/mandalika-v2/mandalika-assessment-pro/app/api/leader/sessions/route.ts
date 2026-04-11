@@ -31,3 +31,4 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: err?.message ?? 'Internal error' }, { status: 500 });
   }
 }
+export const dynamic = 'force-dynamic';
