@@ -63,7 +63,7 @@ export interface DimResult {
 export interface ScoringResult {
   fcScores: Record<DimensionKey, number>;
   sjtScores: Record<DimensionKey, number>;
-  dimResults: DimResult[];
+  dimResults?: DimResult[];
   dimInterpretations?: Record<DimensionKey, DimInterpretation>;
   profileScore: number;
   css: number;
@@ -76,9 +76,9 @@ export interface ScoringResult {
   pgs: number;
   finalScore: number;
   finalCategory: PlayerCategory;
-  sleepingStrengths: DimensionKey[];
-  genuineGaps: DimensionKey[];
-  possibleFaking: DimensionKey[];
+  sleepingStrengths?: DimensionKey[];
+  genuineGaps?: DimensionKey[];
+  possibleFaking?: DimensionKey[];
   possibleFakingDims?: DimensionKey[]; // legacy alias
   strengths?: DimensionKey[];
   gaps?: DimensionKey[];
