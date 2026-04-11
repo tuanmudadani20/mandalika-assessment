@@ -10,7 +10,7 @@ if (KV_URL) process.env.KV_REST_API_URL = KV_URL;
 if (KV_TOKEN) process.env.KV_REST_API_TOKEN = KV_TOKEN;
 
 // Lazy require after sanitizing env
-const { kv: vercelKv } = require('@vercel/kv');
+const vercelKv: any = require('@vercel/kv').kv;
 
 // Re-use a global map to persist across module reloads in dev
 const mem = (() => {
@@ -23,7 +23,7 @@ const mem = (() => {
 const hasVercelKV = Boolean(KV_URL && KV_TOKEN);
 
 export async function kvGet<T>(key: string): Promise<T | null> {
-  if (hasVercelKV) return (await vercelKv.get<T>(key)) ?? null;
+  if (hasVercelKV) return ((await vercelKv.get(key)) as T) ?? null;
   return (mem.store.has(key) ? (mem.store.get(key) as T) : null);
 }
 
