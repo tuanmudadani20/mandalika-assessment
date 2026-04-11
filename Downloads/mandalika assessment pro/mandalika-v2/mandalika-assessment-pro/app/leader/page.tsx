@@ -26,6 +26,8 @@ export default function LeaderPage() {
   const [detail, setDetail] = useState<any>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [authed, setAuthed] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     const cached = localStorage.getItem("leaderPassword");
@@ -103,24 +105,31 @@ export default function LeaderPage() {
         {authed && (
           <div className="card p-5 space-y-4">
             <div className="flex flex-wrap gap-3 items-center">
-              <button
-                className="rounded-lg border border-border px-3 py-2 text-sm text-muted"
-                onClick={() => {
-                  localStorage.removeItem("leaderPassword");
-                  setSessions([]);
+            <button
+              className="rounded-lg border border-border px-3 py-2 text-sm text-muted"
+              onClick={() => {
+                localStorage.removeItem("leaderPassword");
+                setSessions([]);
                   setDetail(null);
                   setSelected(null);
                   setPassword("");
                   setAuthed(false);
-                }}
-              >
-                Logout
-              </button>
-              <div className="flex-1" />
-              <button
-                className="rounded-lg border border-border px-3 py-2 text-sm text-gold"
-                onClick={() => exportCSV(sessions, "all")}
-              >
+              }}
+            >
+              Logout
+            </button>
+            <button
+              className="rounded-lg border border-cat-c px-3 py-2 text-sm text-cat-c"
+              disabled={resetting}
+              onClick={handleReset}
+            >
+              {resetting ? "Mereset..." : "Reset semua data"}
+            </button>
+            <div className="flex-1" />
+            <button
+              className="rounded-lg border border-border px-3 py-2 text-sm text-gold"
+              onClick={() => exportCSV(sessions, "all")}
+            >
                 Export CSV (Semua)
               </button>
               <button
@@ -178,7 +187,7 @@ export default function LeaderPage() {
                   <th className="p-2 text-left">Category</th>
                   <th className="p-2 text-left">Created</th>
                   <th className="p-2 text-left">Completed</th>
-                  <th className="p-2 text-left">Detail</th>
+                  <th className="p-2 text-left">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -199,7 +208,29 @@ export default function LeaderPage() {
                     <td className="p-2 text-xs text-muted">
                       {s.completedAt ? new Date(s.completedAt).toLocaleString() : "—"}
                     </td>
-                    <td className="p-2 text-xs text-gold underline">Buka</td>
+                    <td className="p-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="text-gold underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDetail(s);
+                          }}
+                        >
+                          Buka
+                        </button>
+                        <button
+                          className="text-cat-c underline"
+                          disabled={busyId === s.sessionId}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(s.sessionId);
+                          }}
+                        >
+                          {busyId === s.sessionId ? "Menghapus..." : "Hapus"}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -357,6 +388,46 @@ export default function LeaderPage() {
     link.download = `mandalika_sessions_${label}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function handleDelete(sessionId: string) {
+    if (!confirm("Hapus data peserta ini?")) return;
+    setBusyId(sessionId);
+    try {
+      const res = await fetch(`/api/leader/session/${sessionId}`, {
+        method: "DELETE",
+        headers: { "x-leader-password": password || localStorage.getItem("leaderPassword") || "" },
+      });
+      if (!res.ok) throw new Error("Gagal hapus");
+      setSessions((prev) => prev.filter((s) => s.sessionId !== sessionId));
+      if (selected?.sessionId === sessionId) {
+        setSelected(null);
+        setDetail(null);
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleReset() {
+    if (!confirm("Reset SEMUA data peserta? Tindakan ini tidak bisa dibatalkan.")) return;
+    setResetting(true);
+    try {
+      const res = await fetch("/api/leader/reset", {
+        method: "POST",
+        headers: { "x-leader-password": password || localStorage.getItem("leaderPassword") || "" },
+      });
+      if (!res.ok) throw new Error("Reset gagal");
+      setSessions([]);
+      setSelected(null);
+      setDetail(null);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setResetting(false);
+    }
   }
 }
 

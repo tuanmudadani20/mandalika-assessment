@@ -25,6 +25,11 @@ export async function kvSet(key: string, value: any) {
   mem.store.set(key, value);
 }
 
+export async function kvDel(key: string) {
+  if (hasVercelKV) return vercelKv.del(key);
+  mem.store.delete(key);
+}
+
 export async function kvZAdd(indexKey: string, entry: ScoreMember) {
   if (hasVercelKV) return vercelKv.zadd(indexKey, entry);
   mem.index.push(entry);
@@ -35,4 +40,10 @@ export async function kvZRange(indexKey: string, start: number, end: number): Pr
   if (hasVercelKV) return (await vercelKv.zrange(indexKey, start, end)) as unknown as string[];
   const slice = mem.index.slice(start < 0 ? mem.index.length + start : start, end + 1);
   return slice.map((i) => i.member);
+}
+
+export async function kvZRem(indexKey: string, member: string) {
+  if (hasVercelKV) return vercelKv.zrem(indexKey, member);
+  const idx = mem.index.findIndex((e) => e.member === member);
+  if (idx >= 0) mem.index.splice(idx, 1);
 }
