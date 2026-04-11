@@ -82,6 +82,9 @@ export interface ScoringResult {
   overrideReason?: string;
   borderlineFlag?: string;
   // compatibility fields
+  wasDowngraded?: boolean;
+  downgradeReason?: string;
+  overrides?: any;
   leaderSummary?: string;
   rawCategory?: PlayerCategory;
   dimensionAlerts?: Array<{ dimension: DimensionKey; note: string; type?: string }>;
