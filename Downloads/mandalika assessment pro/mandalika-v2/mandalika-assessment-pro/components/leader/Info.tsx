@@ -6,6 +6,11 @@ interface Props {
   data: any;
 }
 
+const fmtPct = (v?: number) => {
+  if (v === undefined || v === null || Number.isNaN(v)) return '—';
+  return `${Number(v).toFixed(1)}%`;
+};
+
 export default function Info({ data }: Props) {
   const profileFlags: string[] = data.finalResult?.profileFlags ?? [];
 
@@ -15,10 +20,10 @@ export default function Info({ data }: Props) {
         <InfoCard title="Nama" value={data.profile?.name ?? "—"} />
         <InfoCard title="Email" value={data.profile?.email ?? "—"} />
         <InfoCard title="Status" value={data.status} />
-        <InfoCard
-          title="Final %"
-          value={data.finalResult?.finalScore ? `${data.finalResult.finalScore.toFixed(1)}%` : "—"}
-        />
+        <InfoCard title="Profile Score (FC)" value={fmtPct(data.finalResult?.profileScore)} />
+        <InfoCard title="CSS (SJT L1)" value={data.finalResult ? `-${data.finalResult.css}` : "—"} />
+        <InfoCard title="PGS (SJT L2)" value={data.finalResult ? `-${data.finalResult.pgs}` : "—"} />
+        <InfoCard title="Final %" value={fmtPct(data.finalResult?.finalScore)} />
         <InfoCard title="Kategori" value={data.finalResult?.finalCategory ?? "—"} />
         <InfoCard title="Created" value={new Date(data.createdAt).toLocaleString()} />
         <InfoCard
@@ -37,7 +42,14 @@ export default function Info({ data }: Props) {
       <DualSourcePanel
         fcScores={data.fcScores ?? data.finalResult?.fcScores}
         sjtScores={data.sjtScores ?? data.finalResult?.sjtScores ?? data.dimensionScores}
-        interpretations={data.finalResult?.dimInterpretations}
+        interpretations={
+          data.finalResult?.dimResults
+            ? data.finalResult.dimResults.reduce(
+                (acc: any, d: any) => ({ ...acc, [d.dim]: d.interpretation }),
+                {},
+              )
+            : data.finalResult?.dimInterpretations
+        }
         alerts={data.finalResult?.dimensionAlerts}
       />
 
@@ -45,7 +57,13 @@ export default function Info({ data }: Props) {
 
       {data.beiAnalysis && (
         <div className="card p-3 space-y-2">
-          <p className="text-xs uppercase tracking-[0.2em] text-muted">Hasil BEI</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted">BEI — Insight Leader</p>
+            <span className="text-[10px] bg-border text-muted px-2 py-[2px] rounded-full">Tidak mempengaruhi kategori</span>
+          </div>
+          <p className="text-[11px] text-muted italic">
+            BEI adalah data kualitatif tambahan. Status resmi ditentukan oleh FC Tetrad + SJT di atas.
+          </p>
           <div className="space-y-2 text-sm">
             {data.beiAnalysis.map((r: any) => {
               const q = BEI_QUESTIONS.find((qq) => qq.id === r.questionId);

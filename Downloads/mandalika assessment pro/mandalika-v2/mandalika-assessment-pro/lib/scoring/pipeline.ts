@@ -1,6 +1,6 @@
 import { analyzeBEIAnswers, computeBEIScores, deriveBEIConfidence } from './bei-scorer';
 import { computeFCScores, detectConsistencyWarnings } from './fc-scorer';
-import { computeScore } from './mtcs';
+import { computeScore } from './engine';
 import { computeSJTScores } from './sjt-scorer';
 import { getSession, saveAnalysis } from '@/lib/kv/session';
 import { DimensionKey } from './types';
@@ -16,20 +16,16 @@ export async function runScoring(sessionId: string) {
   const consistencyFlags = detectConsistencyWarnings(session.tetradAnswers);
 
   const sjtScores = computeSJTScores(session.sjtAnswers);
-  const sleepingStrengths = detectSleepingStrengths(fcScores, sjtScores);
-  const possibleFakingDims = detectPossibleFaking(fcScores, sjtScores);
 
   const beiAnalysis = session.beiAnswers ? await analyzeBEIAnswers(session.beiAnswers) : [];
   const beiScores = beiAnalysis.length ? computeBEIScores(beiAnalysis) : undefined;
   const beiConfidence = beiAnalysis.length ? deriveBEIConfidence(beiAnalysis) : undefined;
 
-  const finalResult = computeScore({
-    fcScores,
-    sjtScores,
-    consistencyFlags,
-    sleepingStrengths,
-    possibleFakingDims,
-  });
+  const finalResult = computeScore(fcScores, sjtScores);
+  const dimInterpretations = finalResult.dimResults.reduce((acc, d) => {
+    acc[d.dim] = d.interpretation;
+    return acc;
+  }, {} as Record<DimensionKey, any>);
 
   await saveAnalysis(sessionId, {
     fcScores,
@@ -38,19 +34,10 @@ export async function runScoring(sessionId: string) {
     beiAnalysis,
     psychometricScores: undefined,
     dimensionScores: sjtScores,
-    dimInterpretations: finalResult.dimInterpretations,
+    dimInterpretations,
     profileScore: finalResult.profileScore,
     finalResult,
     consistencyFlags,
     inconsistencyFlags: [],
   });
-}
-
-function detectSleepingStrengths(fc: Record<DimensionKey, number>, sjt: Record<DimensionKey, number>): DimensionKey[] {
-  return (Object.keys(fc) as DimensionKey[]).filter((dim) => (fc[dim] ?? 50) < 40 && (sjt[dim] ?? 0) > 65);
-}
-
-function detectPossibleFaking(fc: Record<DimensionKey, number>, sjt: Record<DimensionKey, number>): DimensionKey[] {
-  const L1: DimensionKey[] = ['integritas', 'ownership', 'standarPribadi', 'emotionallyControlled'];
-  return L1.filter((dim) => (fc[dim] ?? 0) > 65 && (sjt[dim] ?? 0) < 35);
 }

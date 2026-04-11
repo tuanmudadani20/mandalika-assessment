@@ -31,6 +31,11 @@ export const dimensionMap: Record<DimensionKey, DimensionMeta> = DIMENSIONS.redu
   {} as Record<DimensionKey, DimensionMeta>,
 );
 
+export const DIM_LABELS: Record<DimensionKey, string> = DIMENSIONS.reduce(
+  (acc, dim) => ({ ...acc, [dim.key]: dim.label }),
+  {} as Record<DimensionKey, string>,
+);
+
 export function getDimensionsByLayer(layer: Layer) {
   return DIMENSIONS.filter((d) => d.layer === layer);
 }

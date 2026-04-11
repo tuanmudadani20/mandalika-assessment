@@ -92,10 +92,10 @@ function clamp(n: number) {
 
 function interpLabel(code: DimInterpretation) {
   switch (code) {
-    case 'strong':
+    case 'kuat':
       return { label: 'Kuat', className: 'bg-l1/10 text-l1 border border-l1/20', style: undefined };
     case 'sleeping_strength':
-      return { label: 'Sleeping strength', className: 'bg-l2/10 text-l2 border border-l2/20', style: undefined };
+      return { label: 'Potensi terpendam', className: 'bg-l2/10 text-l2 border border-l2/20', style: undefined };
     case 'gap_probe':
       return { label: 'Gap — probe', className: 'bg-amber-100 text-amber-800 border border-amber-200', style: undefined };
     case 'genuine_gap':

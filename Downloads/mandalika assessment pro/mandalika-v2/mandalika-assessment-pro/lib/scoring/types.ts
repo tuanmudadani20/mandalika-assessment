@@ -17,7 +17,7 @@ export type DimensionKey =
 
 export type PlayerCategory = 'A Player' | 'B Solid Player' | 'B Player' | 'C Player' | 'C Player Kritis';
 
-export type DimInterpretation = 'strong' | 'sleeping_strength' | 'gap_probe' | 'genuine_gap' | 'moderate';
+export type DimInterpretation = 'kuat' | 'sleeping_strength' | 'gap_probe' | 'genuine_gap' | 'moderate';
 
 export interface DimensionMeta {
   key: DimensionKey;
@@ -53,36 +53,42 @@ export interface BEIAnalysisResult {
   dimensionScores: Record<DimensionKey, number>;
 }
 
-export interface FinalResult {
+export interface DimResult {
+  dim: DimensionKey;
+  fcScore: number;
+  sjtScore: number;
+  interpretation: DimInterpretation;
+}
+
+export interface ScoringResult {
   fcScores: Record<DimensionKey, number>;
   sjtScores: Record<DimensionKey, number>;
-  dimInterpretations: Record<DimensionKey, DimInterpretation>;
+  dimResults: DimResult[];
   profileScore: number;
   css: number;
-  pgs: number;
-  cssBreakdown: Record<string, number>;
-  finalScore: number;
-  rawCategory: PlayerCategory;
-  finalCategory: PlayerCategory;
-  wasDowngraded: boolean;
-  downgradeReason?: string;
-  overrides: {
-    characterCollapse: boolean;
-    characterFoundationAbsent: boolean;
-    anyOverrideActive: boolean;
-    forcedCategory?: PlayerCategory;
+  cssBreakdown: {
+    integritas: number;
+    ownership: number;
+    standarPribadi: number;
+    emotionallyControlled: number;
   };
-  profileFlags: string[];
-  dimensionAlerts: Array<{ dimension: DimensionKey; note: string; type?: string }>;
-  consistencyFlags?: string[];
+  pgs: number;
+  finalScore: number;
+  finalCategory: PlayerCategory;
+  sleepingStrengths: DimensionKey[];
+  genuineGaps: DimensionKey[];
+  possibleFaking: DimensionKey[];
+  overrideReason?: string;
   borderlineFlag?: string;
-  sleepingStrengths?: DimensionKey[];
-  possibleFakingDims?: DimensionKey[];
-  strengths: DimensionKey[];
-  gaps: DimensionKey[];
-  leaderSummary: string;
-  beiResult?: any;
+  // compatibility fields
+  leaderSummary?: string;
+  rawCategory?: PlayerCategory;
+  dimensionAlerts?: Array<{ dimension: DimensionKey; note: string; type?: string }>;
+  profileFlags?: string[];
 }
+
+// Compatibility alias
+export type FinalResult = ScoringResult;
 
 export interface BEIResult {
   beiCategory: string;
