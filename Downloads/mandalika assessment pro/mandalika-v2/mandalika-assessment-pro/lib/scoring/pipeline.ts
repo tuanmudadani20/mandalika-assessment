@@ -22,7 +22,7 @@ export async function runScoring(sessionId: string) {
   const beiConfidence = beiAnalysis.length ? deriveBEIConfidence(beiAnalysis) : undefined;
 
   const finalResult = computeScore(fcScores, sjtScores);
-  const dimInterpretations = finalResult.dimResults.reduce((acc, d) => {
+  const dimInterpretations = (finalResult.dimResults ?? []).reduce((acc, d) => {
     acc[d.dim] = d.interpretation;
     return acc;
   }, {} as Record<DimensionKey, any>);
