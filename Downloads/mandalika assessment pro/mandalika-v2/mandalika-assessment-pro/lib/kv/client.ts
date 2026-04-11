@@ -18,7 +18,10 @@ async function httpKV<T>(path: string): Promise<T | null> {
   const res = await fetch(`${KV_URL}/${path}`, {
     headers: { Authorization: `Bearer ${KV_TOKEN}` },
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.warn('kv http fallback failed', path, res.status);
+    return null;
+  }
   const json = await res.json();
   return (json?.result as T) ?? null;
 }
