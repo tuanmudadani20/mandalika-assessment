@@ -122,7 +122,13 @@ export async function listSessions(limit = 50): Promise<AssessmentSession[]> {
   const ids = await kvZRange(INDEX_KEY, -limit, -1);
   if (!ids.length) return [];
   const keys = ids.map((id) => SESSION_KEY(id));
-  const sessions = await kvMGet<AssessmentSession>(keys);
+  const sessions: (AssessmentSession | null)[] = [];
+  const CHUNK = 10; // avoid large payloads to Upstash
+  for (let i = 0; i < keys.length; i += CHUNK) {
+    const slice = keys.slice(i, i + CHUNK);
+    const chunk = await kvMGet<AssessmentSession>(slice);
+    sessions.push(...chunk);
+  }
   return sessions.filter(Boolean) as AssessmentSession[];
 }
 
