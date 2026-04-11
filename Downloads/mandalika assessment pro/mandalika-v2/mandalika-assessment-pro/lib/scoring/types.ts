@@ -64,6 +64,7 @@ export interface ScoringResult {
   fcScores: Record<DimensionKey, number>;
   sjtScores: Record<DimensionKey, number>;
   dimResults: DimResult[];
+  dimInterpretations?: Record<DimensionKey, DimInterpretation>;
   profileScore: number;
   css: number;
   cssBreakdown: {
