@@ -5,6 +5,12 @@ import { kv as vercelKv } from '@vercel/kv';
 
 type ScoreMember = { score: number; member: string };
 
+// Sanitize env vars (some CLI paths inject trailing newline)
+const KV_URL = process.env.KV_REST_API_URL?.trim();
+const KV_TOKEN = process.env.KV_REST_API_TOKEN?.trim();
+if (KV_URL) process.env.KV_REST_API_URL = KV_URL;
+if (KV_TOKEN) process.env.KV_REST_API_TOKEN = KV_TOKEN;
+
 // Re-use a global map to persist across module reloads in dev
 const mem = (() => {
   const g = globalThis as any;
@@ -13,7 +19,7 @@ const mem = (() => {
   return { store: g.__mandalikaMemKV as Map<string, any>, index: g.__mandalikaMemIndex as ScoreMember[] };
 })();
 
-const hasVercelKV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+const hasVercelKV = Boolean(KV_URL && KV_TOKEN);
 
 export async function kvGet<T>(key: string): Promise<T | null> {
   if (hasVercelKV) return (await vercelKv.get<T>(key)) ?? null;
