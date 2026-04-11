@@ -128,7 +128,13 @@ export function computeScore(params: {
 
   const dimInterpretations = interpretAllDimensions(fcScores, sjtScores);
   const profileScore = computeProfileScore(sjtScores);
-  const { css, breakdown: cssBreakdown } = computeCSS(sjtScores, dimInterpretations);
+  const { css, breakdown } = computeCSS(sjtScores, dimInterpretations);
+  const cssBreakdown = breakdown as {
+    integritas: number;
+    ownership: number;
+    standarPribadi: number;
+    emotionallyControlled: number;
+  };
   const pgs = computePGS(sjtScores);
   const finalScore = Math.max(0, Math.min(100, profileScore - css - pgs));
 
