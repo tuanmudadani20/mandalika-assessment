@@ -1,5 +1,5 @@
 import { DIM_LABELS } from '@/lib/scoring/dimensions';
-import { ALL_DIMS, L1, L2, L3, L4 } from '@/lib/scoring/engine';
+import { ALL_DIMS, L1, L2 } from '@/lib/scoring/engine';
 import type { DimensionKey } from '@/lib/scoring/types';
 
 type FCMap = Record<DimensionKey, number>;
@@ -8,16 +8,13 @@ export function FCPriorityPanel({ fcScores }: { fcScores: FCMap }) {
   const ranked = [...ALL_DIMS].map((dim) => ({ dim, score: fcScores[dim] ?? 0 }));
   ranked.sort((a, b) => b.score - a.score);
 
-  const top = ranked.slice(0, 5);
-  const mid = ranked.slice(5, ranked.length - 3);
-  const bottom = ranked.slice(-3);
+const top = ranked.slice(0, 5);
+const mid = ranked.slice(5, ranked.length - 3);
+const bottom = ranked.slice(-3);
 
   const notes: { text: string; tone: 'info' | 'warn' }[] = [];
   if (top.slice(0, 3).every((d) => L1.includes(d.dim))) {
     notes.push({ text: 'Top 3 semuanya L1 — orientasi karakter kuat.', tone: 'info' });
-  }
-  if (bottom.some((d) => L4.includes(d.dim))) {
-    notes.push({ text: 'Dimensi L4 di prioritas rendah itu normal bila L1 kuat.', tone: 'info' });
   }
   if ([...bottom, ...mid.slice(-2)].some((d) => L1.includes(d.dim))) {
     notes.push({ text: 'Perhatikan: ada dimensi fondasi (L1) di prioritas rendah.', tone: 'warn' });
@@ -68,7 +65,7 @@ function Section({ title, items }: { title: string; items: { dim: DimensionKey; 
 }
 
 function Row({ rank, dim, score }: { rank: number; dim: DimensionKey; score: number }) {
-  const layer = L1.includes(dim) ? 'L1' : L2.includes(dim) ? 'L2' : L3.includes(dim) ? 'L3' : 'L4';
+  const layer = L1.includes(dim) ? 'L1' : L2.includes(dim) ? 'L2' : 'L3/L4';
   return (
     <div className="flex items-center gap-2 rounded-lg border border-border px-2 py-1 bg-white">
       <span className="w-6 text-xs font-semibold text-muted text-center">{rank}</span>
