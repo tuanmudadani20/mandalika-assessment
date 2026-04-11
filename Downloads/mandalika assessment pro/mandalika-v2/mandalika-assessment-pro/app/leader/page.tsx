@@ -11,7 +11,7 @@ interface SessionRow {
   status: string;
   createdAt: string;
   completedAt?: string;
-  profile?: { name: string; email: string };
+  profile?: { name: string; email: string; position?: string };
   finalResult?: { finalScore: number; finalCategory: string; profileScore?: number };
 }
 
@@ -138,6 +138,12 @@ export default function LeaderPage() {
               >
                 Export (Saringan)
               </button>
+              <button
+                className="rounded-lg border border-border px-3 py-2 text-sm text-gold"
+                onClick={backupJSON}
+              >
+                Backup JSON (semua data)
+              </button>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -169,6 +175,26 @@ export default function LeaderPage() {
                 <option value="email">Email</option>
               </select>
               <span className="text-xs text-muted whitespace-nowrap">{filtered.length} hasil</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                className="rounded-lg border border-border px-3 py-2 text-sm text-muted"
+                onClick={() => exportCSV(filtered, "filtered")}
+              >
+                Export (Saringan)
+              </button>
+              <button
+                className="rounded-lg border border-border px-3 py-2 text-sm text-gold"
+                onClick={() => exportCSV(sessions, "all")}
+              >
+                Export CSV (Semua)
+              </button>
+              <button
+                className="rounded-lg border border-border px-3 py-2 text-sm text-gold"
+                onClick={backupJSON}
+              >
+                Backup JSON (semua data)
+              </button>
             </div>
           </div>
         )}
@@ -264,6 +290,7 @@ export default function LeaderPage() {
               <div className="space-y-3 mt-3 print:w-full">
                 <div className="grid grid-cols-2 gap-2">
                   <InfoCard title="Email" value={detail.profile?.email ?? "—"} />
+                  <InfoCard title="Jabatan" value={detail.profile?.position ?? "—"} />
                   <InfoCard title="Status" value={detail.status} />
                   <InfoCard title="Final %" value={detail.finalResult?.finalScore ? `${detail.finalResult.finalScore.toFixed(1)}%` : "—"} />
                   <InfoCard title="Kategori" value={detail.finalResult?.finalCategory ?? "—"} />
@@ -280,9 +307,13 @@ export default function LeaderPage() {
                   interpretations={detail.finalResult?.dimInterpretations}
                   title="Perbandingan FC & SJT per dimensi"
                 />
-                {detail.beiAnalysis && (
-                  <div className="card p-3 space-y-2">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted">Hasil BEI</p>
+                <div className="card p-3 space-y-2">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted">Hasil BEI</p>
+                  {detail.profile?.position?.toLowerCase() === "staff" ? (
+                    <p className="text-sm text-muted">BEI dilewati (khusus Staff).</p>
+                  ) : !detail.beiAnalysis || detail.beiAnalysis.length === 0 ? (
+                    <p className="text-sm text-muted">Belum ada analisis BEI (proses mungkin belum selesai atau jawaban kosong).</p>
+                  ) : (
                     <div className="space-y-2 text-sm">
                       {detail.beiAnalysis.map((r: any) => {
                         const q = BEI_QUESTIONS.find((qq) => qq.id === r.questionId);
@@ -310,6 +341,22 @@ export default function LeaderPage() {
                                 ))}
                               </div>
                             )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                {detail.beiAnswers && detail.beiAnswers.length > 0 && (
+                  <div className="card p-3 space-y-2">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted">Jawaban BEI</p>
+                    <div className="space-y-3 text-sm">
+                      {detail.beiAnswers.map((ans: any, idx: number) => {
+                        const q = BEI_QUESTIONS.find((qq) => qq.id === ans.questionId);
+                        return (
+                          <div key={ans.questionId} className="rounded-lg border border-border bg-bg/60 p-2">
+                            <p className="text-[11px] text-muted mb-1">{q?.title ?? `Q${idx + 1}`}</p>
+                            <p className="whitespace-pre-wrap text-text">{ans.text}</p>
                           </div>
                         );
                       })}
@@ -449,5 +496,23 @@ function InfoCard({ title, value }: { title: string; value: string }) {
   );
 }
 
-
-
+async function backupJSON() {
+  try {
+    const pwd = localStorage.getItem("leaderPassword") || "";
+    const res = await fetch("/api/leader/export", {
+      headers: { "x-leader-password": pwd },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Gagal backup");
+    const blob = new Blob([JSON.stringify(json.sessions, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `mandalika_backup_${new Date().toISOString()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (err: any) {
+    alert(err.message);
+  }
+}
+  
