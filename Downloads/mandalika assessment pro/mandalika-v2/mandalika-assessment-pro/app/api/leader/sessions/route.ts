@@ -12,6 +12,11 @@ export async function GET(request: Request) {
     }
 
     const sessions = await listSessions(100);
+    console.log('leader/sessions ok', {
+      hasKvUrl: Boolean(process.env.KV_REST_API_URL),
+      hasKvToken: Boolean(process.env.KV_REST_API_TOKEN),
+      count: sessions.length,
+    });
     return NextResponse.json({ sessions });
   } catch (err: any) {
     console.error('leader/sessions error', err);
