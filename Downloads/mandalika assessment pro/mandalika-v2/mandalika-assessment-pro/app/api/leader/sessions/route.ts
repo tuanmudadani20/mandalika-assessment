@@ -12,10 +12,13 @@ export async function GET(request: Request) {
     }
 
     const sessions = await listSessions(100);
+    const url = process.env.KV_REST_API_URL;
     console.log('leader/sessions ok', {
       hasKvUrl: Boolean(process.env.KV_REST_API_URL),
       hasKvToken: Boolean(process.env.KV_REST_API_TOKEN),
       count: sessions.length,
+      urlLen: url?.length ?? 0,
+      urlLast: url ? url.charCodeAt(url.length - 1) : null,
     });
     return NextResponse.json({ sessions });
   } catch (err: any) {
