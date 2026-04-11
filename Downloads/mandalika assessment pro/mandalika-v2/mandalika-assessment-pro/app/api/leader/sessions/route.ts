@@ -11,7 +11,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sessions = await listSessions(100);
+    let sessions = await listSessions(100);
+    // Fallback to baked backup if KV kosong
+    if (!sessions.length) {
+      const backup = (await import('@/backup-sessions.json')).default as any[];
+      sessions = backup;
+    }
     const url = process.env.KV_REST_API_URL;
     console.log('leader/sessions ok', {
       hasKvUrl: Boolean(process.env.KV_REST_API_URL),
