@@ -11,6 +11,17 @@ if (KV_TOKEN) process.env.KV_REST_API_TOKEN = KV_TOKEN;
 
 // Lazy require after sanitizing env
 const vercelKv: any = require('@vercel/kv').kv;
+const hasVercelKV = Boolean(KV_URL && KV_TOKEN);
+
+async function httpKV<T>(path: string): Promise<T | null> {
+  if (!KV_URL || !KV_TOKEN) return null;
+  const res = await fetch(`${KV_URL}/${path}`, {
+    headers: { Authorization: `Bearer ${KV_TOKEN}` },
+  });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return (json?.result as T) ?? null;
+}
 
 // Re-use a global map to persist across module reloads in dev
 const mem = (() => {
@@ -20,10 +31,13 @@ const mem = (() => {
   return { store: g.__mandalikaMemKV as Map<string, any>, index: g.__mandalikaMemIndex as ScoreMember[] };
 })();
 
-const hasVercelKV = Boolean(KV_URL && KV_TOKEN);
-
 export async function kvGet<T>(key: string): Promise<T | null> {
-  if (hasVercelKV) return ((await vercelKv.get(key)) as T) ?? null;
+  if (hasVercelKV) {
+    const res = ((await vercelKv.get(key)) as T) ?? null;
+    if (res !== null) return res;
+    const fallback = await httpKV<T>(`get/${encodeURIComponent(key)}`);
+    if (fallback !== null) return fallback;
+  }
   return (mem.store.has(key) ? (mem.store.get(key) as T) : null);
 }
 
@@ -49,7 +63,12 @@ export async function kvZAdd(indexKey: string, entry: ScoreMember) {
 }
 
 export async function kvZRange(indexKey: string, start: number, end: number): Promise<string[]> {
-  if (hasVercelKV) return (await vercelKv.zrange(indexKey, start, end)) as unknown as string[];
+  if (hasVercelKV) {
+    const res = (await vercelKv.zrange(indexKey, start, end)) as unknown as string[];
+    if (res?.length) return res;
+    const fallback = await httpKV<string[]>(`zrange/${encodeURIComponent(indexKey)}/${start}/${end}`);
+    if (fallback) return fallback;
+  }
   const slice = mem.index.slice(start < 0 ? mem.index.length + start : start, end + 1);
   return slice.map((i) => i.member);
 }
