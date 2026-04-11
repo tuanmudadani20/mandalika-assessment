@@ -5,6 +5,8 @@ import { computeScore, L1, L2, ALL_DIMS } from "@/lib/scoring/engine";
 import { DIM_LABELS } from "@/lib/scoring/dimensions";
 import { DimCard } from "@/components/results/DimCard";
 import type { ScoringResult } from "@/lib/scoring/types";
+import { FCPriorityPanel } from "@/components/results/FCPriorityPanel";
+import { SJTJudgmentPanel } from "@/components/results/SJTJudgmentPanel";
 
 const L3 = ["dampakTim", "resiliensi", "communicationClarity"] as const;
 const L4 = ["decisive", "innovative"] as const;
@@ -62,16 +64,9 @@ export default async function ResultsPage({ params }: { params: { sessionId: str
           )}
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-1.5 rounded bg-blue-500 inline-block" />
-            FC = prioritas relatif (ipsatif)
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-1.5 rounded bg-emerald-500 inline-block" />
-            SJT = kemampuan absolut
-          </span>
+        <div className="grid gap-4 md:grid-cols-2">
+          <FCPriorityPanel fcScores={result.fcScores} />
+          <SJTJudgmentPanel sjtScores={result.sjtScores} />
         </div>
 
         {/* Dimensi per Layer */}
