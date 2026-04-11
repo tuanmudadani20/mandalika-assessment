@@ -85,7 +85,7 @@ export default async function ResultsPage({ params }: { params: { sessionId: str
             <h3 className={`text-xs font-bold uppercase tracking-wider ${layer.color}`}>{layer.label}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {layer.dims.map((dim) => {
-                const dr = result.dimResults.find((d) => d.dim === dim);
+                const dr = result.dimResults?.find((d) => d.dim === dim);
                 if (!dr) return null;
                 return <DimCard key={dim} dimResult={dr} />;
               })}
