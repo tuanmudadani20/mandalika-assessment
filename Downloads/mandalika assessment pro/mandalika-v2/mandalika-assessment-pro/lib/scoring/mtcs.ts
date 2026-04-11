@@ -2,7 +2,7 @@ import { DIMENSIONS, getDimensionsByLayer } from './dimensions';
 import { DimensionKey, DimInterpretation, FinalResult, PlayerCategory, ScoreMap } from './types';
 
 export function interpretDimension(fc: number, sjt: number): DimInterpretation {
-  if (sjt >= 55) return fc >= 50 ? 'strong' : 'sleeping_strength';
+  if (sjt >= 55) return fc >= 50 ? 'kuat' : 'sleeping_strength';
   if (sjt < 45) return fc >= 50 ? 'gap_probe' : 'genuine_gap';
   return 'moderate';
 }
