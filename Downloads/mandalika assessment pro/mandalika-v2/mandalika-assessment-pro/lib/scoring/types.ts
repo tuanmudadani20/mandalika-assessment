@@ -79,6 +79,10 @@ export interface ScoringResult {
   sleepingStrengths: DimensionKey[];
   genuineGaps: DimensionKey[];
   possibleFaking: DimensionKey[];
+  possibleFakingDims?: DimensionKey[]; // legacy alias
+  strengths?: DimensionKey[];
+  gaps?: DimensionKey[];
+  consistencyFlags?: string[];
   overrideReason?: string;
   borderlineFlag?: string;
   // compatibility fields
